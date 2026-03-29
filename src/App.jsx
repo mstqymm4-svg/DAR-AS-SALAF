@@ -11,6 +11,7 @@ import Books from './pages/Books';
 import BookDetails from './pages/BookDetails';
 import Favorites from './pages/Favorites';
 import Admin from './pages/Admin';
+import Settings from './pages/Settings';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -44,6 +45,7 @@ const AuthenticatedApp = () => {
         <Route path="/book/:id" element={<BookDetails />} />
         <Route path="/favorites" element={<Favorites />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>
     </Routes>
