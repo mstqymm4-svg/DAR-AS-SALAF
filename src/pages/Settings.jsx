@@ -170,12 +170,14 @@ export default function Settings() {
             </div>
 
             <div>
-              <Label>اللغة المفضلة</Label>
+              <Label>اللغة المفضلة للكتب</Label>
+              <p className="text-xs text-muted-foreground mt-0.5 mb-1.5">سيتم تصفية الكتب حسب هذه اللغة في صفحة المكتبة</p>
               <Select value={language} onValueChange={setLanguage}>
                 <SelectTrigger className="mt-1.5">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="الكل">الكل (جميع اللغات)</SelectItem>
                   <SelectItem value="العربية">العربية</SelectItem>
                   <SelectItem value="الإنجليزية">الإنجليزية</SelectItem>
                   <SelectItem value="الفرنسية">الفرنسية</SelectItem>

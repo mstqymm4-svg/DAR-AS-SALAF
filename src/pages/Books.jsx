@@ -12,6 +12,7 @@ export default function Books() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("الكل");
   const [user, setUser] = useState(null);
+  const [preferredLanguage, setPreferredLanguage] = useState("الكل");
 
   const urlParams = new URLSearchParams(window.location.search);
   const categoryParam = urlParams.get("category");
@@ -30,6 +31,13 @@ export default function Books() {
 
     const allBooks = await base44.entities.Book.list('-created_date', 200);
     setBooks(allBooks);
+
+    if (u?.preferred_language && u.preferred_language !== 'الكل') {
+      setActiveCategory('الكل');
+      setSearchQuery('');
+      // pre-apply language filter by storing it
+      setPreferredLanguage(u.preferred_language);
+    }
 
     if (u) {
       const favs = await base44.entities.Favorite.filter({ user_email: u.email });
@@ -59,7 +67,8 @@ export default function Books() {
       !searchQuery ||
       book.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       book.author?.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+    const matchesLanguage = preferredLanguage === "الكل" || !book.language || book.language === preferredLanguage;
+    return matchesCategory && matchesSearch && matchesLanguage;
   });
 
   if (loading) {
@@ -102,9 +111,20 @@ export default function Books() {
       </div>
 
       {/* Results count */}
-      <p className="text-sm text-muted-foreground mb-4">
-        {filteredBooks.length} كتاب
-      </p>
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-sm text-muted-foreground">{filteredBooks.length} كتاب</p>
+        {preferredLanguage !== "الكل" && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">اللغة: {preferredLanguage}</span>
+            <button
+              onClick={() => setPreferredLanguage("الكل")}
+              className="text-xs text-primary hover:underline"
+            >
+              عرض الكل
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Books Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
