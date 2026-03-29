@@ -179,6 +179,7 @@ export default function Settings() {
                   <SelectItem value="العربية">العربية</SelectItem>
                   <SelectItem value="الإنجليزية">الإنجليزية</SelectItem>
                   <SelectItem value="الفرنسية">الفرنسية</SelectItem>
+                  <SelectItem value="الأوردو">الأوردو (هندي)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
