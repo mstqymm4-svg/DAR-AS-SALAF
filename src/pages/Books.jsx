@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search } from "lucide-react";
+import AISearch from "../components/AISearch";
 import BookCard from "../components/BookCard";
 import CategoryChip, { categories } from "../components/CategoryChip";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,8 @@ export default function Books() {
   const [activeCategory, setActiveCategory] = useState("الكل");
   const [user, setUser] = useState(null);
   const [preferredLanguage, setPreferredLanguage] = useState("الكل");
+  const [aiResults, setAiResults] = useState(null);
+  const [aiLabel, setAiLabel] = useState("");
 
   const urlParams = new URLSearchParams(window.location.search);
   const categoryParam = urlParams.get("category");
@@ -61,7 +64,7 @@ export default function Books() {
     }
   };
 
-  const filteredBooks = books.filter((book) => {
+  const filteredBooks = aiResults ?? books.filter((book) => {
     const matchesCategory = activeCategory === "الكل" || book.category === activeCategory;
     const matchesSearch =
       !searchQuery ||
@@ -87,6 +90,13 @@ export default function Books() {
         <p className="text-sm text-muted-foreground">تصفح جميع الكتب الدينية المتاحة</p>
       </div>
 
+      {/* AI Search */}
+      <AISearch
+        books={books}
+        onResults={(results, label) => { setAiResults(results); setAiLabel(label); }}
+        onClear={() => { setAiResults(null); setAiLabel(""); }}
+      />
+
       {/* Search */}
       <div className="relative mb-6">
         <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -109,6 +119,13 @@ export default function Books() {
           />
         ))}
       </div>
+
+      {/* AI Results Banner */}
+      {aiResults && (
+        <div className="mb-4 px-4 py-2 rounded-xl bg-accent/10 border border-accent/30 text-sm text-foreground flex items-center gap-2">
+          <span className="text-accent">✨</span> {aiLabel} — {aiResults.length} نتيجة
+        </div>
+      )}
 
       {/* Results count */}
       <div className="flex items-center justify-between mb-4">
