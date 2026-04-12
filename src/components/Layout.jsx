@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { BookOpen, Home, Heart, Search, Plus, Settings, Code2 } from "lucide-react";
+import { BookOpen, Home, Heart, Search, Settings } from "lucide-react";
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 
@@ -8,7 +8,6 @@ const navItems = [
   { path: "/books", icon: BookOpen, label: "المكتبة" },
   { path: "/favorites", icon: Heart, label: "المفضلة" },
   { path: "/settings", icon: Settings, label: "الإعدادات" },
-  { path: "/dev", icon: Code2, label: "المطور" },
 ];
 
 export default function Layout() {
@@ -54,19 +53,6 @@ export default function Layout() {
                   </Link>
                 );
               })}
-              {isAdmin && (
-                <Link
-                  to="/admin"
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    location.pathname === "/admin"
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  }`}
-                >
-                  <Plus className="w-4 h-4" />
-                  إدارة الكتب
-                </Link>
-              )}
             </nav>
             <Link to="/books" className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors">
               <Search className="w-5 h-5 text-muted-foreground" />
@@ -98,17 +84,7 @@ export default function Layout() {
               </Link>
             );
           })}
-          {isAdmin && (
-            <Link
-              to="/admin"
-              className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 ${
-                location.pathname === "/admin" ? "text-primary" : "text-muted-foreground"
-              }`}
-            >
-              <Plus className="w-5 h-5" />
-              <span className="text-[10px] font-medium">إدارة</span>
-            </Link>
-          )}
+
         </div>
       </nav>
     </div>

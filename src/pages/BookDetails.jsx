@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Heart, Star, BookOpen, ArrowRight, Download, FileText, User } from "lucide-react";
+import { Heart, Star, BookOpen, ArrowRight, Download, FileText, User, BookMarked } from "lucide-react";
+import { useState as useReadState } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 
@@ -183,14 +184,22 @@ export default function BookDetails() {
             </div>
           )}
 
-          {/* Download */}
+          {/* Actions */}
           {book.pdf_url && (
-            <a href={book.pdf_url} target="_blank" rel="noopener noreferrer">
-              <Button className="w-full md:w-auto gap-2 h-12 rounded-xl text-sm font-bold">
-                <Download className="w-4 h-4" />
-                تحميل الكتاب PDF
-              </Button>
-            </a>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <a href={book.pdf_url} target="_blank" rel="noopener noreferrer" className="flex-1">
+                <Button variant="outline" className="w-full gap-2 h-12 rounded-xl text-sm font-bold">
+                  <Download className="w-4 h-4" />
+                  تحميل PDF
+                </Button>
+              </a>
+              <a href={`/read/${book.id}`} className="flex-1">
+                <Button className="w-full gap-2 h-12 rounded-xl text-sm font-bold">
+                  <BookMarked className="w-4 h-4" />
+                  قراءة الكتاب
+                </Button>
+              </a>
+            </div>
           )}
         </div>
       </motion.div>

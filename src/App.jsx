@@ -13,6 +13,7 @@ import Favorites from './pages/Favorites';
 import Admin from './pages/Admin';
 import Settings from './pages/Settings';
 import DevPanel from './pages/DevPanel';
+import ReadBook from './pages/ReadBook';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -48,6 +49,7 @@ const AuthenticatedApp = () => {
         <Route path="/admin" element={<Admin />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/dev" element={<DevPanel />} />
+        <Route path="/read/:id" element={<ReadBook />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>
     </Routes>
