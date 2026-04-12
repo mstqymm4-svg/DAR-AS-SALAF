@@ -12,6 +12,7 @@ import BookDetails from './pages/BookDetails';
 import Favorites from './pages/Favorites';
 import Admin from './pages/Admin';
 import Settings from './pages/Settings';
+import DevPanel from './pages/DevPanel';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -46,6 +47,7 @@ const AuthenticatedApp = () => {
         <Route path="/favorites" element={<Favorites />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/dev" element={<DevPanel />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>
     </Routes>

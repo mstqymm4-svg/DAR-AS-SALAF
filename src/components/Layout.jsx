@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { BookOpen, Home, Heart, Search, Plus, Settings } from "lucide-react";
+import { BookOpen, Home, Heart, Search, Plus, Settings, Code2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 
@@ -8,6 +8,7 @@ const navItems = [
   { path: "/books", icon: BookOpen, label: "المكتبة" },
   { path: "/favorites", icon: Heart, label: "المفضلة" },
   { path: "/settings", icon: Settings, label: "الإعدادات" },
+  { path: "/dev", icon: Code2, label: "المطور" },
 ];
 
 export default function Layout() {
