@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ArrowRight, Download, BookOpen, ZoomIn, ZoomOut, RotateCw } from "lucide-react";
+import { ArrowRight, Download, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function ReadBook() {
   const { id } = useParams();
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [zoom, setZoom] = useState(100);
 
   useEffect(() => {
     base44.entities.Book.filter({ id }).then((books) => {
@@ -35,10 +34,8 @@ export default function ReadBook() {
     );
   }
 
-  const googleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(book.pdf_url)}&embedded=true`;
-
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col" style={{ height: "100dvh" }}>
       {/* Top Bar */}
       <div className="bg-card border-b border-border px-4 py-2 flex items-center justify-between gap-3 shrink-0">
         <Link to={`/book/${book.id}`} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -46,32 +43,19 @@ export default function ReadBook() {
           <span className="hidden sm:inline">{book.title}</span>
           <span className="sm:hidden">رجوع</span>
         </Link>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setZoom(z => Math.max(50, z - 10))}>
-            <ZoomOut className="w-3.5 h-3.5" />
+        <a href={book.pdf_url} download target="_blank" rel="noopener noreferrer">
+          <Button size="sm" className="gap-1.5 h-8 text-xs rounded-lg">
+            <Download className="w-3.5 h-3.5" />
+            تحميل
           </Button>
-          <span className="text-xs text-muted-foreground w-12 text-center">{zoom}%</span>
-          <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setZoom(z => Math.min(200, z + 10))}>
-            <ZoomIn className="w-3.5 h-3.5" />
-          </Button>
-          <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setZoom(100)}>
-            <RotateCw className="w-3.5 h-3.5" />
-          </Button>
-          <a href={book.pdf_url} target="_blank" rel="noopener noreferrer">
-            <Button size="sm" className="gap-1.5 h-8 text-xs rounded-lg">
-              <Download className="w-3.5 h-3.5" />
-              تحميل
-            </Button>
-          </a>
-        </div>
+        </a>
       </div>
 
-      {/* PDF Viewer */}
-      <div className="flex-1 overflow-hidden bg-muted/30">
+      {/* PDF Viewer - مباشر داخل التطبيق */}
+      <div className="flex-1 overflow-hidden">
         <iframe
-          src={googleViewerUrl}
+          src={book.pdf_url + "#toolbar=1&navpanes=1&scrollbar=1"}
           className="w-full h-full border-0"
-          style={{ transform: `scale(${zoom / 100})`, transformOrigin: "top center", height: `${10000 / zoom}%` }}
           title={book.title}
         />
       </div>
