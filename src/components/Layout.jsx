@@ -66,8 +66,8 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-xl border-t border-border">
+      {/* Bottom Nav - always visible */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-xl border-t border-border">
         <div className="flex items-center justify-around py-2 px-4">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
