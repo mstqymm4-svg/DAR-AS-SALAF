@@ -62,7 +62,7 @@ export default function Layout() {
       </header>
 
       {/* Main Content */}
-      <main className="pb-20 md:pb-8">
+      <main className="pb-24">
         <Outlet />
       </main>
 
