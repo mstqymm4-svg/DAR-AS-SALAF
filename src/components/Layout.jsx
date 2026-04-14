@@ -10,6 +10,8 @@ const navItems = [
   { path: "/settings", icon: Settings, label: "الإعدادات" },
 ];
 
+// زر المطور مخفي
+
 export default function Layout() {
   const location = useLocation();
   const [user, setUser] = useState(null);
