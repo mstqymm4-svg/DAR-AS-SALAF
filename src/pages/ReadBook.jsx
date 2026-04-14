@@ -51,10 +51,10 @@ export default function ReadBook() {
         </a>
       </div>
 
-      {/* PDF Viewer - مباشر داخل التطبيق */}
+      {/* PDF Viewer - عبر Google Docs Viewer */}
       <div className="flex-1 overflow-hidden">
         <iframe
-          src={book.pdf_url + "#toolbar=1&navpanes=1&scrollbar=1"}
+          src={`https://docs.google.com/viewer?url=${encodeURIComponent(book.pdf_url)}&embedded=true`}
           className="w-full h-full border-0"
           title={book.title}
         />
