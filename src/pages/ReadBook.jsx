@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { ArrowRight, Download, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import PdfViewer from "@/components/PdfViewer";
 
 export default function ReadBook() {
   const { id } = useParams();
@@ -51,13 +52,9 @@ export default function ReadBook() {
         </a>
       </div>
 
-      {/* PDF Viewer - عبر Google Docs Viewer */}
-      <div className="flex-1 overflow-hidden">
-        <iframe
-          src={`https://docs.google.com/viewer?url=${encodeURIComponent(book.pdf_url)}&embedded=true`}
-          className="w-full h-full border-0"
-          title={book.title}
-        />
+      {/* PDF Viewer */}
+      <div className="flex-1 overflow-hidden relative">
+        <PdfViewer url={book.pdf_url} title={book.title} />
       </div>
     </div>
   );
