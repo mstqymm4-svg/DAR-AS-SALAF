@@ -34,18 +34,13 @@ export function applyStoredColors() {
 }
 
 function applyColors({ bg, fg, primary, accent, card }) {
-  const apply = (cssVar, val, storageKey) => {
-    if (!val) return;
-    document.documentElement.style.setProperty(cssVar, val);
-    localStorage.setItem(storageKey, val);
-  };
-  apply("--background", bg, "dev_bg");
-  apply("--foreground", fg, "dev_fg");
+  if (bg) { document.documentElement.style.setProperty("--background", bg); localStorage.setItem("dev_bg", bg); }
+  if (fg) { document.documentElement.style.setProperty("--foreground", fg); localStorage.setItem("dev_fg", fg); }
   if (primary) {
     ["--primary","--ring","--sidebar-primary"].forEach(v => document.documentElement.style.setProperty(v, primary));
     localStorage.setItem("dev_primary", primary);
   }
-  apply("--accent", accent, "dev_accent");
+  if (accent) { document.documentElement.style.setProperty("--accent", accent); localStorage.setItem("dev_accent", accent); }
   if (card) {
     ["--card","--popover"].forEach(v => document.documentElement.style.setProperty(v, card));
     localStorage.setItem("dev_card", card);
@@ -237,6 +232,8 @@ export default function DevPanel() {
   };
 
   const handleApplyCustom = () => {
+    const hasAny = Object.values(colors).some(v => v.trim() !== "");
+    if (!hasAny) { toast.error("أدخل قيمة لون واحدة على الأقل أو اختر ثيماً جاهزاً"); return; }
     applyColors(colors);
     toast.success("تم تطبيق الألوان");
   };
@@ -305,9 +302,27 @@ export default function DevPanel() {
   };
 
   const handleSaveEdit = async () => {
+    if (!editingBook) return;
     setSavingEdit(true);
-    await base44.entities.Book.update(editingBook.id, { ...editForm, pages_count: editForm.pages_count ? Number(editForm.pages_count) : null, rating: Number(editForm.rating)||0 });
-    toast.success("تم التحديث"); setEditDialog(false); setSavingEdit(false); loadBooks();
+    try {
+      await base44.entities.Book.update(editingBook.id, {
+        title: editForm.title,
+        author: editForm.author,
+        category: editForm.category,
+        description: editForm.description,
+        cover_image: editForm.cover_image,
+        pages_count: editForm.pages_count ? Number(editForm.pages_count) : null,
+        language: editForm.language,
+        pdf_url: editForm.pdf_url,
+        is_featured: editForm.is_featured,
+        rating: Number(editForm.rating) || 0,
+      });
+      toast.success("تم التحديث بنجاح");
+      setEditDialog(false);
+      loadBooks();
+    } finally {
+      setSavingEdit(false);
+    }
   };
 
   const handleDelete = async (book) => {
