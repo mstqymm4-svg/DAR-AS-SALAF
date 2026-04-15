@@ -270,10 +270,9 @@ export default function DevPanel() {
     setUploadingLogo(false); toast.success("تم رفع الشعار");
   };
 
-  const handleSaveAppName = async () => {
-    // Save to user profile so it persists across sessions
-    await base44.auth.updateMe({ app_name: appName, app_subtitle: appSubtitle });
-    try { localStorage.setItem("dev_app_name", appName); localStorage.setItem("dev_app_subtitle", appSubtitle); } catch(e) {}
+  const handleSaveAppName = () => {
+    ls.set("dev_app_name", appName);
+    ls.set("dev_app_subtitle", appSubtitle);
     toast.success("تم حفظ اسم التطبيق بنجاح ✓");
   };
 

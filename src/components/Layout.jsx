@@ -3,26 +3,38 @@ import { BookOpen, Home, Heart, Search, Settings, Code } from "lucide-react";
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 
-const navItems = [
-  { path: "/", icon: Home, label: "الرئيسية" },
-  { path: "/books", icon: BookOpen, label: "المكتبة" },
-  { path: "/favorites", icon: Heart, label: "المفضلة" },
-  { path: "/settings", icon: Settings, label: "الإعدادات" },
-  { path: "/dev", icon: Code, label: "المطور" },
-];
+// Safe localStorage
+const ls = {
+  get: (k, fallback = "") => { try { return localStorage.getItem(k) || fallback; } catch(e) { return fallback; } }
+};
 
 export default function Layout() {
   const location = useLocation();
   const [user, setUser] = useState(null);
 
+  // Read customization from localStorage
+  const appName    = ls.get("dev_app_name", "المكتبة الدينية");
+  const appSub     = ls.get("dev_app_subtitle", "نور العلم والمعرفة");
+  const langDir    = ls.get("dev_lang_dir", "rtl");
+  const navHome    = ls.get("dev_lang_navHome", "الرئيسية");
+  const navBooks   = ls.get("dev_lang_navBooks", "المكتبة");
+  const navFav     = ls.get("dev_lang_navFav", "المفضلة");
+  const navSettings= ls.get("dev_lang_navSettings", "الإعدادات");
+
+  const navItems = [
+    { path: "/",         icon: Home,     label: navHome },
+    { path: "/books",    icon: BookOpen, label: navBooks },
+    { path: "/favorites",icon: Heart,    label: navFav },
+    { path: "/settings", icon: Settings, label: navSettings },
+    { path: "/dev",      icon: Code,     label: "Dev" },
+  ];
+
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
-  const isAdmin = user?.role === "admin";
-
   return (
-    <div dir="rtl" className="min-h-screen bg-background font-tajawal">
+    <div dir={langDir} className="min-h-screen bg-background font-tajawal">
       {/* Top Header */}
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -32,8 +44,8 @@ export default function Layout() {
                 <BookOpen className="w-5 h-5 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-foreground leading-tight">المكتبة الدينية</h1>
-                <p className="text-[10px] text-muted-foreground -mt-0.5">نور العلم والمعرفة</p>
+                <h1 className="text-lg font-bold text-foreground leading-tight">{appName}</h1>
+                <p className="text-[10px] text-muted-foreground -mt-0.5">{appSub}</p>
               </div>
             </Link>
             <nav className="hidden md:flex items-center gap-1">
@@ -67,7 +79,7 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      {/* Bottom Nav - always visible */}
+      {/* Bottom Nav */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-xl border-t border-border">
         <div className="flex items-center justify-around py-2 px-4">
           {navItems.map((item) => {
@@ -85,7 +97,6 @@ export default function Layout() {
               </Link>
             );
           })}
-
         </div>
       </nav>
     </div>
