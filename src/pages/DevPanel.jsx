@@ -19,31 +19,39 @@ const DEFAULT_PASSWORD = "42891";
 const getPassword = () => localStorage.getItem(DEV_PASSWORD_KEY) || DEFAULT_PASSWORD;
 
 // ─── Color Utils ─────────────────────────────────────────────────────
+// Safe localStorage wrapper
+const ls = {
+  get: (k) => { try { return localStorage.getItem(k); } catch(e) { return null; } },
+  set: (k, v) => { try { localStorage.setItem(k, v); } catch(e) {} },
+  remove: (k) => { try { localStorage.removeItem(k); } catch(e) {} },
+  clear: () => { try { localStorage.clear(); } catch(e) {} },
+};
+
 export function applyStoredColors() {
   const map = {
-    "--background": localStorage.getItem("dev_bg"),
-    "--foreground": localStorage.getItem("dev_fg"),
-    "--primary": localStorage.getItem("dev_primary"),
-    "--ring": localStorage.getItem("dev_primary"),
-    "--sidebar-primary": localStorage.getItem("dev_primary"),
-    "--accent": localStorage.getItem("dev_accent"),
-    "--card": localStorage.getItem("dev_card"),
-    "--popover": localStorage.getItem("dev_card"),
+    "--background": ls.get("dev_bg"),
+    "--foreground": ls.get("dev_fg"),
+    "--primary": ls.get("dev_primary"),
+    "--ring": ls.get("dev_primary"),
+    "--sidebar-primary": ls.get("dev_primary"),
+    "--accent": ls.get("dev_accent"),
+    "--card": ls.get("dev_card"),
+    "--popover": ls.get("dev_card"),
   };
   Object.entries(map).forEach(([k, v]) => { if (v) document.documentElement.style.setProperty(k, v); });
 }
 
 function applyColors({ bg, fg, primary, accent, card }) {
-  if (bg) { document.documentElement.style.setProperty("--background", bg); localStorage.setItem("dev_bg", bg); }
-  if (fg) { document.documentElement.style.setProperty("--foreground", fg); localStorage.setItem("dev_fg", fg); }
+  if (bg) { document.documentElement.style.setProperty("--background", bg); ls.set("dev_bg", bg); }
+  if (fg) { document.documentElement.style.setProperty("--foreground", fg); ls.set("dev_fg", fg); }
   if (primary) {
     ["--primary","--ring","--sidebar-primary"].forEach(v => document.documentElement.style.setProperty(v, primary));
-    localStorage.setItem("dev_primary", primary);
+    ls.set("dev_primary", primary);
   }
-  if (accent) { document.documentElement.style.setProperty("--accent", accent); localStorage.setItem("dev_accent", accent); }
+  if (accent) { document.documentElement.style.setProperty("--accent", accent); ls.set("dev_accent", accent); }
   if (card) {
     ["--card","--popover"].forEach(v => document.documentElement.style.setProperty(v, card));
-    localStorage.setItem("dev_card", card);
+    ls.set("dev_card", card);
   }
 }
 
@@ -169,10 +177,10 @@ export default function DevPanel() {
   const [selectedPreset, setSelectedPreset] = useState(null);
 
   // Logo & Name
-  const [logoUrl, setLogoUrl] = useState(() => localStorage.getItem("dev_logo_url") || "");
-  const [uploadingLogo, setUploadingLogo] = useState(false);
-  const [appName, setAppName] = useState(() => localStorage.getItem("dev_app_name") || "المكتبة الدينية");
-  const [appSubtitle, setAppSubtitle] = useState(() => localStorage.getItem("dev_app_subtitle") || "نور العلم والمعرفة");
+  const [logoUrl, setLogoUrl] = useState(() => ls.get("dev_logo_url") || "");
+...
+  const [appName, setAppName] = useState(() => ls.get("dev_app_name") || "المكتبة الدينية");
+  const [appSubtitle, setAppSubtitle] = useState(() => ls.get("dev_app_subtitle") || "نور العلم والمعرفة");
 
   // Book PDF
   const [bookForm, setBookForm] = useState(emptyBook);
@@ -196,9 +204,9 @@ export default function DevPanel() {
   const [savingEdit, setSavingEdit] = useState(false);
 
   // App Settings
-  const [pdfViewer, setPdfViewer] = useState(() => localStorage.getItem("dev_pdf_viewer") || "google");
-  const [showDevNav, setShowDevNav] = useState(() => localStorage.getItem("dev_show_dev_nav") !== "false");
-  const [appLang, setAppLang] = useState(() => localStorage.getItem("dev_app_lang") || "ar");
+  const [pdfViewer, setPdfViewer] = useState(() => ls.get("dev_pdf_viewer") || "google");
+  const [showDevNav, setShowDevNav] = useState(() => ls.get("dev_show_dev_nav") !== "false");
+  const [appLang, setAppLang] = useState(() => ls.get("dev_app_lang") || "ar");
 
   // Stats
   const [stats, setStats] = useState({ total: 0, featured: 0, categories: 0 });
@@ -239,7 +247,7 @@ export default function DevPanel() {
   };
 
   const handleResetColors = () => {
-    ["dev_bg","dev_fg","dev_primary","dev_accent","dev_card"].forEach(k => localStorage.removeItem(k));
+    ["dev_bg","dev_fg","dev_primary","dev_accent","dev_card"].forEach(k => ls.remove(k));
     ["--background","--foreground","--primary","--ring","--sidebar-primary","--accent","--card","--popover"]
       .forEach(v => document.documentElement.style.removeProperty(v));
     setColors({ bg:"", fg:"", primary:"", accent:"", card:"" });
@@ -258,14 +266,15 @@ export default function DevPanel() {
     const file = e.target.files[0]; if (!file) return;
     setUploadingLogo(true);
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    setLogoUrl(file_url); localStorage.setItem("dev_logo_url", file_url);
+    setLogoUrl(file_url); ls.set("dev_logo_url", file_url);
     setUploadingLogo(false); toast.success("تم رفع الشعار");
   };
 
-  const handleSaveAppName = () => {
-    localStorage.setItem("dev_app_name", appName);
-    localStorage.setItem("dev_app_subtitle", appSubtitle);
-    toast.success("تم الحفظ — أعد تحميل الصفحة");
+  const handleSaveAppName = async () => {
+    // Save to user profile so it persists across sessions
+    await base44.auth.updateMe({ app_name: appName, app_subtitle: appSubtitle });
+    try { localStorage.setItem("dev_app_name", appName); localStorage.setItem("dev_app_subtitle", appSubtitle); } catch(e) {}
+    toast.success("تم حفظ اسم التطبيق بنجاح ✓");
   };
 
   // ── Book ──
@@ -290,8 +299,25 @@ export default function DevPanel() {
   const handleAddBook = async () => {
     if (!bookForm.title || !bookForm.author) { toast.error("أدخل العنوان والمؤلف"); return; }
     setSavingBook(true);
-    await base44.entities.Book.create({ ...bookForm, pages_count: bookForm.pages_count ? Number(bookForm.pages_count) : null, rating: Number(bookForm.rating)||0 });
-    toast.success("تمت إضافة الكتاب"); setBookForm(emptyBook); setSavingBook(false); loadBooks();
+    try {
+      await base44.entities.Book.create({
+        title: bookForm.title,
+        author: bookForm.author,
+        category: bookForm.category,
+        description: bookForm.description,
+        cover_image: bookForm.cover_image,
+        pages_count: bookForm.pages_count ? Number(bookForm.pages_count) : null,
+        language: bookForm.language,
+        pdf_url: bookForm.pdf_url,
+        is_featured: bookForm.is_featured,
+        rating: Number(bookForm.rating) || 0,
+      });
+      toast.success("تمت إضافة الكتاب بنجاح ✓");
+      setBookForm(emptyBook);
+      loadBooks();
+    } finally {
+      setSavingBook(false);
+    }
   };
 
   // ── Admin ──
@@ -341,16 +367,15 @@ export default function DevPanel() {
 
   // ── App Settings ──
   const handleSaveAppSettings = () => {
-    localStorage.setItem("dev_pdf_viewer", pdfViewer);
-    localStorage.setItem("dev_show_dev_nav", String(showDevNav));
-    localStorage.setItem("dev_app_lang", appLang);
-    // apply language strings to localStorage for app to pick up
+    ls.set("dev_pdf_viewer", pdfViewer);
+    ls.set("dev_show_dev_nav", String(showDevNav));
+    ls.set("dev_app_lang", appLang);
     const lang = APP_LANGUAGES[appLang];
     if (lang) {
-      Object.entries(lang.strings).forEach(([k, v]) => localStorage.setItem(`dev_lang_${k}`, v));
-      localStorage.setItem("dev_lang_dir", lang.dir);
+      Object.entries(lang.strings).forEach(([k, v]) => ls.set(`dev_lang_${k}`, v));
+      ls.set("dev_lang_dir", lang.dir);
     }
-    toast.success("تم حفظ الإعدادات — أعد تحميل الصفحة");
+    toast.success("تم حفظ الإعدادات ✓");
   };
 
   const tabs = [
@@ -685,7 +710,7 @@ export default function DevPanel() {
               <p className="text-sm font-semibold mb-1">مسح ذاكرة التخزين المؤقت</p>
               <p className="text-xs text-muted-foreground mb-3">يمسح جميع إعدادات التخصيص المحفوظة</p>
               <Button variant="destructive" size="sm" className="rounded-xl" onClick={() => {
-                localStorage.clear();
+                ls.clear();
                 toast.success("تم المسح — ستتم إعادة التحميل");
                 setTimeout(() => window.location.reload(), 1500);
               }}>
