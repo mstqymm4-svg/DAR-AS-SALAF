@@ -178,7 +178,7 @@ export default function DevPanel() {
 
   // Logo & Name
   const [logoUrl, setLogoUrl] = useState(() => ls.get("dev_logo_url") || "");
-...
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [appName, setAppName] = useState(() => ls.get("dev_app_name") || "المكتبة الدينية");
   const [appSubtitle, setAppSubtitle] = useState(() => ls.get("dev_app_subtitle") || "نور العلم والمعرفة");
 
