@@ -136,7 +136,7 @@ export default function Home() {
 
       {/* Recent Books */}
       <section className="mb-12">
-        <div className="mb-5 rounded-md flex items-center justify-between">
+        <div className="mb-5 opacity-100 rounded flex items-center justify-between">
           <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-primary" />
             أحدث الإضافات
