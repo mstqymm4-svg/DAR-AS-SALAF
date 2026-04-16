@@ -48,7 +48,7 @@ export default function BookCard({ book, isFavorite, onToggleFavorite, index = 0
 
 
           <div className="flex flex-col items-center gap-2">
-              <span className="text-5xl hidden">{emoji}</span>
+              
               <BookOpen className="w-6 h-6 text-primary/30" />
             </div>
           }
