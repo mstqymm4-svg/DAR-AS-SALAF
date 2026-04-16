@@ -32,7 +32,7 @@ export default function Books() {
     const u = await base44.auth.me().catch(() => null);
     setUser(u);
 
-    const allBooks = await base44.entities.Book.list('-created_date', 200);
+    const allBooks = await base44.entities.Book.list('-created_date', 1000);
     setBooks(allBooks);
 
     if (u?.preferred_language && u.preferred_language !== 'الكل') {

@@ -49,7 +49,7 @@ export default function Admin() {
   }, []);
 
   const loadBooks = async () => {
-    const allBooks = await base44.entities.Book.list('-created_date', 200);
+    const allBooks = await base44.entities.Book.list('-created_date', 1000);
     setBooks(allBooks);
     setLoading(false);
   };

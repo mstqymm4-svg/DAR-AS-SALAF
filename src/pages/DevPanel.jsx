@@ -3,7 +3,8 @@ import { base44 } from "@/api/base44Client";
 import {
   Lock, Palette, Image, BookPlus, KeyRound, Eye, EyeOff,
   Upload, Check, BookOpen, Pencil, Trash2, Settings, RefreshCw,
-  Shield, LayoutDashboard, Sparkles, Globe, Pipette, RotateCcw
+  Shield, LayoutDashboard, Sparkles, Globe, Pipette, RotateCcw,
+  Tags, Plus, X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -91,7 +92,14 @@ const PRESETS = [
   { name: "وردي ناعم",   bg: "340 25% 97%", fg: "340 30% 10%", primary: "340 60% 40%", accent: "43 80% 55%", card: "340 20% 99%" },
 ];
 
-const categoryOptions = ["القرآن وعلومه","الحديث الشريف","الفقه الإسلامي","السيرة النبوية","العقيدة","التزكية والرقائق","التاريخ الإسلامي","أخرى"];
+const DEFAULT_CATEGORIES = ["القرآن وعلومه","الحديث الشريف","الفقه الإسلامي","السيرة النبوية","العقيدة","التزكية والرقائق","التاريخ الإسلامي","أخرى"];
+const getCategoryOptions = () => {
+  try {
+    const stored = localStorage.getItem("dev_categories");
+    return stored ? JSON.parse(stored) : DEFAULT_CATEGORIES;
+  } catch(e) { return DEFAULT_CATEGORIES; }
+};
+const categoryOptions = getCategoryOptions();
 const emptyBook = { title:"", author:"", category:"القرآن وعلومه", description:"", cover_image:"", pages_count:"", language:"العربية", pdf_url:"", is_featured:false, rating:0 };
 
 const COLOR_FIELDS = [
@@ -208,6 +216,10 @@ export default function DevPanel() {
   const [showDevNav, setShowDevNav] = useState(() => ls.get("dev_show_dev_nav") !== "false");
   const [appLang, setAppLang] = useState(() => ls.get("dev_app_lang") || "ar");
 
+  // Categories management
+  const [categories, setCategories] = useState(() => getCategoryOptions());
+  const [newCategory, setNewCategory] = useState("");
+
   // Stats
   const [stats, setStats] = useState({ total: 0, featured: 0, categories: 0 });
 
@@ -219,7 +231,7 @@ export default function DevPanel() {
 
   const loadBooks = async () => {
     setLoadingBooks(true);
-    const all = await base44.entities.Book.list('-created_date', 300);
+    const all = await base44.entities.Book.list('-created_date', 1000);
     setBooks(all);
     const cats = new Set(all.map(b => b.category));
     setStats({ total: all.length, featured: all.filter(b => b.is_featured).length, categories: cats.size });
@@ -377,12 +389,40 @@ export default function DevPanel() {
     toast.success("تم حفظ الإعدادات ✓");
   };
 
+  const saveCategoriesHandler = (cats) => {
+    try { localStorage.setItem("dev_categories", JSON.stringify(cats)); } catch(e) {}
+    setCategories(cats);
+  };
+
+  const handleAddCategory = () => {
+    const trimmed = newCategory.trim();
+    if (!trimmed) { toast.error("أدخل اسم التصنيف"); return; }
+    if (categories.includes(trimmed)) { toast.error("التصنيف موجود مسبقاً"); return; }
+    const updated = [...categories, trimmed];
+    saveCategoriesHandler(updated);
+    setNewCategory("");
+    toast.success("تم إضافة التصنيف");
+  };
+
+  const handleRemoveCategory = (cat) => {
+    if (!confirm(`حذف تصنيف "${cat}"؟ الكتب المصنفة به ستبقى لكن التصنيف لن يظهر في القوائم.`)) return;
+    const updated = categories.filter(c => c !== cat);
+    saveCategoriesHandler(updated);
+    toast.success("تم حذف التصنيف");
+  };
+
+  const handleResetCategories = () => {
+    saveCategoriesHandler(DEFAULT_CATEGORIES);
+    toast.success("تم إعادة التصنيفات للافتراضية");
+  };
+
   const tabs = [
     { id: "dashboard",    label: "لوحة التحكم",     icon: LayoutDashboard },
     { id: "color",        label: "الألوان",           icon: Palette },
     { id: "logo",         label: "الشعار والاسم",    icon: Image },
     { id: "book",         label: "إضافة كتاب",       icon: BookPlus },
     { id: "admin",        label: "إدارة الكتب",      icon: BookOpen },
+    { id: "categories",   label: "التصنيفات",        icon: Tags },
     { id: "app_settings", label: "إعدادات التطبيق",  icon: Settings },
     { id: "password",     label: "كلمة المرور",      icon: KeyRound },
   ];
@@ -640,6 +680,47 @@ export default function DevPanel() {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* ─── Categories ─── */}
+        {activeTab === "categories" && (
+          <div className="space-y-5">
+            <h2 className="text-base font-bold flex items-center gap-2"><Tags className="w-4 h-4"/> إدارة التصنيفات</h2>
+            <p className="text-xs text-muted-foreground">أضف أو أزل تصنيفات الكتب. التغييرات تُطبَّق فوراً على قوائم الاختيار.</p>
+
+            {/* Add new */}
+            <div className="flex gap-2">
+              <Input
+                value={newCategory}
+                onChange={e => setNewCategory(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && handleAddCategory()}
+                placeholder="اسم التصنيف الجديد..."
+                className="flex-1"
+              />
+              <Button onClick={handleAddCategory} className="gap-1.5 rounded-xl shrink-0">
+                <Plus className="w-4 h-4"/> إضافة
+              </Button>
+            </div>
+
+            {/* List */}
+            <div className="space-y-2">
+              {categories.map((cat) => (
+                <div key={cat} className="flex items-center justify-between p-3 rounded-xl bg-muted/50 border border-border">
+                  <span className="text-sm font-medium">{cat}</span>
+                  <button
+                    onClick={() => handleRemoveCategory(cat)}
+                    className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors"
+                  >
+                    <X className="w-4 h-4 text-destructive"/>
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <Button variant="outline" onClick={handleResetCategories} className="w-full rounded-xl gap-2">
+              <RotateCcw className="w-3.5 h-3.5"/> إعادة التصنيفات للافتراضية
+            </Button>
           </div>
         )}
 

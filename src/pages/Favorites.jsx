@@ -26,7 +26,7 @@ export default function Favorites() {
     setFavoriteIds(ids);
 
     if (ids.length > 0) {
-      const allBooks = await base44.entities.Book.list('-created_date', 200);
+      const allBooks = await base44.entities.Book.list('-created_date', 1000);
       const favBooks = allBooks.filter((b) => ids.includes(b.id));
       setBooks(favBooks);
     }

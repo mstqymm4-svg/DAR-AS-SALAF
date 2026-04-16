@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Heart, Star, BookOpen, BookMarked } from "lucide-react";
+import { Heart, Star, BookOpen, BookMarked, Languages } from "lucide-react";
 import { motion } from "framer-motion";
 
 const categoryColors = {
@@ -109,14 +109,24 @@ export default function BookCard({ book, isFavorite, onToggleFavorite, index = 0
         </div>
       </Link>
 
-      <div className="px-4 pb-4 -mt-1">
+      <div className="px-4 pb-4 -mt-1 flex gap-1.5">
         <Link
           to={`/read/${book.id}`}
-          className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition-colors"
+          className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition-colors"
         >
           <BookMarked className="w-3.5 h-3.5" />
-          قراءة الكتاب
+          قراءة
         </Link>
+        <a
+          href={`https://translate.google.com/translate?sl=auto&tl=ar&u=${encodeURIComponent(book.pdf_url || `https://www.google.com/search?q=${encodeURIComponent(book.title)}`)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="ترجمة الكتاب"
+          className="flex items-center justify-center gap-1 px-2.5 py-2 rounded-xl bg-accent/10 hover:bg-accent/20 text-accent-foreground text-xs font-bold transition-colors"
+        >
+          <Languages className="w-3.5 h-3.5" />
+          ترجمة
+        </a>
       </div>
     </motion.div>
   );
