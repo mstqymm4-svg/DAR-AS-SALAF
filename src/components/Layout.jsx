@@ -5,7 +5,7 @@ import { base44 } from "@/api/base44Client";
 
 // Safe localStorage
 const ls = {
-  get: (k, fallback = "") => { try { return localStorage.getItem(k) || fallback; } catch(e) { return fallback; } }
+  get: (k, fallback = "") => {try {return localStorage.getItem(k) || fallback;} catch (e) {return fallback;}}
 };
 
 export default function Layout() {
@@ -13,21 +13,21 @@ export default function Layout() {
   const [user, setUser] = useState(null);
 
   // Read customization from localStorage
-  const appName    = ls.get("dev_app_name", "المكتبة الدينية");
-  const appSub     = ls.get("dev_app_subtitle", "نور العلم والمعرفة");
-  const langDir    = ls.get("dev_lang_dir", "rtl");
-  const navHome    = ls.get("dev_lang_navHome", "الرئيسية");
-  const navBooks   = ls.get("dev_lang_navBooks", "المكتبة");
-  const navFav     = ls.get("dev_lang_navFav", "المفضلة");
-  const navSettings= ls.get("dev_lang_navSettings", "الإعدادات");
+  const appName = ls.get("dev_app_name", "المكتبة الدينية");
+  const appSub = ls.get("dev_app_subtitle", "نور العلم والمعرفة");
+  const langDir = ls.get("dev_lang_dir", "rtl");
+  const navHome = ls.get("dev_lang_navHome", "الرئيسية");
+  const navBooks = ls.get("dev_lang_navBooks", "المكتبة");
+  const navFav = ls.get("dev_lang_navFav", "المفضلة");
+  const navSettings = ls.get("dev_lang_navSettings", "الإعدادات");
 
   const navItems = [
-    { path: "/",         icon: Home,     label: navHome },
-    { path: "/books",    icon: BookOpen, label: navBooks },
-    { path: "/favorites",icon: Heart,    label: navFav },
-    { path: "/settings", icon: Settings, label: navSettings },
-    { path: "/dev",      icon: Code,     label: "Dev" },
-  ];
+  { path: "/", icon: Home, label: navHome },
+  { path: "/books", icon: BookOpen, label: navBooks },
+  { path: "/favorites", icon: Heart, label: navFav },
+  { path: "/settings", icon: Settings, label: navSettings },
+  { path: "/dev", icon: Code, label: "Dev" }];
+
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -44,7 +44,7 @@ export default function Layout() {
                 <BookOpen className="w-5 h-5 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-foreground leading-tight">{appName}</h1>
+                <h1 className="text-foreground text-4xl font-bold text-justify leading-tight">{appName}</h1>
                 <p className="text-[10px] text-muted-foreground -mt-0.5">{appSub}</p>
               </div>
             </Link>
@@ -56,15 +56,15 @@ export default function Layout() {
                     key={item.path}
                     to={item.path}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                      isActive
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                    }`}
-                  >
+                    isActive ?
+                    "bg-primary text-primary-foreground" :
+                    "text-muted-foreground hover:text-foreground hover:bg-muted"}`
+                    }>
+                    
                     <item.icon className="w-4 h-4" />
                     {item.label}
-                  </Link>
-                );
+                  </Link>);
+
               })}
             </nav>
             <Link to="/books" className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors">
@@ -89,16 +89,16 @@ export default function Layout() {
                 key={item.path}
                 to={item.path}
                 className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 ${
-                  isActive ? "text-primary" : "text-muted-foreground"
-                }`}
-              >
+                isActive ? "text-primary" : "text-muted-foreground"}`
+                }>
+                
                 <item.icon className={`w-5 h-5 ${isActive ? "fill-primary/20" : ""}`} />
                 <span className="text-[10px] font-medium">{item.label}</span>
-              </Link>
-            );
+              </Link>);
+
           })}
         </div>
       </nav>
-    </div>
-  );
+    </div>);
+
 }
