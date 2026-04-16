@@ -103,7 +103,7 @@ export default function BookDetails() {
             <img src={book.cover_image} alt={book.title} className="w-full h-full object-cover" /> :
 
             <div className="flex flex-col items-center gap-3">
-                <span className="text-7xl hidden">{emoji}</span>
+                
                 <BookOpen className="w-8 h-8 text-primary/30" />
               </div>
             }
