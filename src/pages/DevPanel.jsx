@@ -768,7 +768,7 @@ export default function DevPanel() {
                     <input type="radio" name="pdfViewer" value={opt.value} checked={pdfViewer === opt.value} onChange={(e) => setPdfViewer(e.target.value)} className="hidden" />
                     <div className={`w-4 h-4 rounded-full border-2 shrink-0 ${pdfViewer === opt.value ? "border-primary bg-primary" : "border-border"}`} />
                     <div>
-                      <p className="text-sm font-medium">{opt.label}</p>
+                      <p className="text-sm font-medium text-right">{opt.label}</p>
                       <p className="text-xs text-muted-foreground">{opt.desc}</p>
                     </div>
                   </label>
