@@ -141,9 +141,9 @@ export default function Home() {
             <BookOpen className="w-5 h-5 text-primary" />
             أحدث الإضافات
           </h2>
-          <Link to="/books" className="text-sm text-primary font-medium hover:underline flex items-center gap-1">
-            عرض الكل
-            <ArrowLeft className="w-3.5 h-3.5" />
+          <Link to="/books" className="text-primary text-base font-medium hover:underline flex items-center gap-1">عرض الكل
+
+
           </Link>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
