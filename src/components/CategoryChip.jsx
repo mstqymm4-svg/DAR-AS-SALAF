@@ -30,14 +30,14 @@ export const categories = [
 export default function CategoryChip({ category, isActive, onClick }) {
   return (
     <button
-      onClick={() => onClick(category.name)}
-      className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 ${
-      isActive ?
-      "bg-primary text-primary-foreground shadow-md shadow-primary/20" :
-      "bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/30"}`
-      }>
+      onClick={() => onClick(category.name)} className="bg-card text-muted-foreground px-4 py-2 text-sm font-medium text-left line-through underline rounded-full flex items-center gap-2 whitespace-nowrap transition-all duration-200 border border-border hover:text-foreground hover:border-primary/30">
+
+
+
+
       
-      <span className="text-[#24e5e5]">{category.emoji}</span>
+      
+      <span className="text-[#24e5e5] hidden">{category.emoji}</span>
       {category.name}
     </button>);
 
