@@ -37,7 +37,7 @@ export default function CategoryChip({ category, isActive, onClick }) {
 
       
       
-      <span className="text-[#24e5e5] hidden">{category.emoji}</span>
+      
       {category.name}
     </button>);
 
