@@ -78,8 +78,8 @@ export default function Home() {
               <Sparkles className="w-5 h-5 text-accent" />
               <span className="text-sm font-medium text-accent">مكتبتك الدينية الشاملة</span>
             </div>
-            <h1 className="text-3xl md:text-5xl font-black leading-tight mb-4">
-              اقرأ وتعلّم وتدبّر
+            <h1 className="mb-4 text-3xl font-black text-center leading-tight md:text-5xl">اقرأ وتعلّم وتدبّر
+
             </h1>
             <p className="mb-8 text-base text-center normal-case leading-relaxed opacity-90 md:text-lg max-w-lg">اكتشف مجموعة واسعة من الكتب الدينية في مختلف المجالات الإسلامية. و مختلف اللغات 
 
