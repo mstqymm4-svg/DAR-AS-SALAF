@@ -81,7 +81,7 @@ export default function Home() {
             <h1 className="text-3xl md:text-5xl font-black leading-tight mb-4">
               اقرأ وتعلّم وتدبّر
             </h1>
-            <p className="text-base md:text-lg opacity-90 leading-relaxed mb-8 max-w-lg">اكتشف مجموعة واسعة من الكتب الدينية في مختلف المجالات الإسلامية. و مختلف اللغات 
+            <p className="mb-8 text-base text-center normal-case leading-relaxed opacity-90 md:text-lg max-w-lg">اكتشف مجموعة واسعة من الكتب الدينية في مختلف المجالات الإسلامية. و مختلف اللغات 
 
             </p>
             <Link
