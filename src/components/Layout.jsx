@@ -93,7 +93,7 @@ export default function Layout() {
                 }>
                 
                 <item.icon className="opacity-100 lucide lucide-house w-5 h-5 fill-primary/20" />
-                <span className="text-[10px] text-base font-medium text-left">{item.label}</span>
+                <span className="text-[10px] text-xs font-semibold text-left">{item.label}</span>
               </Link>);
 
           })}
