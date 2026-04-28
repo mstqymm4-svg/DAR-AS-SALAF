@@ -75,8 +75,8 @@ export default function Home() {
           </div>
           <div className="relative z-10 max-w-2xl">
             <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="lucide lucide-sparkles w-5 h-5 text-accent hidden" />
-              <span className="text-sm font-medium text-accent hidden">مكتبتك الدينية الشاملة</span>
+              
+              
             </div>
             <h1 className="mb-4 text-3xl font-black text-center leading-tight md:text-5xl">اقرأ وتعلّم وتدبّر
 
