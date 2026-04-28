@@ -432,7 +432,7 @@ export default function DevPanel() {
       <div className="min-h-[80vh] flex items-center justify-center px-4">
         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-card border border-border rounded-2xl p-8 w-full max-w-sm">
           <div className="flex flex-col items-center mb-6">
-            <div className="bg-[#050505] text-[#d91212] mb-3 rounded-2xl w-14 h-14 flex items-center justify-center">
+            <div className="bg-slate-50 text-[#d91212] mb-3 rounded-2xl w-14 h-14 flex items-center justify-center">
               <Lock className="w-7 h-7 text-primary" />
             </div>
             <h1 className="text-xl font-black">لوحة المطور</h1>
