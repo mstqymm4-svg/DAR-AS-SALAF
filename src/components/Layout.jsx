@@ -92,7 +92,7 @@ export default function Layout() {
                 isActive ? "text-primary" : "text-muted-foreground"}`
                 }>
                 
-                <item.icon className={`w-5 h-5 ${isActive ? "fill-primary/20" : ""}`} />
+                <item.icon className="opacity-100 lucide lucide-house w-5 h-5 fill-primary/20" />
                 <span className="text-[10px] font-medium">{item.label}</span>
               </Link>);
 
