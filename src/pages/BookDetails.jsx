@@ -126,8 +126,8 @@ export default function BookDetails() {
               onClick={toggleFavorite}
               className="shrink-0 w-11 h-11 rounded-xl border border-border flex items-center justify-center hover:bg-muted transition-colors">
               
-                <Heart
-                className={`w-5 h-5 ${isFavorite ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
+                <Heart className="bg-[hsl(var(--destructive))] text-red-600 lucide lucide-heart w-5 h-5 fill-red-500" />
+              
               
               </button>
             }
