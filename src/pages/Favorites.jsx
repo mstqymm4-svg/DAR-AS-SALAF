@@ -58,7 +58,7 @@ export default function Favorites() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-foreground mb-2 flex items-center gap-2">
-          <Heart className="lucide lucide-heart w-6 h-6 text-red-500 fill-red-500 hidden" />
+          
           المفضلة
         </h1>
         <p className="text-sm text-muted-foreground">الكتب التي أضفتها إلى قائمة المفضلة</p>
