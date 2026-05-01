@@ -110,69 +110,7 @@ const COLOR_FIELDS = [
 { key: "card", label: "البطاقات", cssVar: "--card" }];
 
 
-// ─── App Language translations ────────────────────────────────────────
-const APP_LANGUAGES = {
-  ar: {
-    label: "العربية 🇸🇦",
-    dir: "rtl",
-    strings: {
-      appName: "المكتبة الدينية",
-      appSubtitle: "نور العلم والمعرفة",
-      heroTitle: "اقرأ وتعلّم وتدبّر",
-      heroSub: "اكتشف مجموعة واسعة من الكتب الدينية في مختلف المجالات الإسلامية.",
-      navHome: "الرئيسية",
-      navBooks: "المكتبة",
-      navFav: "المفضلة",
-      navSettings: "الإعدادات",
-      browseLib: "تصفح المكتبة"
-    }
-  },
-  en: {
-    label: "English 🇬🇧",
-    dir: "ltr",
-    strings: {
-      appName: "Islamic Library",
-      appSubtitle: "Light of Knowledge",
-      heroTitle: "Read, Learn & Reflect",
-      heroSub: "Discover a wide collection of Islamic books covering all fields of Islamic knowledge.",
-      navHome: "Home",
-      navBooks: "Library",
-      navFav: "Favorites",
-      navSettings: "Settings",
-      browseLib: "Browse Library"
-    }
-  },
-  hi: {
-    label: "हिंदी 🇮🇳",
-    dir: "ltr",
-    strings: {
-      appName: "इस्लामी पुस्तकालय",
-      appSubtitle: "ज्ञान का प्रकाश",
-      heroTitle: "पढ़ें, सीखें और विचार करें",
-      heroSub: "इस्लामी ज्ञान के सभी क्षेत्रों को कवर करने वाली पुस्तकों का विशाल संग्रह खोजें।",
-      navHome: "मुख्य पृष्ठ",
-      navBooks: "पुस्तकालय",
-      navFav: "पसंदीदा",
-      navSettings: "सेटिंग्स",
-      browseLib: "पुस्तकालय देखें"
-    }
-  },
-  ur: {
-    label: "اردو 🇵🇰",
-    dir: "rtl",
-    strings: {
-      appName: "اسلامی کتب خانہ",
-      appSubtitle: "علم کی روشنی",
-      heroTitle: "پڑھیں، سیکھیں اور غور کریں",
-      heroSub: "اسلامی علوم کے تمام شعبوں پر مشتمل کتابوں کا وسیع ذخیرہ دریافت کریں۔",
-      navHome: "مرکزی صفحہ",
-      navBooks: "کتب خانہ",
-      navFav: "پسندیدہ",
-      navSettings: "ترتیبات",
-      browseLib: "کتب خانہ دیکھیں"
-    }
-  }
-};
+import { TRANSLATIONS } from "@/lib/i18n";
 
 export default function DevPanel() {
   const [unlocked, setUnlocked] = useState(false);
@@ -212,7 +150,6 @@ export default function DevPanel() {
   const [savingEdit, setSavingEdit] = useState(false);
 
   // App Settings
-  const [pdfViewer, setPdfViewer] = useState(() => ls.get("dev_pdf_viewer") || "google");
   const [showDevNav, setShowDevNav] = useState(() => ls.get("dev_show_dev_nav") !== "false");
   const [appLang, setAppLang] = useState(() => ls.get("dev_app_lang") || "ar");
 
@@ -378,15 +315,10 @@ export default function DevPanel() {
 
   // ── App Settings ──
   const handleSaveAppSettings = () => {
-    ls.set("dev_pdf_viewer", pdfViewer);
     ls.set("dev_show_dev_nav", String(showDevNav));
     ls.set("dev_app_lang", appLang);
-    const lang = APP_LANGUAGES[appLang];
-    if (lang) {
-      Object.entries(lang.strings).forEach(([k, v]) => ls.set(`dev_lang_${k}`, v));
-      ls.set("dev_lang_dir", lang.dir);
-    }
     toast.success("تم حفظ الإعدادات ✓");
+    setTimeout(() => window.location.reload(), 800);
   };
 
   const saveCategoriesHandler = (cats) => {
@@ -579,23 +511,66 @@ export default function DevPanel() {
         {/* ─── Logo & Name ─── */}
         {activeTab === "logo" &&
         <div className="space-y-6">
-            <div>
-              <h2 className="text-base font-bold mb-4">شعار التطبيق</h2>
-              <div className="flex flex-col items-center gap-4">
-                {logoUrl && <img src={logoUrl} alt="الشعار" className="w-20 h-20 rounded-2xl object-cover border border-border" />}
-                <label className="cursor-pointer w-full">
-                  <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
-                  <div className="flex items-center justify-center gap-2 h-12 rounded-xl border-2 border-dashed border-border hover:border-primary/40 transition-colors">
-                    {uploadingLogo ? <div className="w-5 h-5 border-2 border-primary/20 border-t-primary rounded-full animate-spin" /> : <><Upload className="w-4 h-4 text-muted-foreground" /><span className="text-sm text-muted-foreground">اختر صورة للشعار</span></>}
-                  </div>
-                </label>
+            {/* Live Preview */}
+            <div className="p-4 rounded-2xl border-2 border-dashed border-border bg-muted/30">
+              <p className="text-xs text-muted-foreground mb-3 text-center">معاينة مباشرة للهيدر</p>
+              <div className="flex items-center gap-3 bg-card rounded-xl px-4 py-3 border border-border shadow-sm">
+                <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center overflow-hidden shrink-0">
+                  {logoUrl
+                    ? <img src={logoUrl} alt="logo" className="w-full h-full object-cover" />
+                    : <BookOpen className="w-5 h-5 text-primary-foreground" />}
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-foreground leading-tight">{appName || "اسم التطبيق"}</p>
+                  <p className="text-[10px] text-muted-foreground">{appSubtitle || "الوصف"}</p>
+                </div>
               </div>
             </div>
-            <div className="border-t border-border pt-5 space-y-4">
-              <h2 className="text-base font-bold">اسم التطبيق</h2>
-              <div><Label>الاسم الرئيسي</Label><Input value={appName} onChange={(e) => setAppName(e.target.value)} className="mt-1.5" /></div>
-              <div><Label>الوصف الفرعي</Label><Input value={appSubtitle} onChange={(e) => setAppSubtitle(e.target.value)} className="mt-1.5" /></div>
-              <Button onClick={handleSaveAppName} className="w-full rounded-xl">حفظ</Button>
+
+            {/* Logo upload */}
+            <div>
+              <h2 className="text-sm font-bold mb-3 flex items-center gap-2"><Image className="w-4 h-4"/> الشعار (Logo)</h2>
+              <div className="flex gap-3 items-start">
+                <div className="w-16 h-16 rounded-2xl border-2 border-border bg-muted flex items-center justify-center overflow-hidden shrink-0">
+                  {logoUrl
+                    ? <img src={logoUrl} alt="logo" className="w-full h-full object-cover" />
+                    : <BookOpen className="w-6 h-6 text-muted-foreground" />}
+                </div>
+                <div className="flex-1 space-y-2">
+                  <label className="cursor-pointer block">
+                    <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                    <div className="flex items-center justify-center gap-2 h-10 rounded-xl border-2 border-dashed border-border hover:border-primary/40 transition-colors">
+                      {uploadingLogo
+                        ? <div className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+                        : <><Upload className="w-4 h-4 text-muted-foreground" /><span className="text-sm text-muted-foreground">رفع صورة</span></>}
+                    </div>
+                  </label>
+                  {logoUrl && (
+                    <button
+                      onClick={() => { ls.remove("dev_logo_url"); setLogoUrl(""); toast.success("تم حذف الشعار"); }}
+                      className="text-xs text-destructive hover:underline"
+                    >
+                      حذف الشعار الحالي
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Name & subtitle */}
+            <div className="space-y-4">
+              <h2 className="text-sm font-bold flex items-center gap-2"><Sparkles className="w-4 h-4"/> اسم التطبيق والوصف</h2>
+              <div>
+                <Label>الاسم الرئيسي</Label>
+                <Input value={appName} onChange={(e) => setAppName(e.target.value)} className="mt-1.5" placeholder="المكتبة الدينية" />
+              </div>
+              <div>
+                <Label>الوصف الفرعي</Label>
+                <Input value={appSubtitle} onChange={(e) => setAppSubtitle(e.target.value)} className="mt-1.5" placeholder="نور العلم والمعرفة" />
+              </div>
+              <Button onClick={handleSaveAppName} className="w-full rounded-xl gap-2">
+                <Check className="w-4 h-4"/> حفظ الاسم والوصف
+              </Button>
             </div>
           </div>
         }
@@ -737,40 +712,13 @@ export default function DevPanel() {
               </div>
               <p className="text-xs text-muted-foreground">اختر لغة واجهة التطبيق وسيتم تطبيقها عند إعادة التحميل</p>
               <div className="grid grid-cols-2 gap-2">
-                {Object.entries(APP_LANGUAGES).map(([code, lang]) =>
+                {Object.entries(TRANSLATIONS).map(([code, lang]) =>
               <label key={code} className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${appLang === code ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"}`}>
                     <input type="radio" name="appLang" value={code} checked={appLang === code} onChange={() => setAppLang(code)} className="hidden" />
                     <div className={`w-4 h-4 rounded-full border-2 shrink-0 ${appLang === code ? "border-primary bg-primary" : "border-border"}`} />
-                    <span className="text-sm font-medium">{lang.label}</span>
-                  </label>
-              )}
-              </div>
-              {appLang !== "ar" &&
-            <div className="mt-2 p-3 rounded-xl bg-accent/10 border border-accent/20 text-xs text-muted-foreground space-y-1">
-                  <p className="font-semibold text-foreground">معاينة النصوص:</p>
-                  {Object.entries(APP_LANGUAGES[appLang].strings).slice(0, 4).map(([k, v]) =>
-              <p key={k}><span className="text-muted-foreground">{k}:</span> <span className={APP_LANGUAGES[appLang].dir === "rtl" ? "font-tajawal" : ""}>{v}</span></p>
-              )}
-                </div>
-            }
-            </div>
-
-            {/* PDF Viewer */}
-            <div className="p-4 bg-muted/50 rounded-xl space-y-3">
-              <p className="text-sm font-semibold">عارض PDF</p>
-              <div className="space-y-2">
-                {[
-              { value: "google", label: "Google Docs Viewer", desc: "الأكثر توافقاً مع المتصفحات" },
-              { value: "mozilla", label: "Mozilla PDF.js", desc: "سريع ويعمل بدون إنترنت" },
-              { value: "direct", label: "مباشر (iframe)", desc: "يعتمد على إعدادات الخادم" }].
-              map((opt) =>
-              <label key={opt.value} className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${pdfViewer === opt.value ? "border-primary bg-primary/5" : "border-border"}`}>
-                    <input type="radio" name="pdfViewer" value={opt.value} checked={pdfViewer === opt.value} onChange={(e) => setPdfViewer(e.target.value)} className="hidden" />
-                    <div className={`w-4 h-4 rounded-full border-2 shrink-0 ${pdfViewer === opt.value ? "border-primary bg-primary" : "border-border"}`} />
-                    <div>
-                      <p className="text-sm font-medium text-right">{opt.label}</p>
-                      <p className="text-xs text-muted-foreground">{opt.desc}</p>
-                    </div>
+                    <span className="text-sm font-medium">
+                      {code === "ar" ? "العربية 🇸🇦" : code === "en" ? "English 🇬🇧" : code === "fr" ? "Français 🇫🇷" : code === "ur" ? "اردو 🇵🇰" : "हिंदी 🇮🇳"}
+                    </span>
                   </label>
               )}
               </div>
