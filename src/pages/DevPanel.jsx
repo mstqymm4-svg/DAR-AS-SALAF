@@ -122,6 +122,13 @@ export default function DevPanel() {
   const [colors, setColors] = useState({ bg: "", fg: "", primary: "", accent: "", card: "" });
   const [selectedPreset, setSelectedPreset] = useState(null);
 
+  // Save button states
+  const [savedStates, setSavedStates] = useState({});
+  const markSaved = (key) => {
+    setSavedStates(s => ({ ...s, [key]: true }));
+    setTimeout(() => setSavedStates(s => ({ ...s, [key]: false })), 2000);
+  };
+
   // Logo & Name
   const [logoUrl, setLogoUrl] = useState(() => ls.get("dev_logo_url") || "");
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -192,6 +199,7 @@ export default function DevPanel() {
     const hasAny = Object.values(colors).some((v) => v.trim() !== "");
     if (!hasAny) {toast.error("أدخل قيمة لون واحدة على الأقل أو اختر ثيماً جاهزاً");return;}
     applyColors(colors);
+    markSaved("colors");
     toast.success("تم تطبيق الألوان");
   };
 
@@ -222,6 +230,7 @@ export default function DevPanel() {
   const handleSaveAppName = () => {
     ls.set("dev_app_name", appName);
     ls.set("dev_app_subtitle", appSubtitle);
+    markSaved("appName");
     toast.success("تم حفظ اسم التطبيق بنجاح ✓");
   };
 
@@ -291,8 +300,9 @@ export default function DevPanel() {
         is_featured: editForm.is_featured,
         rating: Number(editForm.rating) || 0
       });
+      markSaved("editBook");
       toast.success("تم التحديث بنجاح");
-      setEditDialog(false);
+      setTimeout(() => setEditDialog(false), 800);
       loadBooks();
     } finally {
       setSavingEdit(false);
@@ -310,6 +320,7 @@ export default function DevPanel() {
     if (newPwd.length < 4) {toast.error("كلمة المرور الجديدة قصيرة جداً");return;}
     if (newPwd !== confirmPwd) {toast.error("كلمتا المرور غير متطابقتين");return;}
     localStorage.setItem(DEV_PASSWORD_KEY, newPwd);
+    markSaved("password");
     toast.success("تم تغيير كلمة المرور");setCurrentPwd("");setNewPwd("");setConfirmPwd("");
   };
 
@@ -317,8 +328,9 @@ export default function DevPanel() {
   const handleSaveAppSettings = () => {
     ls.set("dev_show_dev_nav", String(showDevNav));
     ls.set("dev_app_lang", appLang);
+    markSaved("appSettings");
     toast.success("تم حفظ الإعدادات ✓");
-    setTimeout(() => window.location.reload(), 800);
+    setTimeout(() => window.location.reload(), 1200);
   };
 
   const saveCategoriesHandler = (cats) => {
@@ -501,7 +513,9 @@ export default function DevPanel() {
               })}
               </div>
               <div className="flex gap-2 mt-4">
-                <Button onClick={handleApplyCustom} className="flex-1 rounded-xl">تطبيق الألوان</Button>
+                <Button onClick={handleApplyCustom} className={`flex-1 rounded-xl gap-2 transition-all duration-300 ${savedStates.colors ? "bg-green-600 hover:bg-green-700" : ""}`}>
+                  {savedStates.colors ? <><Check className="w-4 h-4" /> تم التطبيق!</> : "تطبيق الألوان"}
+                </Button>
                 <Button variant="outline" onClick={handleResetColors} className="rounded-xl gap-1.5"><RotateCcw className="w-3.5 h-3.5" /> إعادة تعيين</Button>
               </div>
             </div>
@@ -568,8 +582,8 @@ export default function DevPanel() {
                 <Label>الوصف الفرعي</Label>
                 <Input value={appSubtitle} onChange={(e) => setAppSubtitle(e.target.value)} className="mt-1.5" placeholder="نور العلم والمعرفة" />
               </div>
-              <Button onClick={handleSaveAppName} className="w-full rounded-xl gap-2">
-                <Check className="w-4 h-4"/> حفظ الاسم والوصف
+              <Button onClick={handleSaveAppName} className={`w-full rounded-xl gap-2 transition-all duration-300 ${savedStates.appName ? "bg-green-600 hover:bg-green-700" : ""}`}>
+                <Check className="w-4 h-4"/> {savedStates.appName ? "تم الحفظ!" : "حفظ الاسم والوصف"}
               </Button>
             </div>
           </div>
@@ -746,8 +760,9 @@ export default function DevPanel() {
               </Button>
             </div>
 
-            <Button onClick={handleSaveAppSettings} className="w-full rounded-xl h-11 font-bold">
-              حفظ إعدادات التطبيق
+            <Button onClick={handleSaveAppSettings} className={`w-full rounded-xl h-11 font-bold gap-2 transition-all duration-300 ${savedStates.appSettings ? "bg-green-600 hover:bg-green-700" : ""}`}>
+              <Check className={`w-4 h-4 transition-opacity ${savedStates.appSettings ? "opacity-100" : "opacity-0 w-0 -mx-1"}`} />
+              {savedStates.appSettings ? "تم الحفظ!" : "حفظ إعدادات التطبيق"}
             </Button>
           </div>
         }
@@ -759,7 +774,9 @@ export default function DevPanel() {
             <div><Label>الحالية</Label><Input type="password" value={currentPwd} onChange={(e) => setCurrentPwd(e.target.value)} className="mt-1.5" /></div>
             <div><Label>الجديدة</Label><Input type="password" value={newPwd} onChange={(e) => setNewPwd(e.target.value)} className="mt-1.5" /></div>
             <div><Label>تأكيد الجديدة</Label><Input type="password" value={confirmPwd} onChange={(e) => setConfirmPwd(e.target.value)} className="mt-1.5" /></div>
-            <Button onClick={handleChangePassword} className="w-full rounded-xl">تغيير كلمة المرور</Button>
+            <Button onClick={handleChangePassword} className={`w-full rounded-xl gap-2 transition-all duration-300 ${savedStates.password ? "bg-green-600 hover:bg-green-700" : ""}`}>
+              {savedStates.password ? <><Check className="w-4 h-4" /> تم التغيير!</> : "تغيير كلمة المرور"}
+            </Button>
           </div>
         }
       </div>
@@ -812,8 +829,8 @@ export default function DevPanel() {
               <Label>مميز ⭐</Label>
               <Switch checked={editForm.is_featured} onCheckedChange={(v) => setEditForm((p) => ({ ...p, is_featured: v }))} />
             </div>
-            <Button onClick={handleSaveEdit} disabled={savingEdit} className="w-full rounded-xl">
-              {savingEdit ? "جاري الحفظ..." : "حفظ التعديلات"}
+            <Button onClick={handleSaveEdit} disabled={savingEdit} className={`w-full rounded-xl gap-2 transition-all duration-300 ${savedStates.editBook ? "bg-green-600 hover:bg-green-700" : ""}`}>
+              {savingEdit ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> جاري الحفظ...</> : savedStates.editBook ? <><Check className="w-4 h-4" /> تم الحفظ!</> : "حفظ التعديلات"}
             </Button>
           </div>
         </DialogContent>
