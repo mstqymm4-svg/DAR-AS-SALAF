@@ -4,7 +4,7 @@ import {
   Lock, Palette, Image, BookPlus, KeyRound, Eye, EyeOff,
   Upload, Check, BookOpen, Pencil, Trash2, Settings, RefreshCw,
   Shield, LayoutDashboard, Sparkles, Globe, Pipette, RotateCcw,
-  Tags, Plus, X } from
+  Tags, Plus, X, Youtube } from
 "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -134,6 +134,8 @@ export default function DevPanel() {
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [appName, setAppName] = useState(() => ls.get("dev_app_name") || "المكتبة الدينية");
   const [appSubtitle, setAppSubtitle] = useState(() => ls.get("dev_app_subtitle") || "نور العلم والمعرفة");
+  const [youtubeUrl, setYoutubeUrl] = useState(() => ls.get("dev_youtube_url") || "");
+  const [youtubeLabel, setYoutubeLabel] = useState(() => ls.get("dev_youtube_label") || "قناتنا على يوتيوب");
 
   // Book PDF
   const [bookForm, setBookForm] = useState(emptyBook);
@@ -230,8 +232,10 @@ export default function DevPanel() {
   const handleSaveAppName = () => {
     ls.set("dev_app_name", appName);
     ls.set("dev_app_subtitle", appSubtitle);
+    ls.set("dev_youtube_url", youtubeUrl);
+    ls.set("dev_youtube_label", youtubeLabel);
     markSaved("appName");
-    toast.success("تم حفظ اسم التطبيق بنجاح ✓");
+    toast.success("تم الحفظ بنجاح ✓");
   };
 
   // ── Book ──
@@ -469,16 +473,51 @@ export default function DevPanel() {
         <div className="space-y-6">
             <h2 className="text-base font-bold flex items-center gap-2"><Palette className="w-4 h-4" /> تخصيص ألوان التطبيق</h2>
 
+            {/* Live Preview Card */}
+            <div className="p-4 rounded-2xl border-2 border-dashed border-border bg-muted/20">
+              <p className="text-xs text-muted-foreground mb-3 text-center">معاينة فورية للألوان</p>
+              <div className="rounded-xl overflow-hidden border border-border shadow-sm">
+                {/* Mock header */}
+                <div style={{ background: colors.bg ? `hsl(${colors.bg})` : undefined }} className="bg-card px-4 py-2.5 flex items-center gap-2 border-b border-border">
+                  <div style={{ background: colors.primary ? `hsl(${colors.primary})` : undefined }} className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
+                    <BookOpen className="w-3.5 h-3.5" style={{ color: "white" }} />
+                  </div>
+                  <span style={{ color: colors.fg ? `hsl(${colors.fg})` : undefined }} className="text-xs font-bold text-foreground">المكتبة الدينية</span>
+                  <div className="flex gap-1 mr-auto">
+                    {["الرئيسية","المكتبة","المفضلة"].map((n,i) => (
+                      <span key={i} style={i===0 ? { background: colors.primary ? `hsl(${colors.primary})` : undefined, color: "white" } : { color: colors.fg ? `hsl(${colors.fg})` : undefined }} className={`text-[9px] px-2 py-0.5 rounded-md ${i===0 ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>{n}</span>
+                    ))}
+                  </div>
+                </div>
+                {/* Mock hero */}
+                <div style={{ background: colors.primary ? `hsl(${colors.primary})` : undefined }} className="bg-primary px-4 py-4">
+                  <p className="text-white text-xs font-bold mb-1">اقرأ وتعلّم وتدبّر</p>
+                  <span style={{ background: colors.accent ? `hsl(${colors.accent})` : undefined }} className="inline-block bg-accent text-[9px] font-bold px-3 py-1 rounded-lg text-foreground">تصفح المكتبة</span>
+                </div>
+                {/* Mock cards */}
+                <div style={{ background: colors.bg ? `hsl(${colors.bg})` : undefined }} className="bg-background px-3 py-3 grid grid-cols-3 gap-2">
+                  {[1,2,3].map(i => (
+                    <div key={i} style={{ background: colors.card ? `hsl(${colors.card})` : undefined }} className="bg-card rounded-lg p-2 border border-border">
+                      <div style={{ background: colors.primary ? `hsl(${colors.primary})` : undefined }} className="bg-primary/20 rounded h-8 mb-1.5" />
+                      <div style={{ background: colors.fg ? `hsl(${colors.fg})` : undefined, opacity: 0.7 }} className="bg-foreground/20 rounded h-2 w-3/4 mb-1" />
+                      <div style={{ background: colors.fg ? `hsl(${colors.fg})` : undefined, opacity: 0.4 }} className="bg-foreground/10 rounded h-1.5 w-1/2" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             {/* Presets */}
             <div>
-              <p className="text-sm font-medium text-muted-foreground mb-3">ثيمات جاهزة</p>
+              <p className="text-sm font-medium text-muted-foreground mb-3">ثيمات جاهزة — انقر للتطبيق الفوري</p>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {PRESETS.map((p) =>
-              <button key={p.name} onClick={() => handleApplyPreset(p)} className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${selectedPreset === p.name ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
-                    <div className="flex gap-0.5">
-                      <div className="w-5 h-8 rounded-sm" style={{ background: `hsl(${p.bg})`, border: "1px solid hsl(0 0% 80%)" }} />
-                      <div className="w-5 h-8 rounded-sm" style={{ background: `hsl(${p.primary})` }} />
-                      <div className="w-5 h-8 rounded-sm" style={{ background: `hsl(${p.accent})` }} />
+              <button key={p.name} onClick={() => handleApplyPreset(p)} className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${selectedPreset === p.name ? "border-primary bg-primary/10 shadow-md" : "border-border hover:border-primary/40 hover:shadow-sm"}`}>
+                    <div className="flex gap-0.5 rounded-md overflow-hidden shadow-sm">
+                      <div className="w-6 h-9" style={{ background: `hsl(${p.bg})`, border: "1px solid hsl(0 0% 80%)" }} />
+                      <div className="w-6 h-9" style={{ background: `hsl(${p.primary})` }} />
+                      <div className="w-6 h-9" style={{ background: `hsl(${p.accent})` }} />
+                      <div className="w-6 h-9" style={{ background: `hsl(${p.card})`, border: "1px solid hsl(0 0% 80%)" }} />
                     </div>
                     <span className="text-[10px] font-medium text-center leading-tight">{p.name}</span>
                     {selectedPreset === p.name && <Check className="w-3 h-3 text-primary" />}
@@ -489,34 +528,45 @@ export default function DevPanel() {
 
             {/* Color Pickers */}
             <div>
-              <p className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-1"><Pipette className="w-3.5 h-3.5" /> منتقي الألوان</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {COLOR_FIELDS.map(({ key, label }) => {
+              <p className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-1"><Pipette className="w-3.5 h-3.5" /> ضبط دقيق للألوان</p>
+              <div className="grid grid-cols-1 gap-3">
+                {COLOR_FIELDS.map(({ key, label, cssVar }) => {
                 const hexVal = colors[key] ? hslStringToHex(colors[key]) : hslStringToHex(
-                  getComputedStyle(document.documentElement).getPropertyValue(
-                    key === "bg" ? "--background" : key === "fg" ? "--foreground" : key === "primary" ? "--primary" : key === "accent" ? "--accent" : "--card"
-                  ).trim()
+                  getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim()
                 );
                 return (
-                  <div key={key} className="flex items-center gap-3 p-3 rounded-xl bg-muted/40 border border-border">
-                      <div className="relative shrink-0">
-                        <div className="w-10 h-10 rounded-xl border-2 border-border overflow-hidden cursor-pointer" style={{ background: colors[key] ? `hsl(${colors[key]})` : hexVal }}>
-                          <input type="color" value={hexVal} onChange={(e) => handleColorPicker(key, e.target.value)} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
+                  <div key={key} className="flex items-center gap-3 p-3 rounded-xl bg-muted/40 border border-border hover:border-primary/30 transition-colors">
+                      <label className="relative shrink-0 cursor-pointer group">
+                        <div className="w-12 h-12 rounded-xl border-2 border-border shadow-sm group-hover:scale-105 transition-transform overflow-hidden" style={{ background: colors[key] ? `hsl(${colors[key]})` : hexVal }}>
+                          <input type="color" value={hexVal} onChange={(e) => {
+                            handleColorPicker(key, e.target.value);
+                            // Live apply on pick
+                            const hsl = hexToHsl(e.target.value);
+                            const tmp = { [key]: hsl };
+                            applyColors(tmp);
+                          }} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
+                        </div>
+                        <div className="absolute -bottom-1 -right-1 bg-primary rounded-full w-4 h-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Pipette className="w-2 h-2 text-white" />
+                        </div>
+                      </label>
+                      <div className="flex-1">
+                        <Label className="text-xs font-bold">{label}</Label>
+                        <div className="flex gap-1.5 mt-1">
+                          <Input value={colors[key]} onChange={(e) => setColors((c) => ({ ...c, [key]: e.target.value }))} placeholder="158 45% 28%" className="h-7 text-xs flex-1 font-mono" />
+                          <div className="text-[9px] font-mono text-muted-foreground self-center shrink-0 bg-muted px-1.5 py-1 rounded">
+                            {hexVal}
+                          </div>
                         </div>
                       </div>
-                      <div className="flex-1">
-                        <Label className="text-xs font-semibold">{label}</Label>
-                        <Input value={colors[key]} onChange={(e) => setColors((c) => ({ ...c, [key]: e.target.value }))} placeholder="158 45% 28%" className="h-7 text-xs mt-0.5" />
-                      </div>
                     </div>);
-
               })}
               </div>
               <div className="flex gap-2 mt-4">
                 <Button onClick={handleApplyCustom} className={`flex-1 rounded-xl gap-2 transition-all duration-300 ${savedStates.colors ? "bg-green-600 hover:bg-green-700" : ""}`}>
-                  {savedStates.colors ? <><Check className="w-4 h-4" /> تم التطبيق!</> : "تطبيق الألوان"}
+                  {savedStates.colors ? <><Check className="w-4 h-4" /> تم التطبيق!</> : <><Palette className="w-4 h-4" /> تطبيق وحفظ الألوان</>}
                 </Button>
-                <Button variant="outline" onClick={handleResetColors} className="rounded-xl gap-1.5"><RotateCcw className="w-3.5 h-3.5" /> إعادة تعيين</Button>
+                <Button variant="outline" onClick={handleResetColors} className="rounded-xl gap-1.5 shrink-0"><RotateCcw className="w-3.5 h-3.5" /> إعادة</Button>
               </div>
             </div>
           </div>
@@ -582,8 +632,32 @@ export default function DevPanel() {
                 <Label>الوصف الفرعي</Label>
                 <Input value={appSubtitle} onChange={(e) => setAppSubtitle(e.target.value)} className="mt-1.5" placeholder="نور العلم والمعرفة" />
               </div>
+            </div>
+
+            {/* YouTube */}
+            <div className="space-y-4 border-t border-border pt-4">
+              <h2 className="text-sm font-bold flex items-center gap-2">
+                <svg className="w-4 h-4 text-red-500" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                زر قناة يوتيوب
+              </h2>
+              <p className="text-xs text-muted-foreground -mt-2">يظهر في الصفحة الرئيسية بجانب زر "تصفح المكتبة" — اتركه فارغاً لإخفائه</p>
+              <div>
+                <Label>رابط القناة</Label>
+                <Input value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} className="mt-1.5" placeholder="https://youtube.com/@channel" dir="ltr" />
+              </div>
+              <div>
+                <Label>نص الزر</Label>
+                <Input value={youtubeLabel} onChange={(e) => setYoutubeLabel(e.target.value)} className="mt-1.5" placeholder="قناتنا على يوتيوب" />
+              </div>
+              {/* Preview */}
+              {youtubeUrl && (
+                <div className="p-3 rounded-xl bg-primary flex items-center gap-2 w-fit">
+                  <svg className="w-4 h-4 text-red-400" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                  <span className="text-xs font-bold text-white">{youtubeLabel || "قناتنا على يوتيوب"}</span>
+                </div>
+              )}
               <Button onClick={handleSaveAppName} className={`w-full rounded-xl gap-2 transition-all duration-300 ${savedStates.appName ? "bg-green-600 hover:bg-green-700" : ""}`}>
-                <Check className="w-4 h-4"/> {savedStates.appName ? "تم الحفظ!" : "حفظ الاسم والوصف"}
+                <Check className="w-4 h-4"/> {savedStates.appName ? "تم الحفظ!" : "حفظ جميع إعدادات هذا القسم"}
               </Button>
             </div>
           </div>

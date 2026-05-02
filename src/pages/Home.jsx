@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { BookOpen, ArrowLeft, Sparkles } from "lucide-react";
+import { BookOpen, ArrowLeft, Sparkles, Youtube } from "lucide-react";
 import BookCard from "../components/BookCard";
 import CategoryChip, { categories } from "../components/CategoryChip";
 import { motion } from "framer-motion";
 import { useT } from "@/lib/i18n";
+
+const ls = { get: (k, fb = "") => { try { return localStorage.getItem(k) || fb; } catch(e) { return fb; } } };
 
 export default function Home() {
   const t = useT();
@@ -14,6 +16,9 @@ export default function Home() {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+
+  const youtubeUrl = ls.get("dev_youtube_url", "");
+  const youtubeLabel = ls.get("dev_youtube_label", "قناتنا على يوتيوب");
 
   useEffect(() => { loadData(); }, []);
 
@@ -70,13 +75,26 @@ export default function Home() {
           <div className="relative z-10 max-w-2xl">
             <h1 className="mb-4 text-3xl font-black leading-tight md:text-5xl">{t.heroTitle}</h1>
             <p className="mb-8 text-base leading-relaxed opacity-90 md:text-lg max-w-lg">{t.heroSub}</p>
-            <Link
-              to="/books"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent text-accent-foreground font-bold text-sm hover:opacity-90 transition-opacity"
-            >
-              {t.browseLib}
-              <ArrowLeft className="w-4 h-4" />
-            </Link>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                to="/books"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent text-accent-foreground font-bold text-sm hover:opacity-90 transition-opacity"
+              >
+                {t.browseLib}
+                <ArrowLeft className="w-4 h-4" />
+              </Link>
+              {youtubeUrl && (
+                <a
+                  href={youtubeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-sm transition-all backdrop-blur-sm border border-white/20"
+                >
+                  <Youtube className="w-4 h-4 text-red-400" />
+                  {youtubeLabel}
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </motion.section>
