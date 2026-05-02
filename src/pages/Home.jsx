@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { BookOpen, ArrowLeft, Sparkles, Youtube } from "lucide-react";
+import { BookOpen, ArrowLeft, Sparkles, Youtube, ExternalLink } from "lucide-react";
 import BookCard from "../components/BookCard";
 import CategoryChip, { categories } from "../components/CategoryChip";
 import { motion } from "framer-motion";
@@ -83,20 +83,36 @@ export default function Home() {
                 {t.browseLib}
                 <ArrowLeft className="w-4 h-4" />
               </Link>
-              <a
-                href={youtubeUrl || "#"}
-                target={youtubeUrl ? "_blank" : "_self"}
-                rel="noopener noreferrer"
-                onClick={!youtubeUrl ? (e) => e.preventDefault() : undefined}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-sm transition-all backdrop-blur-sm border border-white/20"
-              >
-                <Youtube className="w-4 h-4 text-red-400" />
-                {youtubeLabel || "قناتنا على يوتيوب"}
-              </a>
             </div>
           </div>
         </div>
       </motion.section>
+
+      {/* YouTube Banner */}
+      {youtubeUrl && (
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mb-10 -mt-4"
+        >
+          <a
+            href={youtubeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-l from-red-600/10 to-red-500/5 border border-red-200/50 hover:border-red-400/50 hover:shadow-md hover:shadow-red-500/10 transition-all group"
+          >
+            <div className="w-12 h-12 rounded-xl bg-red-600 flex items-center justify-center shrink-0 shadow-lg shadow-red-500/30 group-hover:scale-105 transition-transform">
+              <Youtube className="w-6 h-6 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-sm text-foreground">{youtubeLabel || t.youtubeBtn}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t.youtubeSub}</p>
+            </div>
+            <ExternalLink className="w-4 h-4 text-muted-foreground shrink-0 group-hover:text-red-500 transition-colors" />
+          </a>
+        </motion.section>
+      )}
 
       {/* Categories */}
       <section className="mb-12">

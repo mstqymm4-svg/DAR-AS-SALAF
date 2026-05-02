@@ -4,7 +4,7 @@ import {
   Lock, Palette, Image, BookPlus, KeyRound, Eye, EyeOff,
   Upload, Check, BookOpen, Pencil, Trash2, Settings, RefreshCw,
   Shield, LayoutDashboard, Sparkles, Globe, Pipette, RotateCcw,
-  Tags, Plus, X, Youtube } from
+  Tags, Plus, X, Youtube, ExternalLink, Languages } from
 "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -368,10 +368,12 @@ export default function DevPanel() {
   { id: "dashboard", label: "لوحة التحكم", icon: LayoutDashboard },
   { id: "color", label: "الألوان", icon: Palette },
   { id: "logo", label: "الشعار والاسم", icon: Image },
+  { id: "youtube", label: "يوتيوب", icon: Youtube },
   { id: "book", label: "إضافة كتاب", icon: BookPlus },
   { id: "admin", label: "إدارة الكتب", icon: BookOpen },
   { id: "categories", label: "التصنيفات", icon: Tags },
   { id: "app_settings", label: "إعدادات التطبيق", icon: Settings },
+  { id: "translation", label: "الترجمة", icon: Languages },
   { id: "password", label: "كلمة المرور", icon: KeyRound }];
 
 
@@ -634,52 +636,63 @@ export default function DevPanel() {
               </div>
             </div>
 
-            {/* YouTube */}
-            <div className="border-t border-border pt-5">
-              {/* Header Card */}
-              <div className="flex items-center gap-3 mb-4 p-4 rounded-2xl bg-gradient-to-l from-red-500/10 to-red-600/5 border border-red-200/50">
-                <div className="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center shrink-0 shadow-md shadow-red-500/30">
-                  <Youtube className="w-5 h-5 text-white" />
+            <Button onClick={handleSaveAppName} className={`w-full h-11 rounded-xl gap-2 font-bold transition-all duration-300 shadow-sm hover:shadow-md ${savedStates.appName ? "bg-green-600 hover:bg-green-700" : "shadow-primary/20"}`}>
+              {savedStates.appName ? <><Check className="w-4 h-4" /> تم الحفظ!</> : <><Image className="w-4 h-4" /> حفظ الشعار والاسم</>}
+            </Button>
+          </div>
+        }
+
+        {/* ─── YouTube ─── */}
+        {activeTab === "youtube" &&
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-l from-red-500/10 to-red-600/5 border border-red-200/60">
+              <div className="w-12 h-12 rounded-xl bg-red-600 flex items-center justify-center shrink-0 shadow-lg shadow-red-500/30">
+                <Youtube className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-base font-bold">إعدادات قناة يوتيوب</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">يظهر كبانر تحت القسم الرئيسي في الصفحة</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <Label>رابط القناة</Label>
+                <div className="relative mt-1.5">
+                  <Youtube className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-red-500" />
+                  <Input value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} className="pr-9" placeholder="https://youtube.com/@channel" dir="ltr" />
                 </div>
-                <div>
-                  <h2 className="text-sm font-bold">زر قناة يوتيوب</h2>
-                  <p className="text-xs text-muted-foreground mt-0.5">يظهر دائماً في الصفحة الرئيسية</p>
+              </div>
+              <div>
+                <Label>نص العنوان</Label>
+                <Input value={youtubeLabel} onChange={(e) => setYoutubeLabel(e.target.value)} className="mt-1.5" placeholder="قناتنا على يوتيوب" />
+              </div>
+
+              {/* Live Preview */}
+              <div className="p-4 rounded-2xl bg-muted/30 border-2 border-dashed border-border">
+                <p className="text-xs text-muted-foreground mb-3 text-center font-medium">معاينة البانر كما يظهر في الصفحة الرئيسية</p>
+                <div className="flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-l from-red-600/10 to-red-500/5 border border-red-200/50">
+                  <div className="w-12 h-12 rounded-xl bg-red-600 flex items-center justify-center shrink-0 shadow-lg shadow-red-500/30">
+                    <Youtube className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-sm">{youtubeLabel || "قناتنا على يوتيوب"}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">تابعونا على قناتنا لمزيد من المحتوى الإسلامي</p>
+                  </div>
+                  <ExternalLink className="w-4 h-4 text-muted-foreground shrink-0" />
+                </div>
+                <div className="mt-3 text-center">
+                  {youtubeUrl
+                    ? <p className="text-xs text-green-600 font-medium">✓ البانر نشط ويظهر في الصفحة الرئيسية</p>
+                    : <p className="text-xs text-orange-500 font-medium">⚠ أدخل رابط القناة لتفعيل البانر</p>
+                  }
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div>
-                  <Label>رابط القناة</Label>
-                  <div className="relative mt-1.5">
-                    <Youtube className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-red-500" />
-                    <Input value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} className="pr-9" placeholder="https://youtube.com/@channel" dir="ltr" />
-                  </div>
-                </div>
-                <div>
-                  <Label>نص الزر</Label>
-                  <Input value={youtubeLabel} onChange={(e) => setYoutubeLabel(e.target.value)} className="mt-1.5" placeholder="قناتنا على يوتيوب" />
-                </div>
-
-                {/* Live Preview */}
-                <div className="p-4 rounded-2xl bg-muted/30 border border-dashed border-border">
-                  <p className="text-xs text-muted-foreground mb-3 text-center">معاينة الزر كما يظهر في الصفحة</p>
-                  <div className="flex justify-center">
-                    <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary/80 border border-white/20 shadow-sm">
-                      <Youtube className="w-4 h-4 text-red-400" />
-                      <span className="text-sm font-bold text-white">{youtubeLabel || "قناتنا على يوتيوب"}</span>
-                    </div>
-                  </div>
-                  {youtubeUrl ? (
-                    <p className="text-center text-xs text-green-600 mt-2">✓ الرابط مضبوط — الزر نشط</p>
-                  ) : (
-                    <p className="text-center text-xs text-orange-500 mt-2">⚠ أدخل رابط القناة لتفعيل الزر</p>
-                  )}
-                </div>
-
-                <Button onClick={handleSaveAppName} className={`w-full h-11 rounded-xl gap-2 font-bold transition-all duration-300 ${savedStates.appName ? "bg-green-600 hover:bg-green-700" : ""}`}>
-                  {savedStates.appName ? <><Check className="w-4 h-4" /> تم الحفظ!</> : <><Check className="w-4 h-4 opacity-0 w-0" /> حفظ جميع إعدادات هذا القسم</>}
-                </Button>
-              </div>
+              <Button onClick={handleSaveAppName} className={`w-full h-12 rounded-xl gap-2 font-bold transition-all duration-300 shadow-sm hover:shadow-md hover:scale-[1.01] ${savedStates.appName ? "bg-green-600 hover:bg-green-700 shadow-green-500/20" : "shadow-red-500/20 bg-red-600 hover:bg-red-700 text-white"}`}>
+                {savedStates.appName ? <><Check className="w-4 h-4" /> تم الحفظ!</> : <><Youtube className="w-4 h-4" /> حفظ إعدادات يوتيوب</>}
+              </Button>
             </div>
           </div>
         }
@@ -813,26 +826,6 @@ export default function DevPanel() {
         <div className="space-y-5">
             <h2 className="text-base font-bold flex items-center gap-2"><Settings className="w-4 h-4" /> إعدادات التطبيق</h2>
 
-            {/* Language / Translation */}
-            <div className="p-4 bg-muted/50 rounded-xl space-y-3">
-              <div className="flex items-center gap-2">
-                <Globe className="w-4 h-4 text-primary" />
-                <p className="text-sm font-semibold">لغة التطبيق</p>
-              </div>
-              <p className="text-xs text-muted-foreground">اختر لغة واجهة التطبيق وسيتم تطبيقها عند إعادة التحميل</p>
-              <div className="grid grid-cols-2 gap-2">
-                {Object.entries(TRANSLATIONS).map(([code, lang]) =>
-              <label key={code} className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${appLang === code ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"}`}>
-                    <input type="radio" name="appLang" value={code} checked={appLang === code} onChange={() => setAppLang(code)} className="hidden" />
-                    <div className={`w-4 h-4 rounded-full border-2 shrink-0 ${appLang === code ? "border-primary bg-primary" : "border-border"}`} />
-                    <span className="text-sm font-medium">
-                      {code === "ar" ? "العربية 🇸🇦" : code === "en" ? "English 🇬🇧" : code === "fr" ? "Français 🇫🇷" : code === "ur" ? "اردو 🇵🇰" : "हिंदी 🇮🇳"}
-                    </span>
-                  </label>
-              )}
-              </div>
-            </div>
-
             {/* Show Dev Nav */}
             <div className="p-4 bg-muted/50 rounded-xl flex items-center justify-between">
               <div>
@@ -857,6 +850,51 @@ export default function DevPanel() {
 
             <Button onClick={handleSaveAppSettings} className={`w-full rounded-xl h-12 font-bold gap-2 transition-all duration-300 shadow-sm hover:shadow-md hover:scale-[1.01] ${savedStates.appSettings ? "bg-green-600 hover:bg-green-700 shadow-green-500/20" : "shadow-primary/20"}`}>
               {savedStates.appSettings ? <><Check className="w-4 h-4" /> تم الحفظ!</> : <><Settings className="w-4 h-4" /> حفظ إعدادات التطبيق</>}
+            </Button>
+          </div>
+        }
+
+        {/* ─── Translation ─── */}
+        {activeTab === "translation" &&
+        <div className="space-y-5">
+            <h2 className="text-base font-bold flex items-center gap-2"><Languages className="w-4 h-4 text-primary" /> إدارة الترجمة</h2>
+            <p className="text-xs text-muted-foreground">تحكم في لغة التطبيق وترتيب اللغات المتاحة للمستخدمين.</p>
+
+            {/* Current language display */}
+            <div className="p-4 rounded-2xl bg-primary/5 border border-primary/20 flex items-center gap-3">
+              <Globe className="w-5 h-5 text-primary shrink-0" />
+              <div>
+                <p className="text-sm font-bold">اللغة الحالية</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {appLang === "ar" ? "🇸🇦 العربية" : appLang === "en" ? "🇬🇧 English" : appLang === "fr" ? "🇫🇷 Français" : appLang === "ur" ? "🇵🇰 اردو" : "🇮🇳 हिंदी"}
+                </p>
+              </div>
+            </div>
+
+            {/* Language selector */}
+            <div className="space-y-2">
+              <p className="text-sm font-semibold">اختر لغة التطبيق</p>
+              {[
+                { code: "ar", flag: "🇸🇦", name: "العربية", dir: "RTL" },
+                { code: "en", flag: "🇬🇧", name: "English", dir: "LTR" },
+                { code: "fr", flag: "🇫🇷", name: "Français", dir: "LTR" },
+                { code: "ur", flag: "🇵🇰", name: "اردو", dir: "RTL" },
+                { code: "hi", flag: "🇮🇳", name: "हिंदी", dir: "LTR" },
+              ].map(({ code, flag, name, dir: d }) =>
+                <label key={code} className={`flex items-center gap-3 p-3.5 rounded-xl border-2 cursor-pointer transition-all ${appLang === code ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary/30 hover:bg-muted/30"}`}>
+                  <input type="radio" name="devLang" value={code} checked={appLang === code} onChange={() => setAppLang(code)} className="hidden" />
+                  <div className={`w-5 h-5 rounded-full border-2 shrink-0 flex items-center justify-center ${appLang === code ? "border-primary bg-primary" : "border-border"}`}>
+                    {appLang === code && <Check className="w-3 h-3 text-white" />}
+                  </div>
+                  <span className="text-xl">{flag}</span>
+                  <span className="text-sm font-bold flex-1">{name}</span>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${d === "RTL" ? "bg-accent/20 text-accent-foreground" : "bg-muted text-muted-foreground"}`}>{d}</span>
+                </label>
+              )}
+            </div>
+
+            <Button onClick={handleSaveAppSettings} className={`w-full rounded-xl h-12 font-bold gap-2 transition-all duration-300 shadow-sm hover:shadow-md hover:scale-[1.01] ${savedStates.appSettings ? "bg-green-600 hover:bg-green-700 shadow-green-500/20" : "shadow-primary/20"}`}>
+              {savedStates.appSettings ? <><Check className="w-4 h-4" /> تم الحفظ وإعادة التحميل!</> : <><Languages className="w-4 h-4" /> تطبيق اللغة</>}
             </Button>
           </div>
         }
