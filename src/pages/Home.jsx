@@ -17,8 +17,8 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
 
-  const youtubeUrl = ls.get("dev_youtube_url", "");
-  const youtubeLabel = ls.get("dev_youtube_label", "قناتنا على يوتيوب");
+  const [youtubeUrl, setYoutubeUrlState] = useState(() => ls.get("dev_youtube_url", ""));
+  const [youtubeLabel] = useState(() => ls.get("dev_youtube_label", "قناتنا على يوتيوب"));
 
   useEffect(() => { loadData(); }, []);
 
@@ -83,17 +83,16 @@ export default function Home() {
                 {t.browseLib}
                 <ArrowLeft className="w-4 h-4" />
               </Link>
-              {youtubeUrl && (
-                <a
-                  href={youtubeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-sm transition-all backdrop-blur-sm border border-white/20"
-                >
-                  <Youtube className="w-4 h-4 text-red-400" />
-                  {youtubeLabel}
-                </a>
-              )}
+              <a
+                href={youtubeUrl || "#"}
+                target={youtubeUrl ? "_blank" : "_self"}
+                rel="noopener noreferrer"
+                onClick={!youtubeUrl ? (e) => e.preventDefault() : undefined}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-sm transition-all backdrop-blur-sm border border-white/20"
+              >
+                <Youtube className="w-4 h-4 text-red-400" />
+                {youtubeLabel || "قناتنا على يوتيوب"}
+              </a>
             </div>
           </div>
         </div>

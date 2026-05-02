@@ -414,7 +414,7 @@ export default function DevPanel() {
       {/* Tabs */}
       <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
         {tabs.map((tab) =>
-        <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${activeTab === tab.id ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}>
+        <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all shadow-sm ${activeTab === tab.id ? "bg-primary text-primary-foreground shadow-primary/30 scale-[1.03]" : "bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 hover:bg-muted/50"}`}>
             <tab.icon className="w-4 h-4" />{tab.label}
           </button>
         )}
@@ -462,8 +462,8 @@ export default function DevPanel() {
             }
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <Button onClick={() => setActiveTab("book")} className="rounded-xl gap-2 h-11"><BookPlus className="w-4 h-4" /> إضافة كتاب</Button>
-              <Button variant="outline" onClick={() => setActiveTab("admin")} className="rounded-xl gap-2 h-11"><BookOpen className="w-4 h-4" /> إدارة الكتب</Button>
+              <Button onClick={() => setActiveTab("book")} className="rounded-xl gap-2 h-12 font-bold shadow-sm shadow-primary/20 hover:shadow-md hover:scale-[1.02] transition-all"><BookPlus className="w-4 h-4" /> إضافة كتاب</Button>
+              <Button variant="outline" onClick={() => setActiveTab("admin")} className="rounded-xl gap-2 h-12 font-bold hover:border-primary/50 hover:bg-primary/5 hover:scale-[1.02] transition-all"><BookOpen className="w-4 h-4" /> إدارة الكتب</Button>
             </div>
           </div>
         }
@@ -563,10 +563,10 @@ export default function DevPanel() {
               })}
               </div>
               <div className="flex gap-2 mt-4">
-                <Button onClick={handleApplyCustom} className={`flex-1 rounded-xl gap-2 transition-all duration-300 ${savedStates.colors ? "bg-green-600 hover:bg-green-700" : ""}`}>
+                <Button onClick={handleApplyCustom} className={`flex-1 rounded-xl h-11 gap-2 font-bold transition-all duration-300 shadow-sm hover:shadow-md hover:scale-[1.01] ${savedStates.colors ? "bg-green-600 hover:bg-green-700 shadow-green-500/20" : "shadow-primary/20"}`}>
                   {savedStates.colors ? <><Check className="w-4 h-4" /> تم التطبيق!</> : <><Palette className="w-4 h-4" /> تطبيق وحفظ الألوان</>}
                 </Button>
-                <Button variant="outline" onClick={handleResetColors} className="rounded-xl gap-1.5 shrink-0"><RotateCcw className="w-3.5 h-3.5" /> إعادة</Button>
+                <Button variant="outline" onClick={handleResetColors} className="rounded-xl h-11 gap-1.5 shrink-0 font-bold hover:border-destructive/50 hover:text-destructive hover:bg-destructive/5 transition-all"><RotateCcw className="w-3.5 h-3.5" /> إعادة</Button>
               </div>
             </div>
           </div>
@@ -635,30 +635,51 @@ export default function DevPanel() {
             </div>
 
             {/* YouTube */}
-            <div className="space-y-4 border-t border-border pt-4">
-              <h2 className="text-sm font-bold flex items-center gap-2">
-                <svg className="w-4 h-4 text-red-500" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                زر قناة يوتيوب
-              </h2>
-              <p className="text-xs text-muted-foreground -mt-2">يظهر في الصفحة الرئيسية بجانب زر "تصفح المكتبة" — اتركه فارغاً لإخفائه</p>
-              <div>
-                <Label>رابط القناة</Label>
-                <Input value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} className="mt-1.5" placeholder="https://youtube.com/@channel" dir="ltr" />
-              </div>
-              <div>
-                <Label>نص الزر</Label>
-                <Input value={youtubeLabel} onChange={(e) => setYoutubeLabel(e.target.value)} className="mt-1.5" placeholder="قناتنا على يوتيوب" />
-              </div>
-              {/* Preview */}
-              {youtubeUrl && (
-                <div className="p-3 rounded-xl bg-primary flex items-center gap-2 w-fit">
-                  <svg className="w-4 h-4 text-red-400" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                  <span className="text-xs font-bold text-white">{youtubeLabel || "قناتنا على يوتيوب"}</span>
+            <div className="border-t border-border pt-5">
+              {/* Header Card */}
+              <div className="flex items-center gap-3 mb-4 p-4 rounded-2xl bg-gradient-to-l from-red-500/10 to-red-600/5 border border-red-200/50">
+                <div className="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center shrink-0 shadow-md shadow-red-500/30">
+                  <Youtube className="w-5 h-5 text-white" />
                 </div>
-              )}
-              <Button onClick={handleSaveAppName} className={`w-full rounded-xl gap-2 transition-all duration-300 ${savedStates.appName ? "bg-green-600 hover:bg-green-700" : ""}`}>
-                <Check className="w-4 h-4"/> {savedStates.appName ? "تم الحفظ!" : "حفظ جميع إعدادات هذا القسم"}
-              </Button>
+                <div>
+                  <h2 className="text-sm font-bold">زر قناة يوتيوب</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">يظهر دائماً في الصفحة الرئيسية</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <Label>رابط القناة</Label>
+                  <div className="relative mt-1.5">
+                    <Youtube className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-red-500" />
+                    <Input value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} className="pr-9" placeholder="https://youtube.com/@channel" dir="ltr" />
+                  </div>
+                </div>
+                <div>
+                  <Label>نص الزر</Label>
+                  <Input value={youtubeLabel} onChange={(e) => setYoutubeLabel(e.target.value)} className="mt-1.5" placeholder="قناتنا على يوتيوب" />
+                </div>
+
+                {/* Live Preview */}
+                <div className="p-4 rounded-2xl bg-muted/30 border border-dashed border-border">
+                  <p className="text-xs text-muted-foreground mb-3 text-center">معاينة الزر كما يظهر في الصفحة</p>
+                  <div className="flex justify-center">
+                    <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary/80 border border-white/20 shadow-sm">
+                      <Youtube className="w-4 h-4 text-red-400" />
+                      <span className="text-sm font-bold text-white">{youtubeLabel || "قناتنا على يوتيوب"}</span>
+                    </div>
+                  </div>
+                  {youtubeUrl ? (
+                    <p className="text-center text-xs text-green-600 mt-2">✓ الرابط مضبوط — الزر نشط</p>
+                  ) : (
+                    <p className="text-center text-xs text-orange-500 mt-2">⚠ أدخل رابط القناة لتفعيل الزر</p>
+                  )}
+                </div>
+
+                <Button onClick={handleSaveAppName} className={`w-full h-11 rounded-xl gap-2 font-bold transition-all duration-300 ${savedStates.appName ? "bg-green-600 hover:bg-green-700" : ""}`}>
+                  {savedStates.appName ? <><Check className="w-4 h-4" /> تم الحفظ!</> : <><Check className="w-4 h-4 opacity-0 w-0" /> حفظ جميع إعدادات هذا القسم</>}
+                </Button>
+              </div>
             </div>
           </div>
         }
@@ -706,8 +727,8 @@ export default function DevPanel() {
               <Label>كتاب مميز ⭐</Label>
               <Switch checked={bookForm.is_featured} onCheckedChange={(v) => setBookForm((p) => ({ ...p, is_featured: v }))} />
             </div>
-            <Button onClick={handleAddBook} disabled={savingBook} className="w-full rounded-xl h-11">
-              {savingBook ? "جاري الإضافة..." : "إضافة الكتاب"}
+            <Button onClick={handleAddBook} disabled={savingBook} className="w-full rounded-xl h-12 font-bold gap-2 shadow-sm shadow-primary/20 hover:shadow-md hover:scale-[1.01] transition-all">
+              {savingBook ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> جاري الإضافة...</> : <><BookPlus className="w-4 h-4" /> إضافة الكتاب</>}
             </Button>
           </div>
         }
@@ -781,7 +802,7 @@ export default function DevPanel() {
             )}
             </div>
 
-            <Button variant="outline" onClick={handleResetCategories} className="w-full rounded-xl gap-2">
+            <Button variant="outline" onClick={handleResetCategories} className="w-full rounded-xl h-11 gap-2 font-bold hover:border-primary/50 hover:bg-primary/5 transition-all">
               <RotateCcw className="w-3.5 h-3.5" /> إعادة التصنيفات للافتراضية
             </Button>
           </div>
@@ -834,9 +855,8 @@ export default function DevPanel() {
               </Button>
             </div>
 
-            <Button onClick={handleSaveAppSettings} className={`w-full rounded-xl h-11 font-bold gap-2 transition-all duration-300 ${savedStates.appSettings ? "bg-green-600 hover:bg-green-700" : ""}`}>
-              <Check className={`w-4 h-4 transition-opacity ${savedStates.appSettings ? "opacity-100" : "opacity-0 w-0 -mx-1"}`} />
-              {savedStates.appSettings ? "تم الحفظ!" : "حفظ إعدادات التطبيق"}
+            <Button onClick={handleSaveAppSettings} className={`w-full rounded-xl h-12 font-bold gap-2 transition-all duration-300 shadow-sm hover:shadow-md hover:scale-[1.01] ${savedStates.appSettings ? "bg-green-600 hover:bg-green-700 shadow-green-500/20" : "shadow-primary/20"}`}>
+              {savedStates.appSettings ? <><Check className="w-4 h-4" /> تم الحفظ!</> : <><Settings className="w-4 h-4" /> حفظ إعدادات التطبيق</>}
             </Button>
           </div>
         }
@@ -848,8 +868,8 @@ export default function DevPanel() {
             <div><Label>الحالية</Label><Input type="password" value={currentPwd} onChange={(e) => setCurrentPwd(e.target.value)} className="mt-1.5" /></div>
             <div><Label>الجديدة</Label><Input type="password" value={newPwd} onChange={(e) => setNewPwd(e.target.value)} className="mt-1.5" /></div>
             <div><Label>تأكيد الجديدة</Label><Input type="password" value={confirmPwd} onChange={(e) => setConfirmPwd(e.target.value)} className="mt-1.5" /></div>
-            <Button onClick={handleChangePassword} className={`w-full rounded-xl gap-2 transition-all duration-300 ${savedStates.password ? "bg-green-600 hover:bg-green-700" : ""}`}>
-              {savedStates.password ? <><Check className="w-4 h-4" /> تم التغيير!</> : "تغيير كلمة المرور"}
+            <Button onClick={handleChangePassword} className={`w-full rounded-xl h-12 gap-2 font-bold transition-all duration-300 shadow-sm hover:shadow-md hover:scale-[1.01] ${savedStates.password ? "bg-green-600 hover:bg-green-700 shadow-green-500/20" : "shadow-primary/20"}`}>
+              {savedStates.password ? <><Check className="w-4 h-4" /> تم التغيير!</> : <><KeyRound className="w-4 h-4" /> تغيير كلمة المرور</>}
             </Button>
           </div>
         }
