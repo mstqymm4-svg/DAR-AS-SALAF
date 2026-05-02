@@ -116,7 +116,7 @@ export default function Home() {
 
       {/* Categories */}
       <section className="mb-12">
-        <h2 className="text-xl font-bold text-foreground mb-5 hidden">{t.browseByCat}</h2>
+        
         <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide">
           {categories.filter((c) => c.name !== "الكل").map((cat) =>
           <Link key={cat.name} to={`/books?category=${encodeURIComponent(cat.name)}`}>
