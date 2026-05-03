@@ -19,6 +19,7 @@ export default function Home() {
 
   const [youtubeUrl, setYoutubeUrlState] = useState(() => ls.get("dev_youtube_url", ""));
   const [youtubeLabel] = useState(() => ls.get("dev_youtube_label", "قناتنا على يوتيوب"));
+  const [youtubeSubText] = useState(() => ls.get("dev_youtube_sub", ""));
 
   useEffect(() => {loadData();}, []);
 
@@ -107,7 +108,7 @@ export default function Home() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-bold text-sm text-foreground">{youtubeLabel || t.youtubeBtn}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{t.youtubeSub}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{youtubeSubText || t.youtubeSub}</p>
             </div>
             <ExternalLink className="w-4 h-4 text-muted-foreground shrink-0 group-hover:text-red-500 transition-colors" />
           </a>

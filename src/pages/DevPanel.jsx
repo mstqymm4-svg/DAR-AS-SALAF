@@ -136,6 +136,7 @@ export default function DevPanel() {
   const [appSubtitle, setAppSubtitle] = useState(() => ls.get("dev_app_subtitle") || "نور العلم والمعرفة");
   const [youtubeUrl, setYoutubeUrl] = useState(() => ls.get("dev_youtube_url") || "");
   const [youtubeLabel, setYoutubeLabel] = useState(() => ls.get("dev_youtube_label") || "قناتنا على يوتيوب");
+  const [youtubeSub, setYoutubeSub] = useState(() => ls.get("dev_youtube_sub") || "تابعونا على قناتنا لمزيد من المحتوى الإسلامي");
 
   // Book PDF
   const [bookForm, setBookForm] = useState(emptyBook);
@@ -232,10 +233,16 @@ export default function DevPanel() {
   const handleSaveAppName = () => {
     ls.set("dev_app_name", appName);
     ls.set("dev_app_subtitle", appSubtitle);
-    ls.set("dev_youtube_url", youtubeUrl);
-    ls.set("dev_youtube_label", youtubeLabel);
     markSaved("appName");
     toast.success("تم الحفظ بنجاح ✓");
+  };
+
+  const handleSaveYoutube = () => {
+    ls.set("dev_youtube_url", youtubeUrl);
+    ls.set("dev_youtube_label", youtubeLabel);
+    ls.set("dev_youtube_sub", youtubeSub);
+    markSaved("youtube");
+    toast.success("تم حفظ إعدادات يوتيوب ✓");
   };
 
   // ── Book ──
@@ -333,8 +340,14 @@ export default function DevPanel() {
     ls.set("dev_show_dev_nav", String(showDevNav));
     ls.set("dev_app_lang", appLang);
     markSaved("appSettings");
-    toast.success("تم حفظ الإعدادات ✓");
-    setTimeout(() => window.location.reload(), 1200);
+    toast.success("تم حفظ الإعدادات ✓ — سيتم تطبيق اللغة عند إعادة التحميل");
+  };
+
+  const handleSaveAndReload = () => {
+    ls.set("dev_show_dev_nav", String(showDevNav));
+    ls.set("dev_app_lang", appLang);
+    toast.success("تم الحفظ — جاري إعادة التحميل...");
+    setTimeout(() => window.location.reload(), 800);
   };
 
   const saveCategoriesHandler = (cats) => {
@@ -373,7 +386,6 @@ export default function DevPanel() {
   { id: "admin", label: "إدارة الكتب", icon: BookOpen },
   { id: "categories", label: "التصنيفات", icon: Tags },
   { id: "app_settings", label: "إعدادات التطبيق", icon: Settings },
-  { id: "translation", label: "الترجمة", icon: Languages },
   { id: "password", label: "كلمة المرور", icon: KeyRound }];
 
 
@@ -668,6 +680,10 @@ export default function DevPanel() {
                 <Label>نص العنوان</Label>
                 <Input value={youtubeLabel} onChange={(e) => setYoutubeLabel(e.target.value)} className="mt-1.5" placeholder="قناتنا على يوتيوب" />
               </div>
+              <div>
+                <Label>نص الوصف الفرعي</Label>
+                <Input value={youtubeSub} onChange={(e) => setYoutubeSub(e.target.value)} className="mt-1.5" placeholder="تابعونا على قناتنا لمزيد من المحتوى الإسلامي" />
+              </div>
 
               {/* Live Preview */}
               <div className="p-4 rounded-2xl bg-muted/30 border-2 border-dashed border-border">
@@ -678,7 +694,7 @@ export default function DevPanel() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-sm">{youtubeLabel || "قناتنا على يوتيوب"}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">تابعونا على قناتنا لمزيد من المحتوى الإسلامي</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{youtubeSub || "تابعونا على قناتنا لمزيد من المحتوى الإسلامي"}</p>
                   </div>
                   <ExternalLink className="w-4 h-4 text-muted-foreground shrink-0" />
                 </div>
@@ -690,8 +706,8 @@ export default function DevPanel() {
                 </div>
               </div>
 
-              <Button onClick={handleSaveAppName} className={`w-full h-12 rounded-xl gap-2 font-bold transition-all duration-300 shadow-sm hover:shadow-md hover:scale-[1.01] ${savedStates.appName ? "bg-green-600 hover:bg-green-700 shadow-green-500/20" : "shadow-red-500/20 bg-red-600 hover:bg-red-700 text-white"}`}>
-                {savedStates.appName ? <><Check className="w-4 h-4" /> تم الحفظ!</> : <><Youtube className="w-4 h-4" /> حفظ إعدادات يوتيوب</>}
+              <Button onClick={handleSaveYoutube} className={`w-full h-12 rounded-xl gap-2 font-bold transition-all duration-300 shadow-sm hover:shadow-md hover:scale-[1.01] ${savedStates.youtube ? "bg-green-600 hover:bg-green-700 shadow-green-500/20" : "shadow-red-500/20 bg-red-600 hover:bg-red-700 text-white"}`}>
+                {savedStates.youtube ? <><Check className="w-4 h-4" /> تم الحفظ!</> : <><Youtube className="w-4 h-4" /> حفظ إعدادات يوتيوب</>}
               </Button>
             </div>
           </div>
@@ -826,6 +842,33 @@ export default function DevPanel() {
         <div className="space-y-5">
             <h2 className="text-base font-bold flex items-center gap-2"><Settings className="w-4 h-4" /> إعدادات التطبيق</h2>
 
+            {/* Language selector */}
+            <div className="p-4 bg-muted/50 rounded-xl space-y-3">
+              <div className="flex items-center gap-2">
+                <Globe className="w-4 h-4 text-primary" />
+                <p className="text-sm font-semibold">لغة واجهة التطبيق</p>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { code: "ar", flag: "🇸🇦", name: "العربية" },
+                  { code: "en", flag: "🇬🇧", name: "English" },
+                  { code: "fr", flag: "🇫🇷", name: "Français" },
+                  { code: "ur", flag: "🇵🇰", name: "اردو" },
+                  { code: "hi", flag: "🇮🇳", name: "हिंदी" },
+                ].map(({ code, flag, name }) =>
+                  <label key={code} className={`flex items-center gap-2 p-2.5 rounded-xl border-2 cursor-pointer transition-all ${appLang === code ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"}`}>
+                    <input type="radio" name="appLangSettings" value={code} checked={appLang === code} onChange={() => setAppLang(code)} className="hidden" />
+                    <div className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${appLang === code ? "border-primary bg-primary" : "border-border"}`}>
+                      {appLang === code && <Check className="w-2.5 h-2.5 text-white" />}
+                    </div>
+                    <span className="text-base">{flag}</span>
+                    <span className="text-xs font-bold">{name}</span>
+                  </label>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">⚠ تغيير اللغة يتطلب إعادة تحميل الصفحة لتطبيقه</p>
+            </div>
+
             {/* Show Dev Nav */}
             <div className="p-4 bg-muted/50 rounded-xl flex items-center justify-between">
               <div>
@@ -848,54 +891,14 @@ export default function DevPanel() {
               </Button>
             </div>
 
-            <Button onClick={handleSaveAppSettings} className={`w-full rounded-xl h-12 font-bold gap-2 transition-all duration-300 shadow-sm hover:shadow-md hover:scale-[1.01] ${savedStates.appSettings ? "bg-green-600 hover:bg-green-700 shadow-green-500/20" : "shadow-primary/20"}`}>
-              {savedStates.appSettings ? <><Check className="w-4 h-4" /> تم الحفظ!</> : <><Settings className="w-4 h-4" /> حفظ إعدادات التطبيق</>}
-            </Button>
-          </div>
-        }
-
-        {/* ─── Translation ─── */}
-        {activeTab === "translation" &&
-        <div className="space-y-5">
-            <h2 className="text-base font-bold flex items-center gap-2"><Languages className="w-4 h-4 text-primary" /> إدارة الترجمة</h2>
-            <p className="text-xs text-muted-foreground">تحكم في لغة التطبيق وترتيب اللغات المتاحة للمستخدمين.</p>
-
-            {/* Current language display */}
-            <div className="p-4 rounded-2xl bg-primary/5 border border-primary/20 flex items-center gap-3">
-              <Globe className="w-5 h-5 text-primary shrink-0" />
-              <div>
-                <p className="text-sm font-bold">اللغة الحالية</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {appLang === "ar" ? "🇸🇦 العربية" : appLang === "en" ? "🇬🇧 English" : appLang === "fr" ? "🇫🇷 Français" : appLang === "ur" ? "🇵🇰 اردو" : "🇮🇳 हिंदी"}
-                </p>
-              </div>
+            <div className="flex gap-2">
+              <Button onClick={handleSaveAppSettings} className={`flex-1 rounded-xl h-12 font-bold gap-2 transition-all duration-300 shadow-sm hover:shadow-md ${savedStates.appSettings ? "bg-green-600 hover:bg-green-700 shadow-green-500/20" : "shadow-primary/20"}`}>
+                {savedStates.appSettings ? <><Check className="w-4 h-4" /> تم الحفظ!</> : <><Check className="w-4 h-4" /> حفظ</>}
+              </Button>
+              <Button onClick={handleSaveAndReload} variant="outline" className="flex-1 rounded-xl h-12 font-bold gap-2 hover:border-primary/50 hover:bg-primary/5 transition-all">
+                <RefreshCw className="w-4 h-4" /> حفظ وإعادة التحميل
+              </Button>
             </div>
-
-            {/* Language selector */}
-            <div className="space-y-2">
-              <p className="text-sm font-semibold">اختر لغة التطبيق</p>
-              {[
-                { code: "ar", flag: "🇸🇦", name: "العربية", dir: "RTL" },
-                { code: "en", flag: "🇬🇧", name: "English", dir: "LTR" },
-                { code: "fr", flag: "🇫🇷", name: "Français", dir: "LTR" },
-                { code: "ur", flag: "🇵🇰", name: "اردو", dir: "RTL" },
-                { code: "hi", flag: "🇮🇳", name: "हिंदी", dir: "LTR" },
-              ].map(({ code, flag, name, dir: d }) =>
-                <label key={code} className={`flex items-center gap-3 p-3.5 rounded-xl border-2 cursor-pointer transition-all ${appLang === code ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary/30 hover:bg-muted/30"}`}>
-                  <input type="radio" name="devLang" value={code} checked={appLang === code} onChange={() => setAppLang(code)} className="hidden" />
-                  <div className={`w-5 h-5 rounded-full border-2 shrink-0 flex items-center justify-center ${appLang === code ? "border-primary bg-primary" : "border-border"}`}>
-                    {appLang === code && <Check className="w-3 h-3 text-white" />}
-                  </div>
-                  <span className="text-xl">{flag}</span>
-                  <span className="text-sm font-bold flex-1">{name}</span>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${d === "RTL" ? "bg-accent/20 text-accent-foreground" : "bg-muted text-muted-foreground"}`}>{d}</span>
-                </label>
-              )}
-            </div>
-
-            <Button onClick={handleSaveAppSettings} className={`w-full rounded-xl h-12 font-bold gap-2 transition-all duration-300 shadow-sm hover:shadow-md hover:scale-[1.01] ${savedStates.appSettings ? "bg-green-600 hover:bg-green-700 shadow-green-500/20" : "shadow-primary/20"}`}>
-              {savedStates.appSettings ? <><Check className="w-4 h-4" /> تم الحفظ وإعادة التحميل!</> : <><Languages className="w-4 h-4" /> تطبيق اللغة</>}
-            </Button>
           </div>
         }
 
