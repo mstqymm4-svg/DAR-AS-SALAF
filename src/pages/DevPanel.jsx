@@ -4,7 +4,7 @@ import {
   Lock, Palette, Image, BookPlus, KeyRound, Eye, EyeOff,
   Upload, Check, BookOpen, Pencil, Trash2, Settings, RefreshCw,
   Shield, LayoutDashboard, Sparkles, Globe, Pipette, RotateCcw,
-  Tags, Plus, X, Youtube, ExternalLink, Languages } from
+  Tags, Plus, X, Youtube, ExternalLink, Languages, Type } from
 "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,41 @@ const ls = {
   remove: (k) => {try {localStorage.removeItem(k);} catch (e) {}},
   clear: () => {try {localStorage.clear();} catch (e) {}}
 };
+
+// ─── Font Utils ──────────────────────────────────────────────────────
+export const FONT_PRESETS = [
+  { name: "Tajawal", label: "تجول (افتراضي)", url: "https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap", value: "'Tajawal', sans-serif" },
+  { name: "Amiri", label: "أميري (كلاسيكي)", url: "https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap", value: "'Amiri', serif" },
+  { name: "Cairo", label: "القاهرة (عصري)", url: "https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap", value: "'Cairo', sans-serif" },
+  { name: "Noto Naskh Arabic", label: "نوتو نسخ (أنيق)", url: "https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700&display=swap", value: "'Noto Naskh Arabic', serif" },
+  { name: "IBM Plex Sans Arabic", label: "IBM بلكس (تقني)", url: "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;600;700&display=swap", value: "'IBM Plex Sans Arabic', sans-serif" },
+  { name: "Scheherazade New", label: "شهرزاد (تراثي)", url: "https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&display=swap", value: "'Scheherazade New', serif" },
+  { name: "Lateef", label: "لطيف (قرآني)", url: "https://fonts.googleapis.com/css2?family=Lateef&display=swap", value: "'Lateef', serif" },
+  { name: "Readex Pro", label: "ريدكس برو (واضح)", url: "https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;600;700&display=swap", value: "'Readex Pro', sans-serif" },
+];
+
+export function applyStoredFont() {
+  const stored = ls.get("dev_font");
+  if (stored) {
+    const preset = FONT_PRESETS.find(f => f.name === stored);
+    if (preset) injectFont(preset);
+  }
+}
+
+function injectFont(preset) {
+  // Remove old injected font link
+  const old = document.getElementById("dev-font-link");
+  if (old) old.remove();
+  // Inject new
+  const link = document.createElement("link");
+  link.id = "dev-font-link";
+  link.rel = "stylesheet";
+  link.href = preset.url;
+  document.head.appendChild(link);
+  // Apply CSS variable
+  document.documentElement.style.setProperty("--font-tajawal", preset.value);
+  ls.set("dev_font", preset.name);
+}
 
 export function applyStoredColors() {
   const map = {
@@ -170,7 +205,10 @@ export default function DevPanel() {
   // Stats
   const [stats, setStats] = useState({ total: 0, featured: 0, categories: 0 });
 
-  useEffect(() => {applyStoredColors();}, []);
+  // Font state
+  const [selectedFont, setSelectedFont] = useState(() => ls.get("dev_font") || "Tajawal");
+
+  useEffect(() => {applyStoredColors(); applyStoredFont();}, []);
 
   useEffect(() => {
     if ((activeTab === "admin" || activeTab === "dashboard") && unlocked) loadBooks();
@@ -377,9 +415,25 @@ export default function DevPanel() {
     toast.success("تم إعادة التصنيفات للافتراضية");
   };
 
+  const handleSaveFont = (preset) => {
+    setSelectedFont(preset.name);
+    injectFont(preset);
+    toast.success(`تم تطبيق خط: ${preset.label}`);
+  };
+
+  const handleResetFont = () => {
+    ls.remove("dev_font");
+    const old = document.getElementById("dev-font-link");
+    if (old) old.remove();
+    document.documentElement.style.removeProperty("--font-tajawal");
+    setSelectedFont("Tajawal");
+    toast.success("تم إعادة الخط للافتراضي");
+  };
+
   const tabs = [
   { id: "dashboard", label: "لوحة التحكم", icon: LayoutDashboard },
   { id: "color", label: "الألوان", icon: Palette },
+  { id: "fonts", label: "الخطوط", icon: Type },
   { id: "logo", label: "الشعار والاسم", icon: Image },
   { id: "youtube", label: "يوتيوب", icon: Youtube },
   { id: "book", label: "إضافة كتاب", icon: BookPlus },
@@ -583,6 +637,39 @@ export default function DevPanel() {
                 <Button variant="outline" onClick={handleResetColors} className="rounded-xl h-11 gap-1.5 shrink-0 font-bold hover:border-destructive/50 hover:text-destructive hover:bg-destructive/5 transition-all"><RotateCcw className="w-3.5 h-3.5" /> إعادة</Button>
               </div>
             </div>
+          </div>
+        }
+
+        {/* ─── Fonts ─── */}
+        {activeTab === "fonts" &&
+        <div className="space-y-6">
+            <h2 className="text-base font-bold flex items-center gap-2"><Type className="w-4 h-4" /> تخصيص خط التطبيق</h2>
+            <p className="text-xs text-muted-foreground">اختر خطاً من القائمة ليُطبَّق فوراً على جميع نصوص التطبيق.</p>
+
+            <div className="grid grid-cols-1 gap-3">
+              {FONT_PRESETS.map((preset) => {
+                const isActive = selectedFont === preset.name;
+                return (
+                  <button
+                    key={preset.name}
+                    onClick={() => handleSaveFont(preset)}
+                    className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all text-right ${isActive ? "border-primary bg-primary/5 shadow-md shadow-primary/10" : "border-border hover:border-primary/40 hover:bg-muted/40"}`}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold" style={{ fontFamily: preset.value }}>{preset.label}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5" style={{ fontFamily: preset.value }}>
+                        بسم الله الرحمن الرحيم — Islamic Library
+                      </p>
+                    </div>
+                    {isActive && <Check className="w-5 h-5 text-primary shrink-0 mr-3" />}
+                  </button>
+                );
+              })}
+            </div>
+
+            <Button variant="outline" onClick={handleResetFont} className="w-full rounded-xl h-11 gap-2 font-bold hover:border-primary/50 hover:bg-primary/5 transition-all">
+              <RotateCcw className="w-3.5 h-3.5" /> إعادة الخط للافتراضي (تجول)
+            </Button>
           </div>
         }
 
