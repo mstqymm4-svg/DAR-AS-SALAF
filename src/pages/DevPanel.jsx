@@ -30,14 +30,16 @@ const ls = {
 
 // ─── Font Utils ──────────────────────────────────────────────────────
 export const FONT_PRESETS = [
-  { name: "Tajawal", label: "تجول (افتراضي)", url: "https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap", value: "'Tajawal', sans-serif" },
-  { name: "Amiri", label: "أميري (كلاسيكي)", url: "https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap", value: "'Amiri', serif" },
-  { name: "Cairo", label: "القاهرة (عصري)", url: "https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap", value: "'Cairo', sans-serif" },
-  { name: "Noto Naskh Arabic", label: "نوتو نسخ (أنيق)", url: "https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700&display=swap", value: "'Noto Naskh Arabic', serif" },
-  { name: "IBM Plex Sans Arabic", label: "IBM بلكس (تقني)", url: "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;600;700&display=swap", value: "'IBM Plex Sans Arabic', sans-serif" },
-  { name: "Scheherazade New", label: "شهرزاد (تراثي)", url: "https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&display=swap", value: "'Scheherazade New', serif" },
-  { name: "Lateef", label: "لطيف (قرآني)", url: "https://fonts.googleapis.com/css2?family=Lateef&display=swap", value: "'Lateef', serif" },
-  { name: "Readex Pro", label: "ريدكس برو (واضح)", url: "https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;600;700&display=swap", value: "'Readex Pro', sans-serif" },
+  { name: "Tajawal",           label: "تجول",            category: "حديث",  url: "https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap",                          value: "'Tajawal', sans-serif" },
+  { name: "Cairo",             label: "القاهرة",          category: "حديث",  url: "https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap",                                value: "'Cairo', sans-serif" },
+  { name: "IBM Plex Sans Arabic", label: "IBM بلكس",     category: "حديث",  url: "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;600;700&display=swap",                     value: "'IBM Plex Sans Arabic', sans-serif" },
+  { name: "Readex Pro",        label: "ريدكس برو",        category: "حديث",  url: "https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;600;700&display=swap",                               value: "'Readex Pro', sans-serif" },
+  { name: "Amiri",             label: "أميري",            category: "كلاسيكي", url: "https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap",                                          value: "'Amiri', serif" },
+  { name: "Noto Naskh Arabic", label: "نوتو نسخ",        category: "كلاسيكي", url: "https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700&display=swap",                              value: "'Noto Naskh Arabic', serif" },
+  { name: "Scheherazade New",  label: "شهرزاد",           category: "كلاسيكي", url: "https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&display=swap",                               value: "'Scheherazade New', serif" },
+  { name: "Lateef",            label: "لطيف",             category: "قرآني",  url: "https://fonts.googleapis.com/css2?family=Lateef&display=swap",                                                       value: "'Lateef', serif" },
+  { name: "Reem Kufi",         label: "ريم كوفي",         category: "زخرفي",  url: "https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;500;600;700&display=swap",                              value: "'Reem Kufi', sans-serif" },
+  { name: "Aref Ruqaa",        label: "عارف رقعة",        category: "زخرفي",  url: "https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&display=swap",                                     value: "'Aref Ruqaa', serif" },
 ];
 
 export function applyStoredFont() {
@@ -46,6 +48,8 @@ export function applyStoredFont() {
     const preset = FONT_PRESETS.find(f => f.name === stored);
     if (preset) injectFont(preset);
   }
+  const storedSize = ls.get("dev_font_size");
+  if (storedSize) document.documentElement.style.setProperty("font-size", `${storedSize}px`);
 }
 
 function injectFont(preset) {
@@ -207,6 +211,8 @@ export default function DevPanel() {
 
   // Font state
   const [selectedFont, setSelectedFont] = useState(() => ls.get("dev_font") || "Tajawal");
+  const [fontSize, setFontSize] = useState(() => Number(ls.get("dev_font_size")) || 16);
+  const [fontCategory, setFontCategory] = useState("الكل");
 
   useEffect(() => {applyStoredColors(); applyStoredFont();}, []);
 
@@ -421,13 +427,22 @@ export default function DevPanel() {
     toast.success(`تم تطبيق خط: ${preset.label}`);
   };
 
+  const handleFontSizeChange = (size) => {
+    setFontSize(size);
+    document.documentElement.style.setProperty("font-size", `${size}px`);
+    ls.set("dev_font_size", String(size));
+  };
+
   const handleResetFont = () => {
     ls.remove("dev_font");
+    ls.remove("dev_font_size");
     const old = document.getElementById("dev-font-link");
     if (old) old.remove();
     document.documentElement.style.removeProperty("--font-tajawal");
+    document.documentElement.style.removeProperty("font-size");
     setSelectedFont("Tajawal");
-    toast.success("تم إعادة الخط للافتراضي");
+    setFontSize(16);
+    toast.success("تم إعادة إعدادات الخط للافتراضي");
   };
 
   const tabs = [
@@ -643,32 +658,86 @@ export default function DevPanel() {
         {/* ─── Fonts ─── */}
         {activeTab === "fonts" &&
         <div className="space-y-6">
-            <h2 className="text-base font-bold flex items-center gap-2"><Type className="w-4 h-4" /> تخصيص خط التطبيق</h2>
-            <p className="text-xs text-muted-foreground">اختر خطاً من القائمة ليُطبَّق فوراً على جميع نصوص التطبيق.</p>
+            <h2 className="text-base font-bold flex items-center gap-2"><Type className="w-4 h-4" /> تخصيص الخطوط</h2>
 
-            <div className="grid grid-cols-1 gap-3">
-              {FONT_PRESETS.map((preset) => {
+            {/* Live Preview */}
+            <div className="p-4 rounded-2xl border-2 border-dashed border-border bg-muted/20">
+              <p className="text-xs text-muted-foreground mb-3 text-center">معاينة فورية</p>
+              <div className="bg-card rounded-xl p-4 border border-border space-y-2" style={{ fontFamily: FONT_PRESETS.find(f => f.name === selectedFont)?.value }}>
+                <p className="text-lg font-bold text-foreground">المكتبة الإسلامية الرقمية</p>
+                <p className="text-sm text-muted-foreground">بسم الله الرحمن الرحيم — اقرأ وتعلّم وتدبّر</p>
+                <div className="flex gap-2 mt-2">
+                  <span className="text-xs bg-primary text-primary-foreground px-3 py-1 rounded-lg font-semibold">تصفح المكتبة</span>
+                  <span className="text-xs bg-muted text-muted-foreground px-3 py-1 rounded-lg">الكتب المميزة</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Font Size */}
+            <div className="p-4 bg-muted/40 rounded-xl border border-border space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-bold">حجم الخط</p>
+                <span className="text-sm font-mono font-bold text-primary">{fontSize}px</span>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                {[13, 14, 15, 16, 17, 18, 20].map(size => (
+                  <button
+                    key={size}
+                    onClick={() => handleFontSizeChange(size)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border-2 ${fontSize === size ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-primary/40"}`}
+                  >
+                    {size}px
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Category filter */}
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {["الكل", "حديث", "كلاسيكي", "قرآني", "زخرفي"].map(cat => (
+                <button key={cat} onClick={() => setFontCategory(cat)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border-2 shrink-0 ${fontCategory === cat ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/30"}`}>
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            {/* Font Grid */}
+            <div className="grid grid-cols-1 gap-2.5">
+              {FONT_PRESETS.filter(p => fontCategory === "الكل" || p.category === fontCategory).map((preset) => {
                 const isActive = selectedFont === preset.name;
                 return (
                   <button
                     key={preset.name}
                     onClick={() => handleSaveFont(preset)}
-                    className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all text-right ${isActive ? "border-primary bg-primary/5 shadow-md shadow-primary/10" : "border-border hover:border-primary/40 hover:bg-muted/40"}`}
+                    className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-right w-full ${isActive ? "border-primary bg-primary/5 shadow-md shadow-primary/10" : "border-border hover:border-primary/40 hover:bg-muted/40"}`}
                   >
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold" style={{ fontFamily: preset.value }}>{preset.label}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5" style={{ fontFamily: preset.value }}>
-                        بسم الله الرحمن الرحيم — Islamic Library
+                    {/* Big font sample */}
+                    <div className="shrink-0 w-14 h-14 rounded-xl bg-muted flex items-center justify-center overflow-hidden border border-border">
+                      <span className="text-2xl font-bold text-foreground" style={{ fontFamily: preset.value }}>أ</span>
+                    </div>
+                    <div className="flex-1 min-w-0 text-right">
+                      <div className="flex items-center gap-2 justify-between">
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                          preset.category === "حديث" ? "bg-blue-100 text-blue-700" :
+                          preset.category === "كلاسيكي" ? "bg-amber-100 text-amber-700" :
+                          preset.category === "قرآني" ? "bg-emerald-100 text-emerald-700" :
+                          "bg-purple-100 text-purple-700"
+                        }`}>{preset.category}</span>
+                        {isActive && <Check className="w-4 h-4 text-primary shrink-0" />}
+                      </div>
+                      <p className="text-sm font-bold mt-1" style={{ fontFamily: preset.value }}>{preset.label}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 truncate" style={{ fontFamily: preset.value }}>
+                        بسم الله الرحمن الرحيم
                       </p>
                     </div>
-                    {isActive && <Check className="w-5 h-5 text-primary shrink-0 mr-3" />}
                   </button>
                 );
               })}
             </div>
 
-            <Button variant="outline" onClick={handleResetFont} className="w-full rounded-xl h-11 gap-2 font-bold hover:border-primary/50 hover:bg-primary/5 transition-all">
-              <RotateCcw className="w-3.5 h-3.5" /> إعادة الخط للافتراضي (تجول)
+            <Button variant="outline" onClick={handleResetFont} className="w-full rounded-xl h-11 gap-2 font-bold hover:border-destructive/50 hover:text-destructive hover:bg-destructive/5 transition-all">
+              <RotateCcw className="w-3.5 h-3.5" /> إعادة الخط والحجم للافتراضي
             </Button>
           </div>
         }
