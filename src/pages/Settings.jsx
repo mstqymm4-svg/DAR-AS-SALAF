@@ -185,7 +185,7 @@ export default function Settings() {
                 <input type="radio" name="appLang" value={code} checked={appLang === code} onChange={() => setAppLang(code)} className="hidden" />
                 <div className={`w-4 h-4 rounded-full border-2 shrink-0 ${appLang === code ? "border-primary bg-primary" : "border-border"}`} />
                 <span className="text-sm font-medium">
-                  {code === "ar" ? "العربية 🇸🇦" : code === "en" ? "English 🇬🇧" : code === "fr" ? "Français 🇫🇷" : code === "ur" ? "اردو 🇵🇰" : "हिंदी 🇮🇳"}
+                  {code === "ar" ? "العربية" : code === "en" ? "English" : code === "fr" ? "Français" : code === "ur" ? "اردو" : "हिंदी"}
                 </span>
               </label>
             ))}

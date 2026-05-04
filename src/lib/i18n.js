@@ -237,8 +237,6 @@ export const TRANSLATIONS = {
     pages: "صفحات",
     language: "زبان",
     downloadPdf: "PDF ڈاؤن لوڈ کریں",
-    // Additional keys
-    browseByCat: "زمرے کے مطابق",
     aiSearch: "ذہین تلاش",
     aiSearchPlaceholder: "مثلاً: نماز کے بارے میں کتابیں...",
     aiSearchBtn: "تلاش کریں",

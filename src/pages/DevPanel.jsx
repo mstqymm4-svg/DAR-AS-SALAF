@@ -4,7 +4,7 @@ import {
   Lock, Palette, Image, BookPlus, KeyRound, Eye, EyeOff,
   Upload, Check, BookOpen, Pencil, Trash2, Settings, RefreshCw,
   Shield, LayoutDashboard, Sparkles, Globe, Pipette, RotateCcw,
-  Tags, Plus, X, Youtube, ExternalLink, Languages, Type } from
+  Tags, Plus, X, Youtube, ExternalLink, Languages, Type, Search } from
 "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -205,6 +205,7 @@ export default function DevPanel() {
   // Categories management
   const [categories, setCategories] = useState(() => getCategoryOptions());
   const [newCategory, setNewCategory] = useState("");
+  const [adminSearch, setAdminSearch] = useState("");
 
   // Stats
   const [stats, setStats] = useState({ total: 0, featured: 0, categories: 0 });
@@ -509,44 +510,80 @@ export default function DevPanel() {
         {activeTab === "dashboard" &&
         <div className="space-y-6">
             <h2 className="text-base font-bold flex items-center gap-2"><Sparkles className="w-4 h-4 text-accent" /> نظرة عامة</h2>
+
+            {/* Stats */}
             <div className="grid grid-cols-3 gap-3">
-              <div className="bg-primary/10 rounded-xl p-4 text-center">
+              <div className="bg-primary/10 rounded-2xl p-4 text-center border border-primary/20">
                 <p className="text-3xl font-black text-primary">{stats.total}</p>
-                <p className="text-xs text-muted-foreground mt-1">إجمالي الكتب</p>
+                <p className="text-xs text-muted-foreground mt-1 font-medium">إجمالي الكتب</p>
               </div>
-              <div className="bg-accent/10 rounded-xl p-4 text-center">
+              <div className="bg-accent/10 rounded-2xl p-4 text-center border border-accent/20">
                 <p className="text-3xl font-black text-accent">{stats.featured}</p>
-                <p className="text-xs text-muted-foreground mt-1">مميز</p>
+                <p className="text-xs text-muted-foreground mt-1 font-medium">كتاب مميز</p>
               </div>
-              <div className="bg-muted rounded-xl p-4 text-center">
+              <div className="bg-muted rounded-2xl p-4 text-center border border-border">
                 <p className="text-3xl font-black">{stats.categories}</p>
-                <p className="text-xs text-muted-foreground mt-1">تصنيف</p>
+                <p className="text-xs text-muted-foreground mt-1 font-medium">تصنيف</p>
               </div>
             </div>
+
+            {/* PDF coverage */}
+            {books.length > 0 && (() => {
+              const withPdf = books.filter(b => b.pdf_url).length;
+              const pct = Math.round((withPdf / books.length) * 100);
+              return (
+                <div className="p-4 rounded-2xl bg-muted/40 border border-border space-y-2">
+                  <div className="flex justify-between text-xs font-semibold">
+                    <span>تغطية PDF</span>
+                    <span className="text-primary">{withPdf}/{books.length} كتاب ({pct}%)</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-border overflow-hidden">
+                    <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Quick actions */}
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { id: "book",       icon: BookPlus,       label: "إضافة كتاب",    cls: "" },
+                { id: "admin",      icon: BookOpen,       label: "إدارة الكتب",   cls: "outline" },
+                { id: "color",      icon: Palette,        label: "الألوان",       cls: "outline" },
+                { id: "fonts",      icon: Type,           label: "الخطوط",        cls: "outline" },
+                { id: "youtube",    icon: Youtube,        label: "يوتيوب",        cls: "outline" },
+                { id: "categories", icon: Tags,           label: "التصنيفات",     cls: "outline" },
+              ].map(({ id, icon: Icon, label, cls }) => (
+                <Button key={id} variant={cls || "default"} onClick={() => setActiveTab(id)}
+                  className="rounded-xl gap-2 h-11 font-bold hover:scale-[1.02] transition-all text-sm">
+                  <Icon className="w-4 h-4" /> {label}
+                </Button>
+              ))}
+            </div>
+
+            {/* Recent books */}
             <div>
               <p className="text-sm font-semibold mb-3">آخر الكتب المضافة</p>
               {loadingBooks ?
             <div className="flex justify-center py-6"><div className="w-6 h-6 border-4 border-primary/20 border-t-primary rounded-full animate-spin" /></div> :
-
             <div className="space-y-2">
-                  {books.slice(0, 5).map((book) =>
-              <div key={book.id} className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
+                  {books.slice(0, 6).map((book) =>
+              <div key={book.id} className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors">
                       <div className="w-8 h-10 rounded-lg bg-muted flex items-center justify-center overflow-hidden shrink-0">
                         {book.cover_image ? <img src={book.cover_image} alt="" className="w-full h-full object-cover" /> : <BookOpen className="w-3.5 h-3.5 text-muted-foreground" />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold truncate">{book.title}</p>
-                        <p className="text-xs text-muted-foreground">{book.category}</p>
+                        <p className="text-xs text-muted-foreground">{book.author} · {book.category}</p>
                       </div>
-                      {book.pdf_url ? <span className="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">PDF ✓</span> : <span className="text-xs text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full">بدون PDF</span>}
+                      <div className="flex flex-col gap-1 items-end shrink-0">
+                        {book.pdf_url ? <span className="text-[10px] text-green-600 bg-green-50 px-2 py-0.5 rounded-full font-medium">PDF ✓</span> : <span className="text-[10px] text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full font-medium">بدون PDF</span>}
+                        {book.is_featured && <span className="text-[10px] text-accent bg-accent/10 px-2 py-0.5 rounded-full font-medium">⭐ مميز</span>}
+                      </div>
                     </div>
               )}
                 </div>
             }
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <Button onClick={() => setActiveTab("book")} className="rounded-xl gap-2 h-12 font-bold shadow-sm shadow-primary/20 hover:shadow-md hover:scale-[1.02] transition-all"><BookPlus className="w-4 h-4" /> إضافة كتاب</Button>
-              <Button variant="outline" onClick={() => setActiveTab("admin")} className="rounded-xl gap-2 h-12 font-bold hover:border-primary/50 hover:bg-primary/5 hover:scale-[1.02] transition-all"><BookOpen className="w-4 h-4" /> إدارة الكتب</Button>
             </div>
           </div>
         }
@@ -872,85 +909,110 @@ export default function DevPanel() {
         {/* ─── Add Book ─── */}
         {activeTab === "book" &&
         <div className="space-y-4">
-            <h2 className="text-base font-bold mb-2">إضافة كتاب جديد</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div><Label>العنوان *</Label><Input value={bookForm.title} onChange={(e) => setBookForm((p) => ({ ...p, title: e.target.value }))} className="mt-1.5" /></div>
-              <div><Label>المؤلف *</Label><Input value={bookForm.author} onChange={(e) => setBookForm((p) => ({ ...p, author: e.target.value }))} className="mt-1.5" /></div>
+            <h2 className="text-base font-bold mb-2 flex items-center gap-2"><BookPlus className="w-4 h-4" /> إضافة كتاب جديد</h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div><Label>العنوان *</Label><Input value={bookForm.title} onChange={(e) => setBookForm((p) => ({ ...p, title: e.target.value }))} className="mt-1.5" placeholder="عنوان الكتاب" /></div>
+              <div><Label>المؤلف *</Label><Input value={bookForm.author} onChange={(e) => setBookForm((p) => ({ ...p, author: e.target.value }))} className="mt-1.5" placeholder="اسم المؤلف" /></div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <Label>التصنيف</Label>
                 <select value={bookForm.category} onChange={(e) => setBookForm((p) => ({ ...p, category: e.target.value }))} className="mt-1.5 w-full h-9 rounded-md border border-input bg-transparent px-3 text-sm">
                   {categoryOptions.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
-              <div><Label>عدد الصفحات</Label><Input type="number" value={bookForm.pages_count} onChange={(e) => setBookForm((p) => ({ ...p, pages_count: e.target.value }))} className="mt-1.5" /></div>
+              <div><Label>عدد الصفحات</Label><Input type="number" value={bookForm.pages_count} onChange={(e) => setBookForm((p) => ({ ...p, pages_count: e.target.value }))} className="mt-1.5" placeholder="0" /></div>
+              <div><Label>التقييم (0-5)</Label><Input type="number" min={0} max={5} step={0.5} value={bookForm.rating} onChange={(e) => setBookForm((p) => ({ ...p, rating: e.target.value }))} className="mt-1.5" placeholder="0" /></div>
             </div>
-            <div><Label>الوصف</Label><Textarea value={bookForm.description} onChange={(e) => setBookForm((p) => ({ ...p, description: e.target.value }))} className="mt-1.5" rows={3} /></div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+            <div><Label>الوصف</Label><Textarea value={bookForm.description} onChange={(e) => setBookForm((p) => ({ ...p, description: e.target.value }))} className="mt-1.5" rows={3} placeholder="وصف مختصر للكتاب..." /></div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <Label>صورة الغلاف</Label>
                 <label className="cursor-pointer block mt-1.5">
                   <input type="file" accept="image/*" onChange={(e) => handleCoverUpload(e, false)} className="hidden" />
-                  <div className={`flex items-center justify-center gap-2 h-10 rounded-xl border-2 border-dashed transition-colors ${bookForm.cover_image ? "border-primary bg-primary/5" : "border-border"}`}>
-                    {coverUploading ? <div className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin" /> : bookForm.cover_image ? <><Check className="w-4 h-4 text-primary" /><span className="text-xs text-primary">تم الرفع</span></> : <><Upload className="w-4 h-4 text-muted-foreground" /><span className="text-xs text-muted-foreground">رفع الغلاف</span></>}
+                  <div className={`flex items-center justify-center gap-2 h-10 rounded-xl border-2 border-dashed transition-colors ${bookForm.cover_image ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"}`}>
+                    {coverUploading ? <div className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin" /> : bookForm.cover_image ? <><Check className="w-4 h-4 text-primary" /><span className="text-xs text-primary font-medium">تم الرفع ✓</span></> : <><Upload className="w-4 h-4 text-muted-foreground" /><span className="text-xs text-muted-foreground">رفع الغلاف</span></>}
                   </div>
                 </label>
+                {bookForm.cover_image && <Input value={bookForm.cover_image} onChange={(e) => setBookForm((p) => ({ ...p, cover_image: e.target.value }))} placeholder="رابط الغلاف" className="text-xs h-8 mt-1.5 font-mono" />}
               </div>
               <div>
                 <Label>ملف PDF</Label>
                 <label className="cursor-pointer block mt-1.5">
                   <input type="file" accept=".pdf" onChange={(e) => handlePdfUpload(e, false)} className="hidden" />
-                  <div className={`flex items-center justify-center gap-2 h-10 rounded-xl border-2 border-dashed transition-colors ${bookForm.pdf_url ? "border-primary bg-primary/5" : "border-border"}`}>
-                    {pdfUploading ? <div className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin" /> : bookForm.pdf_url ? <><Check className="w-4 h-4 text-primary" /><span className="text-xs text-primary">PDF جاهز</span></> : <><Upload className="w-4 h-4 text-muted-foreground" /><span className="text-xs text-muted-foreground">رفع PDF</span></>}
+                  <div className={`flex items-center justify-center gap-2 h-10 rounded-xl border-2 border-dashed transition-colors ${bookForm.pdf_url ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"}`}>
+                    {pdfUploading ? <div className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin" /> : bookForm.pdf_url ? <><Check className="w-4 h-4 text-primary" /><span className="text-xs text-primary font-medium">PDF جاهز ✓</span></> : <><Upload className="w-4 h-4 text-muted-foreground" /><span className="text-xs text-muted-foreground">رفع PDF</span></>}
                   </div>
                 </label>
                 <Input value={bookForm.pdf_url} onChange={(e) => setBookForm((p) => ({ ...p, pdf_url: e.target.value }))} placeholder="أو أدخل رابط PDF مباشرة" className="text-xs h-8 mt-1.5" />
               </div>
             </div>
-            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
-              <Label>كتاب مميز ⭐</Label>
+
+            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl border border-border">
+              <Label className="cursor-pointer">كتاب مميز ⭐</Label>
               <Switch checked={bookForm.is_featured} onCheckedChange={(v) => setBookForm((p) => ({ ...p, is_featured: v }))} />
             </div>
-            <Button onClick={handleAddBook} disabled={savingBook} className="w-full rounded-xl h-12 font-bold gap-2 shadow-sm shadow-primary/20 hover:shadow-md hover:scale-[1.01] transition-all">
-              {savingBook ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> جاري الإضافة...</> : <><BookPlus className="w-4 h-4" /> إضافة الكتاب</>}
-            </Button>
+
+            <div className="flex gap-2">
+              <Button onClick={handleAddBook} disabled={savingBook} className="flex-1 rounded-xl h-12 font-bold gap-2 shadow-sm shadow-primary/20 hover:shadow-md hover:scale-[1.01] transition-all">
+                {savingBook ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> جاري الإضافة...</> : <><BookPlus className="w-4 h-4" /> إضافة الكتاب</>}
+              </Button>
+              <Button variant="outline" onClick={() => setBookForm(emptyBook)} className="rounded-xl h-12 px-4 font-bold hover:border-destructive/50 hover:text-destructive hover:bg-destructive/5 transition-all">
+                <RotateCcw className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         }
 
         {/* ─── Admin Books ─── */}
-        {activeTab === "admin" &&
-        <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold">إدارة الكتب — {books.length} كتاب</h2>
-              <button onClick={loadBooks} className="p-2 rounded-lg hover:bg-muted transition-colors">
-                <RefreshCw className="w-4 h-4 text-muted-foreground" />
-              </button>
-            </div>
-            {loadingBooks ?
-          <div className="flex justify-center py-10"><div className="w-7 h-7 border-4 border-primary/20 border-t-primary rounded-full animate-spin" /></div> :
-
-          <div className="divide-y divide-border max-h-[60vh] overflow-y-auto">
-                {books.map((book) =>
-            <div key={book.id} className="flex items-center gap-3 py-3">
-                    <div className="w-10 h-12 rounded-lg bg-muted flex items-center justify-center overflow-hidden shrink-0">
-                      {book.cover_image ? <img src={book.cover_image} alt="" className="w-full h-full object-cover" /> : <BookOpen className="w-4 h-4 text-muted-foreground" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold truncate">{book.title}</p>
-                      <p className="text-xs text-muted-foreground truncate">{book.author} · {book.category}</p>
-                      {book.pdf_url && <p className="text-[10px] text-green-600 mt-0.5">✓ يحتوي على PDF</p>}
-                    </div>
-                    <div className="flex gap-1 shrink-0">
-                      <button onClick={() => openEdit(book)} className="p-1.5 rounded-lg hover:bg-muted"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button>
-                      <button onClick={() => handleDelete(book)} className="p-1.5 rounded-lg hover:bg-destructive/10"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>
-                    </div>
-                  </div>
-            )}
+        {activeTab === "admin" && (() => {
+          const filtered = books.filter(b =>
+            !adminSearch || b.title?.includes(adminSearch) || b.author?.includes(adminSearch) || b.category?.includes(adminSearch)
+          );
+          return (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-base font-bold">إدارة الكتب — <span className="text-primary">{books.length}</span> كتاب</h2>
+                <button onClick={loadBooks} className="p-2 rounded-lg hover:bg-muted transition-colors">
+                  <RefreshCw className="w-4 h-4 text-muted-foreground" />
+                </button>
               </div>
-          }
-          </div>
-        }
+              <div className="relative mb-4">
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input value={adminSearch} onChange={e => setAdminSearch(e.target.value)} placeholder="بحث في الكتب..." className="pr-9 h-9 rounded-xl text-sm" />
+              </div>
+              {loadingBooks ?
+                <div className="flex justify-center py-10"><div className="w-7 h-7 border-4 border-primary/20 border-t-primary rounded-full animate-spin" /></div> :
+                <div className="divide-y divide-border max-h-[60vh] overflow-y-auto">
+                  {filtered.map((book) =>
+                    <div key={book.id} className="flex items-center gap-3 py-3 hover:bg-muted/30 rounded-xl px-1 transition-colors">
+                      <div className="w-10 h-12 rounded-lg bg-muted flex items-center justify-center overflow-hidden shrink-0">
+                        {book.cover_image ? <img src={book.cover_image} alt="" className="w-full h-full object-cover" /> : <BookOpen className="w-4 h-4 text-muted-foreground" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold truncate">{book.title}</p>
+                        <p className="text-xs text-muted-foreground truncate">{book.author} · {book.category}</p>
+                        <div className="flex gap-1 mt-0.5">
+                          {book.pdf_url && <span className="text-[10px] text-green-600">✓ PDF</span>}
+                          {book.is_featured && <span className="text-[10px] text-accent">⭐ مميز</span>}
+                        </div>
+                      </div>
+                      <div className="flex gap-1 shrink-0">
+                        <button onClick={() => openEdit(book)} className="p-1.5 rounded-lg hover:bg-primary/10 transition-colors"><Pencil className="w-3.5 h-3.5 text-primary" /></button>
+                        <button onClick={() => handleDelete(book)} className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>
+                      </div>
+                    </div>
+                  )}
+                  {filtered.length === 0 && <p className="text-center text-sm text-muted-foreground py-8">لا توجد نتائج</p>}
+                </div>
+              }
+            </div>
+          );
+        })()}
 
         {/* ─── Categories ─── */}
         {activeTab === "categories" &&
@@ -1006,18 +1068,17 @@ export default function DevPanel() {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  { code: "ar", flag: "🇸🇦", name: "العربية" },
-                  { code: "en", flag: "🇬🇧", name: "English" },
-                  { code: "fr", flag: "🇫🇷", name: "Français" },
-                  { code: "ur", flag: "🇵🇰", name: "اردو" },
-                  { code: "hi", flag: "🇮🇳", name: "हिंदी" },
-                ].map(({ code, flag, name }) =>
+                  { code: "ar", name: "العربية" },
+                  { code: "en", name: "English" },
+                  { code: "fr", name: "Français" },
+                  { code: "ur", name: "اردو" },
+                  { code: "hi", name: "हिंदी" },
+                ].map(({ code, name }) =>
                   <label key={code} className={`flex items-center gap-2 p-2.5 rounded-xl border-2 cursor-pointer transition-all ${appLang === code ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"}`}>
                     <input type="radio" name="appLangSettings" value={code} checked={appLang === code} onChange={() => setAppLang(code)} className="hidden" />
                     <div className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${appLang === code ? "border-primary bg-primary" : "border-border"}`}>
                       {appLang === code && <Check className="w-2.5 h-2.5 text-white" />}
                     </div>
-                    <span className="text-base">{flag}</span>
                     <span className="text-xs font-bold">{name}</span>
                   </label>
                 )}
