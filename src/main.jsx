@@ -8,6 +8,8 @@ import { applyStoredColors, applyStoredFont } from '@/pages/DevPanel'
 applyStoredColors();
 applyStoredFont();
 
+// Apply dev_show_dev_nav (no reload needed — just CSS var awareness)
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <App />
 )

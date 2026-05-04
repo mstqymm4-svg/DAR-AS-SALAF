@@ -248,6 +248,13 @@ export const TRANSLATIONS = {
     noPdf: "PDF دستیاب نہیں",
     addFav: "پسندیدہ میں شامل کریں",
     removeFav: "پسندیدہ سے ہٹائیں",
+    // Additional keys for full coverage
+    browseByCat: "زمرے کے مطابق",
+    aboutBook: "کتاب کا تعارف",
+    readingView: "مطالعہ",
+    close: "بند کریں",
+    bookNotFound: "کتاب نہیں ملی",
+    bookNotFoundSub: "شاید یہ کتاب حذف کر دی گئی ہو",
   },
   hi: {
     dir: "ltr",

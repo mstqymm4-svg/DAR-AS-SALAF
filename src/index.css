@@ -7,6 +7,10 @@
 @layer base {
   :root {
     --font-tajawal: 'Tajawal', sans-serif;
+    --font-heading: var(--font-tajawal);
+    --font-title: var(--font-tajawal);
+    --font-nav: var(--font-tajawal);
+    --font-button: var(--font-tajawal);
     --background: 40 30% 97%;
     --foreground: 160 30% 10%;
     --card: 40 25% 99%;
@@ -85,5 +89,17 @@
 
   body {
     @apply bg-background text-foreground font-tajawal;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+
+  button {
+    font-family: var(--font-button);
+  }
+
+  a[class*="nav"], nav a, nav button {
+    font-family: var(--font-nav);
   }
 }
