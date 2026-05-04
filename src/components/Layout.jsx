@@ -9,7 +9,13 @@ export default function Layout() {
   const [user, setUser] = useState(null);
   const t = useT();
 
-  const showDevNav = (() => { try { return localStorage.getItem("dev_show_dev_nav") !== "false"; } catch(e) { return true; } })();
+  const [showDevNav, setShowDevNav] = useState(() => { try { return localStorage.getItem("dev_show_dev_nav") !== "false"; } catch(e) { return true; } });
+
+  useEffect(() => {
+    const handler = () => setShowDevNav(localStorage.getItem("dev_show_dev_nav") !== "false");
+    window.addEventListener("storage", handler);
+    return () => window.removeEventListener("storage", handler);
+  }, []);
 
   const navItems = [
     { path: "/",          icon: Home,     label: t.navHome },

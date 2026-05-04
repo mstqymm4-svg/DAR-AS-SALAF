@@ -423,8 +423,9 @@ export default function DevPanel() {
 
   // ── App Settings ──
   const handleSaveAppSettings = () => {
-    ls.set("dev_show_dev_nav", String(showDevNav));
-    ls.set("dev_app_lang", appLang);
+    localStorage.setItem("dev_show_dev_nav", String(showDevNav));
+    localStorage.setItem("dev_app_lang", appLang);
+    window.dispatchEvent(new Event("storage"));
     markSaved("appSettings");
     toast.success("تم حفظ الإعدادات ✓ — سيتم تطبيق اللغة عند إعادة التحميل");
   };
