@@ -8,7 +8,12 @@ import { applyStoredColors, applyStoredFont } from '@/pages/DevPanel'
 applyStoredColors();
 applyStoredFont();
 
-// Apply dev_show_dev_nav (no reload needed — just CSS var awareness)
+// Apply dark mode (persistent)
+try {
+  if (localStorage.getItem("dev_dark_mode") === "true") {
+    document.documentElement.classList.add("dark");
+  }
+} catch(e) {}
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <App />

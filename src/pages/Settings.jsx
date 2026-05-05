@@ -28,7 +28,11 @@ export default function Settings() {
 
   useEffect(() => {
     loadUser();
-    setDarkMode(document.documentElement.classList.contains("dark"));
+    // قراءة الوضع الليلي المحفوظ
+    const saved = localStorage.getItem("dev_dark_mode");
+    const isDark = saved !== null ? saved === "true" : document.documentElement.classList.contains("dark");
+    setDarkMode(isDark);
+    document.documentElement.classList.toggle("dark", isDark);
   }, []);
 
   const loadUser = async () => {
@@ -52,6 +56,8 @@ export default function Settings() {
   const handleToggleDark = (val) => {
     setDarkMode(val);
     document.documentElement.classList.toggle("dark", val);
+    // حفظ دائم
+    try { localStorage.setItem("dev_dark_mode", String(val)); } catch(e) {}
   };
 
   const handleSavePreferences = async () => {
@@ -180,13 +186,19 @@ export default function Settings() {
             </div>
           </div>
           <div className="grid grid-cols-2 gap-2 mb-4">
-            {Object.entries(TRANSLATIONS).map(([code, lang]) => (
-              <label key={code} className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${appLang === code ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"}`}>
+            {[
+              { code:"ar", name:"العربية",  flag:"🇸🇦" },
+              { code:"en", name:"English",  flag:"🇬🇧" },
+              { code:"fr", name:"Français", flag:"🇫🇷" },
+              { code:"ur", name:"اردو",     flag:"🇵🇰" },
+              { code:"hi", name:"हिंदी",    flag:"🇮🇳" },
+              { code:"tr", name:"Türkçe",   flag:"🇹🇷" },
+            ].map(({ code, name, flag }) => (
+              <label key={code} className={`flex items-center gap-2 p-3 rounded-xl border-2 cursor-pointer transition-all ${appLang === code ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"}`}>
                 <input type="radio" name="appLang" value={code} checked={appLang === code} onChange={() => setAppLang(code)} className="hidden" />
                 <div className={`w-4 h-4 rounded-full border-2 shrink-0 ${appLang === code ? "border-primary bg-primary" : "border-border"}`} />
-                <span className="text-sm font-medium">
-                  {code === "ar" ? "العربية" : code === "en" ? "English" : code === "fr" ? "Français" : code === "ur" ? "اردو" : "हिंदी"}
-                </span>
+                <span className="text-sm">{flag}</span>
+                <span className="text-sm font-medium">{name}</span>
               </label>
             ))}
           </div>
