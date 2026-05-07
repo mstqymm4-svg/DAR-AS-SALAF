@@ -21,8 +21,8 @@ export default function ReadBook() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-      </div>
-    );
+      </div>);
+
   }
 
   if (!book || !book.pdf_url) {
@@ -31,8 +31,8 @@ export default function ReadBook() {
         <BookOpen className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
         <h3 className="text-lg font-bold mb-2">لا يوجد ملف PDF لهذا الكتاب</h3>
         <Link to="/books" className="text-primary text-sm hover:underline">العودة للمكتبة</Link>
-      </div>
-    );
+      </div>);
+
   }
 
   return (
@@ -45,7 +45,7 @@ export default function ReadBook() {
           <span className="sm:hidden">رجوع</span>
         </Link>
         <a href={book.pdf_url} download target="_blank" rel="noopener noreferrer">
-          <Button size="sm" className="gap-1.5 h-8 text-xs rounded-lg">
+          <Button size="sm" className="gap-1.5 h-8 text-xs rounded-lg hidden">
             <Download className="w-3.5 h-3.5" />
             تحميل
           </Button>
@@ -56,6 +56,6 @@ export default function ReadBook() {
       <div className="flex-1 overflow-hidden relative">
         <PdfViewer url={book.pdf_url} title={book.title} />
       </div>
-    </div>
-  );
+    </div>);
+
 }
