@@ -14,7 +14,7 @@ export default function BookDetails() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
 
-  useEffect(() => { loadBook(); }, [id]);
+  useEffect(() => {loadBook();}, [id]);
 
   const loadBook = async () => {
     const u = await base44.auth.me().catch(() => null);
@@ -44,8 +44,8 @@ export default function BookDetails() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-      </div>
-    );
+      </div>);
+
   }
 
   if (!book) {
@@ -54,8 +54,8 @@ export default function BookDetails() {
         <BookOpen className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
         <h3 className="text-lg font-bold mb-2">الكتاب غير موجود</h3>
         <Link to="/books" className="text-primary text-sm hover:underline">{t.backToLib}</Link>
-      </div>
-    );
+      </div>);
+
   }
 
   return (
@@ -69,16 +69,16 @@ export default function BookDetails() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="grid md:grid-cols-3 gap-8"
-      >
+        className="grid md:grid-cols-3 gap-8">
+        
         {/* Cover */}
         <div className="md:col-span-1">
           <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5 border border-border flex items-center justify-center">
-            {book.cover_image ? (
-              <img src={book.cover_image} alt={book.title} className="w-full h-full object-cover" />
-            ) : (
-              <BookOpen className="w-12 h-12 text-primary/30" />
-            )}
+            {book.cover_image ?
+            <img src={book.cover_image} alt={book.title} className="w-full h-full object-cover" /> :
+
+            <BookOpen className="w-12 h-12 text-primary/30" />
+            }
           </div>
         </div>
 
@@ -91,14 +91,14 @@ export default function BookDetails() {
               </span>
               <h1 className="text-2xl md:text-3xl font-black text-foreground leading-tight">{book.title}</h1>
             </div>
-            {user && (
-              <button
-                onClick={toggleFavorite}
-                className="shrink-0 w-11 h-11 rounded-xl border border-border flex items-center justify-center hover:bg-muted transition-colors"
-              >
+            {user &&
+            <button
+              onClick={toggleFavorite}
+              className="shrink-0 w-11 h-11 rounded-xl border border-border flex items-center justify-center hover:bg-muted transition-colors">
+              
                 <Heart className={`w-5 h-5 ${isFavorite ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
               </button>
-            )}
+            }
           </div>
 
           <div className="flex items-center gap-2 text-muted-foreground mb-6">
@@ -106,45 +106,45 @@ export default function BookDetails() {
             <span className="text-sm">{book.author}</span>
           </div>
 
-          {book.rating > 0 && (
-            <div className="flex items-center gap-2 mb-6">
+          {book.rating > 0 &&
+          <div className="flex items-center gap-2 mb-6">
               <div className="flex gap-0.5">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className={`w-4 h-4 ${i < Math.round(book.rating) ? "fill-accent text-accent" : "text-border"}`} />
-                ))}
+                {[...Array(5)].map((_, i) =>
+              <Star key={i} className={`w-4 h-4 ${i < Math.round(book.rating) ? "fill-accent text-accent" : "text-border"}`} />
+              )}
               </div>
               <span className="text-sm text-muted-foreground">{book.rating} / 5</span>
             </div>
-          )}
+          }
 
           <div className="grid grid-cols-2 gap-3 mb-6">
-            {book.pages_count && (
-              <div className="p-4 rounded-xl bg-muted/50 border border-border">
+            {book.pages_count &&
+            <div className="p-4 rounded-xl bg-muted/50 border border-border">
                 <FileText className="w-4 h-4 text-muted-foreground mb-1" />
                 <p className="text-lg font-bold text-foreground">{book.pages_count}</p>
                 <p className="text-xs text-muted-foreground">{t.pages}</p>
               </div>
-            )}
-            {book.language && (
-              <div className="p-4 rounded-xl bg-muted/50 border border-border">
+            }
+            {book.language &&
+            <div className="p-4 rounded-xl bg-muted/50 border border-border">
                 <BookOpen className="w-4 h-4 text-muted-foreground mb-1" />
                 <p className="text-lg font-bold text-foreground">{book.language}</p>
                 <p className="text-xs text-muted-foreground">{t.language}</p>
               </div>
-            )}
+            }
           </div>
 
-          {book.description && (
-            <div className="mb-8">
+          {book.description &&
+          <div className="mb-8">
               <h3 className="text-sm font-bold text-foreground mb-3">{t.aboutBook}</h3>
               <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{book.description}</p>
             </div>
-          )}
+          }
 
-          {book.pdf_url && (
-            <div className="flex flex-col sm:flex-row gap-3">
+          {book.pdf_url &&
+          <div className="flex flex-col sm:flex-row gap-3">
               <a href={book.pdf_url} target="_blank" rel="noopener noreferrer" className="flex-1">
-                <Button variant="outline" className="w-full gap-2 h-12 rounded-xl text-sm font-bold">
+                <Button variant="outline" className="w-full gap-2 h-12 rounded-xl text-sm font-bold hidden">
                   <Download className="w-4 h-4" />
                   {t.downloadPdf}
                 </Button>
@@ -156,9 +156,9 @@ export default function BookDetails() {
                 </Button>
               </a>
             </div>
-          )}
+          }
         </div>
       </motion.div>
-    </div>
-  );
+    </div>);
+
 }
