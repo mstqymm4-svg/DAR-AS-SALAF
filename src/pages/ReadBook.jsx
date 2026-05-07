@@ -45,10 +45,10 @@ export default function ReadBook() {
           <span className="sm:hidden">رجوع</span>
         </Link>
         <a href={book.pdf_url} download target="_blank" rel="noopener noreferrer">
-          <Button size="sm" className="gap-1.5 h-8 text-xs rounded-lg hidden">
-            <Download className="w-3.5 h-3.5" />
-            تحميل
-          </Button>
+          
+
+
+          
         </a>
       </div>
 
