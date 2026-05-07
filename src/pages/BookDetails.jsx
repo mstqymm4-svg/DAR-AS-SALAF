@@ -144,10 +144,10 @@ export default function BookDetails() {
           {book.pdf_url &&
           <div className="flex flex-col sm:flex-row gap-3">
               <a href={book.pdf_url} target="_blank" rel="noopener noreferrer" className="flex-1">
-                <Button variant="outline" className="w-full gap-2 h-12 rounded-xl text-sm font-bold hidden">
-                  <Download className="w-4 h-4" />
-                  {t.downloadPdf}
-                </Button>
+                
+
+
+              
               </a>
               <a href={`/read/${book.id}`} className="flex-1">
                 <Button className="w-full gap-2 h-12 rounded-xl text-sm font-bold">
