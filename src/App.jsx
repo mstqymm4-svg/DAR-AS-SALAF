@@ -6,6 +6,10 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import Layout from './components/Layout';
+import SaveStatusIndicator from './components/SaveStatusIndicator';
+import { useEffect } from 'react';
+import { loadSettings } from '@/lib/settingsStore';
+import { base44 } from '@/api/base44Client';
 import Home from './pages/Home';
 import Books from './pages/Books';
 import BookDetails from './pages/BookDetails';
@@ -17,6 +21,11 @@ import ReadBook from './pages/ReadBook';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+
+  // Load settings from DB on app start
+  useEffect(() => {
+    base44.auth.me().then(u => loadSettings(u?.email)).catch(() => loadSettings());
+  }, []);
 
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
@@ -40,6 +49,8 @@ const AuthenticatedApp = () => {
 
   // Render the main app
   return (
+    <>
+    <SaveStatusIndicator />
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
@@ -53,6 +64,7 @@ const AuthenticatedApp = () => {
         <Route path="*" element={<PageNotFound />} />
       </Route>
     </Routes>
+    </>
   );
 };
 

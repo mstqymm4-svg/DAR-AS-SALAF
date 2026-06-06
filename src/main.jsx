@@ -2,15 +2,16 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from '@/App.jsx'
 import '@/index.css'
-import { applyStoredColors, applyStoredFont } from '@/pages/DevPanel'
+import { migrateLegacySettings } from '@/lib/settingsStore'
 
-// Apply saved customizations before render
-applyStoredColors();
-applyStoredFont();
+// Migrate old dev_* localStorage keys to new system
+migrateLegacySettings();
 
-// Apply dark mode (persistent)
+// Apply dark mode instantly before render (from new key, fallback old key)
 try {
-  if (localStorage.getItem("dev_dark_mode") === "true") {
+  const newDark = localStorage.getItem("devs_dark_mode");
+  const oldDark = localStorage.getItem("dev_dark_mode");
+  if ((newDark || oldDark) === "true") {
     document.documentElement.classList.add("dark");
   }
 } catch(e) {}

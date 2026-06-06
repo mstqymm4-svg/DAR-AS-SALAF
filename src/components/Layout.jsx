@@ -3,18 +3,30 @@ import { BookOpen, Home, Heart, Settings, Code } from "lucide-react";
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useT } from "@/lib/i18n";
+import { getSetting, subscribeToSettings } from "@/lib/settingsStore";
 
 export default function Layout() {
   const location = useLocation();
   const [user, setUser] = useState(null);
   const t = useT();
 
-  const [showDevNav, setShowDevNav] = useState(() => { try { return localStorage.getItem("dev_show_dev_nav") !== "false"; } catch(e) { return true; } });
+  const [showDevNav, setShowDevNav] = useState(() => getSetting("show_dev_nav") !== "false");
+  const [logoUrl, setLogoUrl] = useState(() => getSetting("logo_url"));
+  const [appNameOverride, setAppNameOverride] = useState(() => getSetting("app_name"));
+  const [appSubtitleOverride, setAppSubtitleOverride] = useState(() => getSetting("app_subtitle"));
 
   useEffect(() => {
-    const handler = () => setShowDevNav(localStorage.getItem("dev_show_dev_nav") !== "false");
+    // Sync from settingsStore events (real-time)
+    const unsub = subscribeToSettings((s) => {
+      setShowDevNav(s.show_dev_nav !== "false");
+      setLogoUrl(s.logo_url || "");
+      setAppNameOverride(s.app_name || "");
+      setAppSubtitleOverride(s.app_subtitle || "");
+    });
+    // Also legacy storage event
+    const handler = () => setShowDevNav(getSetting("show_dev_nav") !== "false");
     window.addEventListener("storage", handler);
-    return () => window.removeEventListener("storage", handler);
+    return () => { unsub(); window.removeEventListener("storage", handler); };
   }, []);
 
   const navItems = [
@@ -29,8 +41,7 @@ export default function Layout() {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
-  // logo from dev panel
-  const logoUrl = (() => { try { return localStorage.getItem("dev_logo_url") || ""; } catch(e) { return ""; } })();
+  // logoUrl and appName now reactive via settingsStore state above
 
   return (
     <div dir={t.dir} className="min-h-screen bg-background font-tajawal">
@@ -45,8 +56,8 @@ export default function Layout() {
                   : <BookOpen className="w-5 h-5 text-primary-foreground" />}
               </div>
               <div>
-                <h1 className="text-foreground text-xl font-bold leading-tight">{t.appName}</h1>
-                <p className="text-[10px] text-muted-foreground -mt-0.5">{t.appSubtitle}</p>
+                <h1 className="text-foreground text-xl font-bold leading-tight">{appNameOverride || t.appName}</h1>
+                <p className="text-[10px] text-muted-foreground -mt-0.5">{appSubtitleOverride || t.appSubtitle}</p>
               </div>
             </Link>
             <nav className="hidden md:flex items-center gap-1">

@@ -15,6 +15,7 @@ import { motion } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { TRANSLATIONS } from "@/lib/i18n";
+import { getSetting, setSetting, setSettings, subscribeToSettings, getAllSettings } from "@/lib/settingsStore";
 
 // ─── Storage ──────────────────────────────────────────────────────────────────
 const ls = {
@@ -179,16 +180,16 @@ export default function DevPanel() {
   const [savedStates, setSavedStates]   = useState({});
   const markSaved = key => { setSavedStates(s => ({...s, [key]:true})); setTimeout(() => setSavedStates(s => ({...s, [key]:false})), 2200); };
 
-  // Logo & Name — load persisted values
-  const [logoUrl, setLogoUrl]           = useState(() => ls.get("dev_logo_url") || "");
-  const [appName, setAppName]           = useState(() => ls.get("dev_app_name") || "المكتبة الدينية");
-  const [appSubtitle, setAppSubtitle]   = useState(() => ls.get("dev_app_subtitle") || "نور العلم والمعرفة");
+  // Logo & Name — load from settingsStore
+  const [logoUrl, setLogoUrl]           = useState(() => getSetting("logo_url"));
+  const [appName, setAppName]           = useState(() => getSetting("app_name") || "المكتبة الدينية");
+  const [appSubtitle, setAppSubtitle]   = useState(() => getSetting("app_subtitle") || "نور العلم والمعرفة");
   const [uploadingLogo, setUploadingLogo] = useState(false);
 
   // YouTube
-  const [youtubeUrl, setYoutubeUrl]     = useState(() => ls.get("dev_youtube_url") || "");
-  const [youtubeLabel, setYoutubeLabel] = useState(() => ls.get("dev_youtube_label") || "قناتنا على يوتيوب");
-  const [youtubeSub, setYoutubeSub]     = useState(() => ls.get("dev_youtube_sub") || "تابعونا على قناتنا لمزيد من المحتوى الإسلامي");
+  const [youtubeUrl, setYoutubeUrl]     = useState(() => getSetting("youtube_url"));
+  const [youtubeLabel, setYoutubeLabel] = useState(() => getSetting("youtube_label") || "قناتنا على يوتيوب");
+  const [youtubeSub, setYoutubeSub]     = useState(() => getSetting("youtube_sub") || "تابعونا على قناتنا لمزيد من المحتوى الإسلامي");
 
   // Books
   const [bookForm, setBookForm]         = useState(emptyBook);
@@ -208,22 +209,25 @@ export default function DevPanel() {
   const [adminSearch, setAdminSearch]   = useState("");
   const [stats, setStats]               = useState({ total:0, featured:0, categories:0 });
 
-  // App Settings — load persisted values
-  const [showDevNav, setShowDevNav]     = useState(() => ls.get("dev_show_dev_nav") !== "false");
-  const [appLang, setAppLang]           = useState(() => ls.get("dev_app_lang") || "ar");
-  const [darkMode, setDarkMode]         = useState(() => ls.get("dev_dark_mode") === "true");
+  // App Settings — load from settingsStore
+  const [showDevNav, setShowDevNav]     = useState(() => getSetting("show_dev_nav") !== "false");
+  const [appLang, setAppLang]           = useState(() => getSetting("app_lang") || "ar");
+  const [darkMode, setDarkMode]         = useState(() => getSetting("dark_mode") === "true");
 
   // Categories
-  const [categories, setCategories]     = useState(() => getStoredCategories());
+  const [categories, setCategories]     = useState(() => {
+    const stored = getSetting("categories");
+    try { return stored ? JSON.parse(stored) : getStoredCategories(); } catch(e) { return getStoredCategories(); }
+  });
   const [newCategory, setNewCategory]   = useState("");
 
   // Fonts
-  const [fontSize, setFontSize]         = useState(() => Number(ls.get("dev_font_size")) || 16);
+  const [fontSize, setFontSize]         = useState(() => Number(getSetting("font_size")) || 16);
   const [fontCategory, setFontCategory] = useState("الكل");
   const [activeRoleTab, setActiveRoleTab] = useState("body");
   const [roleFonts, setRoleFonts]       = useState(() => {
     const init = {};
-    FONT_ROLES.forEach(r => { init[r.key] = ls.get(`dev_font_${r.key}`) || ""; });
+    FONT_ROLES.forEach(r => { init[r.key] = getSetting(`font_${r.key}`) || ""; });
     return init;
   });
 
@@ -232,21 +236,41 @@ export default function DevPanel() {
   const [newPwd, setNewPwd]             = useState("");
   const [confirmPwd, setConfirmPwd]     = useState("");
 
-  useEffect(() => { applyStoredColors(); applyStoredFont(); }, []);
   useEffect(() => {
     if ((activeTab === "admin" || activeTab === "dashboard") && unlocked) loadBooks();
   }, [activeTab, unlocked]);
 
-  // ── Init colors state from saved values
+  // ── Init colors from settingsStore
   useEffect(() => {
     setColors({
-      bg:      ls.get("dev_bg") || "",
-      fg:      ls.get("dev_fg") || "",
-      primary: ls.get("dev_primary") || "",
-      accent:  ls.get("dev_accent") || "",
-      card:    ls.get("dev_card") || "",
+      bg:      getSetting("color_bg"),
+      fg:      getSetting("color_fg"),
+      primary: getSetting("color_primary"),
+      accent:  getSetting("color_accent"),
+      card:    getSetting("color_card"),
     });
   }, [unlocked]);
+
+  // ── Re-sync state when settings change from external source
+  useEffect(() => {
+    const unsub = subscribeToSettings((s) => {
+      setAppName(s.app_name || "المكتبة الدينية");
+      setAppSubtitle(s.app_subtitle || "نور العلم والمعرفة");
+      setLogoUrl(s.logo_url || "");
+      setYoutubeUrl(s.youtube_url || "");
+      setYoutubeLabel(s.youtube_label || "قناتنا على يوتيوب");
+      setYoutubeSub(s.youtube_sub || "تابعونا على قناتنا لمزيد من المحتوى الإسلامي");
+      setDarkMode(s.dark_mode === "true");
+      setShowDevNav(s.show_dev_nav !== "false");
+      setAppLang(s.app_lang || "ar");
+      setFontSize(Number(s.font_size) || 16);
+      const rf = {};
+      FONT_ROLES.forEach(r => { rf[r.key] = s[`font_${r.key}`] || ""; });
+      setRoleFonts(rf);
+      setColors({ bg: s.color_bg||"", fg: s.color_fg||"", primary: s.color_primary||"", accent: s.color_accent||"", card: s.color_card||"" });
+    });
+    return unsub;
+  }, []);
 
   const loadBooks = async () => {
     setLoadingBooks(true);
@@ -265,21 +289,21 @@ export default function DevPanel() {
   // ── Colors ──
   const handleApplyPreset = preset => {
     setSelectedPreset(preset.name);
-    setColors({ bg: preset.bg, fg: preset.fg, primary: preset.primary, accent: preset.accent, card: preset.card });
-    applyColors(preset);
+    const c = { bg: preset.bg, fg: preset.fg, primary: preset.primary, accent: preset.accent, card: preset.card };
+    setColors(c);
+    setSettings({ color_bg: c.bg, color_fg: c.fg, color_primary: c.primary, color_accent: c.accent, color_card: c.card });
     toast.success(`تم تطبيق: ${preset.name}`);
   };
   const handleApplyCustom = () => {
     const hasAny = Object.values(colors).some(v => v.trim() !== "");
     if (!hasAny) { toast.error("أدخل قيمة لون أو اختر ثيماً"); return; }
-    applyColors(colors);
+    setSettings({ color_bg: colors.bg, color_fg: colors.fg, color_primary: colors.primary, color_accent: colors.accent, color_card: colors.card });
     markSaved("colors");
     toast.success("تم حفظ الألوان بشكل دائم ✓");
   };
   const handleResetColors = () => {
-    ["dev_bg","dev_fg","dev_primary","dev_accent","dev_card"].forEach(k => ls.remove(k));
-    ["--background","--foreground","--primary","--ring","--sidebar-primary","--accent","--card","--popover"]
-      .forEach(v => document.documentElement.style.removeProperty(v));
+    const reset = { color_bg:"", color_fg:"", color_primary:"", color_accent:"", color_card:"" };
+    setSettings(reset);
     setColors({ bg:"", fg:"", primary:"", accent:"", card:"" });
     setSelectedPreset(null);
     toast.success("تم إعادة الألوان للافتراضي");
@@ -288,8 +312,7 @@ export default function DevPanel() {
   // ── Dark Mode ──
   const handleToggleDark = val => {
     setDarkMode(val);
-    document.documentElement.classList.toggle("dark", val);
-    ls.set("dev_dark_mode", String(val));
+    setSetting("dark_mode", String(val));
     toast.success(val ? "تم تفعيل الوضع الليلي ✓" : "تم تفعيل الوضع النهاري ✓");
   };
 
@@ -298,21 +321,19 @@ export default function DevPanel() {
     const file = e.target.files[0]; if (!file) return;
     setUploadingLogo(true);
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    setLogoUrl(file_url); ls.set("dev_logo_url", file_url);
+    setLogoUrl(file_url);
+    setSetting("logo_url", file_url);
     setUploadingLogo(false); toast.success("تم رفع الشعار ✓");
   };
   const handleSaveAppName = () => {
-    ls.set("dev_app_name", appName);
-    ls.set("dev_app_subtitle", appSubtitle);
+    setSettings({ app_name: appName, app_subtitle: appSubtitle });
     markSaved("appName");
     toast.success("تم الحفظ بشكل دائم ✓");
   };
 
   // ── YouTube ──
   const handleSaveYoutube = () => {
-    ls.set("dev_youtube_url", youtubeUrl);
-    ls.set("dev_youtube_label", youtubeLabel);
-    ls.set("dev_youtube_sub", youtubeSub);
+    setSettings({ youtube_url: youtubeUrl, youtube_label: youtubeLabel, youtube_sub: youtubeSub });
     markSaved("youtube");
     toast.success("تم حفظ إعدادات يوتيوب بشكل دائم ✓");
   };
@@ -384,22 +405,23 @@ export default function DevPanel() {
 
   // ── App Settings ──
   const handleSaveAppSettings = () => {
-    ls.set("dev_show_dev_nav", String(showDevNav));
-    ls.set("dev_app_lang", appLang);
-    window.dispatchEvent(new Event("storage"));
+    setSettings({ show_dev_nav: String(showDevNav), app_lang: appLang });
     markSaved("appSettings");
     toast.success("تم حفظ الإعدادات بشكل دائم ✓ — أعد تحميل الصفحة لتطبيق اللغة");
   };
   const handleSaveAndReload = () => {
-    ls.set("dev_show_dev_nav", String(showDevNav));
-    ls.set("dev_app_lang", appLang);
-    window.dispatchEvent(new Event("storage"));
+    setSettings({ show_dev_nav: String(showDevNav), app_lang: appLang });
     toast.success("تم الحفظ — جاري إعادة التحميل...");
     setTimeout(() => window.location.reload(), 800);
   };
 
   // ── Categories ──
-  const saveCategories = cats => { ls.setJson("dev_categories", cats); setCategories(cats); };
+  const saveCategories = cats => {
+    setCategories(cats);
+    setSetting("categories", JSON.stringify(cats));
+    // also keep legacy for admin page
+    try { localStorage.setItem("dev_categories", JSON.stringify(cats)); } catch(e) {}
+  };
   const handleAddCategory = () => {
     const t = newCategory.trim();
     if (!t) { toast.error("أدخل اسم التصنيف"); return; }
@@ -421,18 +443,22 @@ export default function DevPanel() {
     if (role) {
       injectRoleFont(role, preset);
       setRoleFonts(prev => ({...prev, [activeRoleTab]: preset.name}));
+      setSetting(`font_${activeRoleTab}`, preset.name);
       toast.success(`تم تطبيق "${preset.label}" على ${role.label} بشكل دائم ✓`);
     }
   };
   const handleFontSizeChange = size => {
     setFontSize(size);
     document.documentElement.style.setProperty("font-size", `${size}px`);
-    ls.set("dev_font_size", String(size));
+    setSetting("font_size", String(size));
   };
   const handleResetFont = () => {
-    FONT_ROLES.forEach(role => { ls.remove(`dev_font_${role.key}`); document.documentElement.style.removeProperty(role.cssVar); });
-    ls.remove("dev_font_size");
+    FONT_ROLES.forEach(role => {
+      document.documentElement.style.removeProperty(role.cssVar);
+      setSetting(`font_${role.key}`, "");
+    });
     document.documentElement.style.removeProperty("font-size");
+    setSetting("font_size", "16");
     setFontSize(16);
     setRoleFonts(Object.fromEntries(FONT_ROLES.map(r => [r.key, ""])));
     toast.success("تم إعادة جميع الخطوط للافتراضي");
@@ -654,7 +680,7 @@ export default function DevPanel() {
                           <input type="color" value={hexVal} onChange={e => {
                             const hsl = hexToHsl(e.target.value);
                             setColors(c => ({...c, [key]: hsl}));
-                            applyColors({ [key]: hsl });
+                            setSetting(`color_${key}`, hsl);
                           }} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
                         </div>
                       </label>
@@ -1034,14 +1060,14 @@ export default function DevPanel() {
                 <p className="text-sm font-semibold">زر المطور في شريط التنقل</p>
                 <p className="text-xs text-muted-foreground mt-0.5">إظهار أو إخفاء الزر فوراً</p>
               </div>
-              <Switch checked={showDevNav} onCheckedChange={v => { setShowDevNav(v); ls.set("dev_show_dev_nav", String(v)); window.dispatchEvent(new Event("storage")); }} />
+              <Switch checked={showDevNav} onCheckedChange={v => { setShowDevNav(v); setSetting("show_dev_nav", String(v)); }} />
             </div>
 
             {/* Clear cache */}
             <div className="p-4 bg-muted/50 rounded-xl">
               <p className="text-sm font-semibold mb-1 text-destructive">مسح جميع الإعدادات</p>
               <p className="text-xs text-muted-foreground mb-3">يمسح جميع إعدادات التخصيص المحفوظة ويعيد التطبيق للافتراضي</p>
-              <Button variant="destructive" size="sm" className="rounded-xl" onClick={() => { ls.clear(); toast.success("تم المسح — جاري إعادة التحميل..."); setTimeout(() => window.location.reload(), 1500); }}>
+              <Button variant="destructive" size="sm" className="rounded-xl" onClick={() => { try { localStorage.clear(); } catch(e) {} toast.success("تم المسح — جاري إعادة التحميل..."); setTimeout(() => window.location.reload(), 1500); }}>
                 مسح كل الإعدادات
               </Button>
             </div>
