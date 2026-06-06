@@ -1,24 +1,23 @@
 import { useState } from "react";
-import { RefreshCw, ExternalLink } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 
 export default function PdfViewer({ url, title }) {
   const [key, setKey] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  const src = `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(url)}`;
+  // Disable download/print toolbar in PDF.js viewer
+  const src = `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(url)}#toolbar=0`;
 
   const reload = () => { setKey(k => k + 1); setLoading(true); };
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full h-full flex flex-col select-none" onContextMenu={e => e.preventDefault()}>
       {/* Toolbar */}
       <div className="flex items-center gap-3 px-3 py-1.5 bg-muted/50 border-b border-border text-xs text-muted-foreground shrink-0">
         <button onClick={reload} className="flex items-center gap-1 hover:text-foreground transition-colors">
           <RefreshCw className="w-3 h-3" /> إعادة تحميل
         </button>
-        <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-foreground mr-auto transition-colors">
-          <ExternalLink className="w-3 h-3" /> فتح خارجياً
-        </a>
+        <span className="mr-auto text-[10px] text-muted-foreground/60 select-none">محمي — للقراءة فقط 🔒</span>
       </div>
 
       {loading && (
@@ -34,6 +33,7 @@ export default function PdfViewer({ url, title }) {
         className="flex-1 w-full border-0"
         title={title}
         onLoad={() => setLoading(false)}
+        sandbox="allow-scripts allow-same-origin"
       />
     </div>
   );

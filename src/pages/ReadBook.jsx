@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ArrowRight, Download, BookOpen } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowRight, BookOpen } from "lucide-react";
 import PdfViewer from "@/components/PdfViewer";
 
 export default function ReadBook() {
