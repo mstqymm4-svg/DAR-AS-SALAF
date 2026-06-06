@@ -18,8 +18,11 @@ export const DEFAULT_SETTINGS = {
   color_bg:          "",
   color_fg:          "",
   color_primary:     "",
+  color_secondary:   "",
   color_accent:      "",
   color_card:        "",
+  color_border:      "",
+  color_button:      "",
   // Fonts per role
   font_body:         "",
   font_heading:      "",
@@ -27,6 +30,20 @@ export const DEFAULT_SETTINGS = {
   font_nav:          "",
   font_button:       "",
   font_size:         "16",
+  line_height:       "1.6",
+  letter_spacing:    "0",
+  custom_fonts:      "[]",
+  // Cards
+  card_radius:       "16",
+  card_padding:      "16",
+  card_gap:          "16",
+  card_style:        "modern",
+  card_shadow:       "md",
+  card_hover:        "lift",
+  // UI
+  ui_radius:         "12",
+  // Nav
+  nav_items:         "",
   // Misc
   youtube_url:       "",
   youtube_label:     "قناتنا على يوتيوب",
@@ -104,6 +121,9 @@ export function applySettingsToDom(settings) {
   applyColorVar("--card",            settings.color_card);
   applyColorVar("--popover",         settings.color_card);
   applyColorVar("--accent",          settings.color_accent);
+  applyColorVar("--secondary",       settings.color_secondary);
+  applyColorVar("--border",          settings.color_border);
+  applyColorVar("--input",           settings.color_border);
   if (settings.color_primary) {
     applyColorVar("--primary",         settings.color_primary);
     applyColorVar("--ring",            settings.color_primary);
