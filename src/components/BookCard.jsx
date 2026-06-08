@@ -53,7 +53,7 @@ export default function BookCard({ book, isFavorite, onToggleFavorite, index = 0
         </div>
 
         {/* Content */}
-        <div className="p-4">
+        <div className="p-4 flex flex-col h-full">
           <div className="flex items-center gap-1.5 mb-2">
             <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
               {book.category}
@@ -72,18 +72,17 @@ export default function BookCard({ book, isFavorite, onToggleFavorite, index = 0
               <span className="text-[10px] text-muted-foreground mr-1">{book.rating}</span>
             </div>
           )}
+
+          <Link
+            to={`/read/${book.id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition-colors mt-auto"
+          >
+            <BookMarked className="w-3.5 h-3.5" />
+            {t.readBook}
+          </Link>
         </div>
       </Link>
-
-      <div className="px-4 pb-4 -mt-1">
-        <Link
-          to={`/read/${book.id}`}
-          className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition-colors"
-        >
-          <BookMarked className="w-3.5 h-3.5" />
-          {t.readBook}
-        </Link>
-      </div>
     </motion.div>
   );
 }
