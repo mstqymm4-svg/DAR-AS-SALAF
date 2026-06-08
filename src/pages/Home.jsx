@@ -6,8 +6,7 @@ import BookCard from "../components/BookCard";
 import CategoryChip, { categories } from "../components/CategoryChip";
 import { motion } from "framer-motion";
 import { useT } from "@/lib/i18n";
-
-const ls = { get: (k, fb = "") => {try {return localStorage.getItem(k) || fb;} catch (e) {return fb;}} };
+import { getSetting, subscribeToSettings } from "@/lib/settingsStore";
 
 export default function Home() {
   const t = useT();
@@ -17,11 +16,19 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
 
-  const [youtubeUrl, setYoutubeUrlState] = useState(() => ls.get("dev_youtube_url", ""));
-  const [youtubeLabel] = useState(() => ls.get("dev_youtube_label", "قناتنا على يوتيوب"));
-  const [youtubeSubText] = useState(() => ls.get("dev_youtube_sub", ""));
+  const [youtubeUrl, setYoutubeUrl] = useState(() => getSetting("youtube_url") || "");
+  const [youtubeLabel, setYoutubeLabel] = useState(() => getSetting("youtube_label") || "قناتنا على يوتيوب");
+  const [youtubeSubText, setYoutubeSubText] = useState(() => getSetting("youtube_sub") || "");
 
-  useEffect(() => {loadData();}, []);
+  useEffect(() => {
+    loadData();
+    const unsub = subscribeToSettings((s) => {
+      setYoutubeUrl(s.youtube_url || "");
+      setYoutubeLabel(s.youtube_label || "قناتنا على يوتيوب");
+      setYoutubeSubText(s.youtube_sub || "");
+    });
+    return unsub;
+  }, []);
 
   const loadData = async () => {
     const u = await base44.auth.me().catch(() => null);
