@@ -444,13 +444,25 @@ const ls = {
   get: (k, fb = "") => { try { return localStorage.getItem(k) || fb; } catch(e) { return fb; } },
 };
 
+// Language metadata: dir, BCP-47 locale, font family
+const LANG_META = {
+  ar: { dir: "rtl", langCode: "ar", fontFamily: "'Tajawal', sans-serif" },
+  ur: { dir: "rtl", langCode: "ur", fontFamily: "'Tajawal', sans-serif" },
+  en: { dir: "ltr", langCode: "en", fontFamily: "'Inter', sans-serif" },
+  fr: { dir: "ltr", langCode: "fr", fontFamily: "'Inter', sans-serif" },
+  tr: { dir: "ltr", langCode: "tr", fontFamily: "'Inter', sans-serif" },
+  hi: { dir: "ltr", langCode: "hi", fontFamily: "'Noto Sans Devanagari', sans-serif" },
+};
+
 export function useT() {
   const lang = ls.get("dev_app_lang", "ar");
   const t = TRANSLATIONS[lang] || TRANSLATIONS["ar"];
+  const meta = LANG_META[lang] || LANG_META["ar"];
   const customName = ls.get("dev_app_name", "");
   const customSub = ls.get("dev_app_subtitle", "");
   return {
     ...t,
+    ...meta,
     appName: customName || t.appName,
     appSubtitle: customSub || t.appSubtitle,
   };

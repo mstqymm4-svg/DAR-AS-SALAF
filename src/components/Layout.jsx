@@ -41,10 +41,21 @@ export default function Layout() {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
+  // Apply dir, lang, font globally whenever language changes
+  useEffect(() => {
+    const html = document.documentElement;
+    html.setAttribute("dir", t.dir || "rtl");
+    html.setAttribute("lang", t.langCode || "ar");
+    if (t.fontFamily) {
+      html.style.setProperty("--font-app", t.fontFamily);
+      document.body.style.fontFamily = t.fontFamily;
+    }
+  }, [t.dir, t.langCode, t.fontFamily]);
+
   // logoUrl and appName now reactive via settingsStore state above
 
   return (
-    <div dir={t.dir} className="min-h-screen bg-background font-tajawal">
+    <div dir={t.dir} lang={t.langCode} className="min-h-screen bg-background" style={{ fontFamily: t.fontFamily }}>
       {/* Top Header */}
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
