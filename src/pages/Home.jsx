@@ -110,7 +110,7 @@ export default function Home() {
           rel="noopener noreferrer"
           className="flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-l from-red-600/10 to-red-500/5 border border-red-200/50 hover:border-red-400/50 hover:shadow-md hover:shadow-red-500/10 transition-all group">
           
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-red-500/30 group-hover:scale-105 transition-transform bg-[#5236c4]">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-red-500/30 group-hover:scale-105 transition-transform bg-[#5636d3]">
               <Youtube className="w-6 h-6 text-white" />
             </div>
             <div className="flex-1 min-w-0">
