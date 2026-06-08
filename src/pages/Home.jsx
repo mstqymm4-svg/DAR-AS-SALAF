@@ -80,7 +80,7 @@ export default function Home() {
             <div className="absolute top-10 right-10 text-8xl">﷽</div>
             <div className="absolute bottom-5 left-10 text-6xl opacity-50">☪</div>
           </div>
-          <div className="relative z-10 max-w-2xl">
+          <div className="relative z-10 max-w-2xl opacity-100">
             <h1 className="mb-4 text-3xl font-black leading-tight md:text-5xl">{t.heroTitle}</h1>
             <p className="mb-8 text-base leading-relaxed opacity-90 md:text-lg max-w-lg">{t.heroSub}</p>
             <div className="flex flex-wrap gap-3">
