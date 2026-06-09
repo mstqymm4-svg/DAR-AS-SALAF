@@ -31,7 +31,7 @@ export const FONT_PRESETS = [
 export const FONT_ROLES = [
   { key: "body",    label: "النص العام",    cssVar: "--font-tajawal", sample: "بسم الله الرحمن الرحيم" },
   { key: "heading", label: "العناوين",      cssVar: "--font-heading", sample: "المكتبة الإسلامية" },
-  { key: "title",   label: "أسماء الكتب",  cssVar: "--font-title",   sample: "صحيح البخاري" },
+  { key: "title",   label: "أسماء الكتب",  cssVar: "--font-title",   sample: "صحيح البخاري — الإمام البخاري" },
   { key: "nav",     label: "شريط التنقل",  cssVar: "--font-nav",     sample: "الرئيسية" },
   { key: "button",  label: "الأزرار",       cssVar: "--font-button",  sample: "تصفح المكتبة" },
 ];

@@ -50,6 +50,8 @@ export default function Layout() {
       html.style.setProperty("--font-app", t.fontFamily);
       document.body.style.fontFamily = t.fontFamily;
     }
+    // Nastaliq Urdu needs extra line-height to prevent letter overlap
+    document.body.style.lineHeight = t.langCode === "ur" ? "2.8" : "";
   }, [t.dir, t.langCode, t.fontFamily]);
 
   // logoUrl and appName now reactive via settingsStore state above
