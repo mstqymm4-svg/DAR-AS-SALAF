@@ -165,6 +165,8 @@ export default function Settings() {
                   <SelectItem value="الإنجليزية">الإنجليزية</SelectItem>
                   <SelectItem value="الفرنسية">الفرنسية</SelectItem>
                   <SelectItem value="الأوردو">الأوردو</SelectItem>
+                  <SelectItem value="الهندية">الهندية</SelectItem>
+                  <SelectItem value="التركية">التركية</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -187,17 +189,16 @@ export default function Settings() {
           </div>
           <div className="grid grid-cols-2 gap-2 mb-4">
             {[
-              { code:"ar", name:"العربية",  flag:"🇸🇦" },
-              { code:"en", name:"English",  flag:"🇬🇧" },
-              { code:"fr", name:"Français", flag:"🇫🇷" },
-              { code:"ur", name:"اردو",     flag:"🇵🇰" },
-              { code:"hi", name:"हिंदी",    flag:"🇮🇳" },
-              { code:"tr", name:"Türkçe",   flag:"🇹🇷" },
-            ].map(({ code, name, flag }) => (
+              { code:"ar", name:"العربية" },
+              { code:"en", name:"English" },
+              { code:"fr", name:"Français" },
+              { code:"ur", name:"اردو" },
+              { code:"hi", name:"हिंदी" },
+              { code:"tr", name:"Türkçe" },
+            ].map(({ code, name }) => (
               <label key={code} className={`flex items-center gap-2 p-3 rounded-xl border-2 cursor-pointer transition-all ${appLang === code ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"}`}>
                 <input type="radio" name="appLang" value={code} checked={appLang === code} onChange={() => setAppLang(code)} className="hidden" />
                 <div className={`w-4 h-4 rounded-full border-2 shrink-0 ${appLang === code ? "border-primary bg-primary" : "border-border"}`} />
-                <span className="text-sm">{flag}</span>
                 <span className="text-sm font-medium">{name}</span>
               </label>
             ))}
