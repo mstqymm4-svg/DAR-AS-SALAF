@@ -447,7 +447,7 @@ const ls = {
 // Language metadata: dir, BCP-47 locale, font family
 const LANG_META = {
   ar: { dir: "rtl", langCode: "ar", fontFamily: "'Tajawal', sans-serif" },
-  ur: { dir: "rtl", langCode: "ur", fontFamily: "'Tajawal', sans-serif" },
+  ur: { dir: "rtl", langCode: "ur", fontFamily: "'Noto Nastaliq Urdu', serif" },
   en: { dir: "ltr", langCode: "en", fontFamily: "'Inter', sans-serif" },
   fr: { dir: "ltr", langCode: "fr", fontFamily: "'Inter', sans-serif" },
   tr: { dir: "ltr", langCode: "tr", fontFamily: "'Inter', sans-serif" },
