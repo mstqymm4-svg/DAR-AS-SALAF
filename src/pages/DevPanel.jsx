@@ -4,7 +4,8 @@ import {
   Shield, Lock, Eye, EyeOff,
   LayoutDashboard, BookOpen, Type, Palette, Layers, Sliders,
   Navigation, Image, Users, HardDrive, Archive, Activity,
-  KeyRound, Zap, Settings, ChevronRight, Moon, Sun, Check, Menu, X
+  KeyRound, Zap, Settings, ChevronRight, Moon, Sun, Check, Menu, X,
+  ImagePlay, GalleryHorizontal
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +29,8 @@ import DevLogs from "@/components/dev/DevLogs";
 import DevSecurity from "@/components/dev/DevSecurity";
 import DevPerformance from "@/components/dev/DevPerformance";
 import DevSystemSettings from "@/components/dev/DevSystemSettings";
+import DevBackground from "@/components/dev/DevBackground";
+import DevBackgroundLibrary from "@/components/dev/DevBackgroundLibrary";
 
 // ─── Font / Color exports (used by settingsStore) ─────────────────────────────
 export { FONT_PRESETS, FONT_ROLES } from "@/components/dev/DevFonts";
@@ -56,6 +59,8 @@ const TABS = [
   { id: "security",     label: "مركز الأمان",        icon: Shield },
   { id: "performance",  label: "مركز الأداء",        icon: Zap },
   { id: "system",       label: "إعدادات النظام",     icon: Settings },
+  { id: "background",   label: "إدارة الخلفيات",     icon: ImagePlay },
+  { id: "bg_library",   label: "مكتبة الخلفيات",     icon: GalleryHorizontal },
 ];
 
 export default function DevPanel() {
@@ -128,8 +133,10 @@ export default function DevPanel() {
     backup:      DevBackup,
     logs:        DevLogs,
     security:    DevSecurity,
-    performance: DevPerformance,
-    system:      DevSystemSettings,
+    performance:  DevPerformance,
+    system:       DevSystemSettings,
+    background:   DevBackground,
+    bg_library:   DevBackgroundLibrary,
   }[activeTab] || DevDashboard;
 
   return (

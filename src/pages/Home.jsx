@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { BookOpen, ArrowLeft, Sparkles, Youtube, ExternalLink } from "lucide-react";
 import BookCard from "../components/BookCard";
 import CategoryChip, { categories } from "../components/CategoryChip";
+import HeroBanner from "../components/HeroBanner";
 import { motion } from "framer-motion";
 import { useT } from "@/lib/i18n";
 import { getSetting, subscribeToSettings } from "@/lib/settingsStore";
@@ -69,32 +70,7 @@ export default function Home() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Hero */}
-      <motion.section
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="py-12 md:py-20">
-        
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-primary to-primary/80 p-8 md:p-14 text-primary-foreground">
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-10 right-10 text-8xl">﷽</div>
-            <div className="absolute bottom-5 left-10 text-6xl opacity-50">☪</div>
-          </div>
-          <div className="relative z-10 max-w-2xl opacity-100">
-            <h1 className="mb-4 text-3xl font-black leading-tight md:text-5xl">{t.heroTitle}</h1>
-            <p className="mb-8 text-base leading-relaxed opacity-90 md:text-lg max-w-lg">{t.heroSub}</p>
-            <div className="flex flex-wrap gap-3">
-              <Link
-                to="/books"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent text-accent-foreground font-bold text-sm hover:opacity-90 transition-opacity">
-                
-                {t.browseLib}
-                <ArrowLeft className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </motion.section>
+      <HeroBanner />
 
       {/* YouTube Banner */}
       {youtubeUrl &&
