@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { SlidersHorizontal, Globe, Moon, Sun, Check, RotateCcw, Tags, Plus, X } from "lucide-react";
+import { SlidersHorizontal, Globe, Moon, Check, RotateCcw, Tags, Plus, X, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { getSetting, setSetting, setSettings, subscribeToSettings } from "@/lib/settingsStore";
+import { useTheme } from "@/hooks/useTheme";
 
 const LANG_OPTIONS = [
   { code: "ar", name: "العربية",  flag: "🇸🇦" },
@@ -19,30 +19,22 @@ const LANG_OPTIONS = [
 const DEFAULT_CATS = ["القرآن وعلومه","الحديث الشريف","الفقه الإسلامي","السيرة النبوية","العقيدة","التزكية والرقائق","التاريخ الإسلامي","أخرى"];
 
 export default function DevAppDesign() {
-  const [darkMode, setDarkMode]     = useState(() => getSetting("dark_mode") === "true");
+  const { isDark, setMode } = useTheme();
   const [appLang, setAppLang]       = useState(() => getSetting("app_lang") || "ar");
   const [borderRadius, setBorderRadius] = useState(() => Number(getSetting("ui_radius")) || 12);
   const [categories, setCategories] = useState(() => {
     try { return JSON.parse(getSetting("categories") || "[]"); } catch(e) { return []; }
   });
   const [newCat, setNewCat]         = useState("");
-  const [saved, setSaved]           = useState(false);
 
   useEffect(() => {
     const unsub = subscribeToSettings((s) => {
-      setDarkMode(s.dark_mode === "true");
       setAppLang(s.app_lang || "ar");
       setBorderRadius(Number(s.ui_radius) || 12);
       try { if (s.categories) setCategories(JSON.parse(s.categories)); } catch(e) {}
     });
     return unsub;
   }, []);
-
-  const handleToggleDark = (val) => {
-    setDarkMode(val);
-    setSetting("dark_mode", String(val));
-    toast.success(val ? "تم تفعيل الوضع الليلي ✓" : "تم تفعيل الوضع النهاري ✓");
-  };
 
   const handleLang = (code) => {
     setAppLang(code);
@@ -77,16 +69,22 @@ export default function DevAppDesign() {
 
   return (
     <div className="space-y-6" dir="rtl">
-      {/* Dark Mode */}
+      {/* Dark Mode — link to DevTheme */}
       <div className="bg-card border border-border rounded-2xl p-5 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          {darkMode ? <Moon className="w-5 h-5 text-primary" /> : <Sun className="w-5 h-5 text-primary" />}
+          <Moon className="w-5 h-5 text-primary" />
           <div>
             <Label className="text-sm font-bold">الوضع الليلي</Label>
-            <p className="text-xs text-muted-foreground mt-0.5">يُطبَّق فورياً ويُحفظ دائماً</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              الوضع الحالي: {isDark ? "🌙 ليلي" : "☀️ فاتح"}
+            </p>
           </div>
         </div>
-        <Switch checked={darkMode} onCheckedChange={handleToggleDark} />
+        <div className="flex gap-2">
+          <Button size="sm" variant={isDark ? "default" : "outline"} onClick={() => setMode(isDark ? "light" : "dark")} className="gap-1.5 text-xs">
+            {isDark ? "☀️ فاتح" : "🌙 ليلي"}
+          </Button>
+        </div>
       </div>
 
       {/* Language */}

@@ -82,6 +82,7 @@ export const DEFAULT_SETTINGS = {
   youtube_sub:       "تابعونا على قناتنا لمزيد من المحتوى الإسلامي",
   app_lang:          "ar",
   dark_mode:         "false",
+  theme_mode:        "light",  // light | dark | auto
   show_dev_nav:      "true",
   categories:        "",
 };
@@ -164,8 +165,11 @@ export function applySettingsToDom(settings) {
     ["--primary","--ring","--sidebar-primary"].forEach(v => document.documentElement.style.removeProperty(v));
   }
 
-  // Dark mode
-  document.documentElement.classList.toggle("dark", settings.dark_mode === "true");
+  // Dark mode — support theme_mode (light|dark|auto) with backward compat
+  const themeMode = settings.theme_mode || (settings.dark_mode === "true" ? "dark" : "light");
+  const systemDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
+  const resolvedDark = themeMode === "dark" ? true : themeMode === "light" ? false : systemDark;
+  document.documentElement.classList.toggle("dark", resolvedDark);
 
   // Fonts
   FONT_ROLES.forEach(role => {

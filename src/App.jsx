@@ -9,7 +9,14 @@ import Layout from './components/Layout';
 import SaveStatusIndicator from './components/SaveStatusIndicator';
 import { useEffect } from 'react';
 import { loadSettings } from '@/lib/settingsStore';
+import { initThemeEngine } from '@/lib/themeEngine';
 import { base44 } from '@/api/base44Client';
+// Apply theme immediately from localStorage before any renders
+try {
+  const lsMode = localStorage.getItem("devs_theme_mode") || (localStorage.getItem("devs_dark_mode") === "true" ? "dark" : "light");
+  if (lsMode === "dark") document.documentElement.classList.add("dark");
+  else if (lsMode === "light") document.documentElement.classList.remove("dark");
+} catch(e) {}
 import Home from './pages/Home';
 import Books from './pages/Books';
 import BookDetails from './pages/BookDetails';
@@ -22,9 +29,12 @@ import ReadBook from './pages/ReadBook';
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
 
-  // Load settings from DB on app start
+  // Load settings from DB on app start, then init theme
   useEffect(() => {
-    base44.auth.me().then(u => loadSettings(u?.email)).catch(() => loadSettings());
+    base44.auth.me()
+      .then(u => loadSettings(u?.email))
+      .catch(() => loadSettings())
+      .finally(() => initThemeEngine());
   }, []);
 
   // Show loading spinner while checking app public settings or auth

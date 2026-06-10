@@ -90,6 +90,35 @@
     @apply border-border outline-ring/50;
   }
 
+  /* ── Ensure dark mode covers ALL elements universally ── */
+  .dark body,
+  .dark #root,
+  .dark .min-h-screen {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+
+  .dark .bg-white {
+    background-color: hsl(var(--card)) !important;
+    color: hsl(var(--card-foreground)) !important;
+  }
+
+  .dark .text-black,
+  .dark .text-gray-900,
+  .dark .text-gray-800 {
+    color: hsl(var(--foreground)) !important;
+  }
+
+  .dark .bg-gray-50,
+  .dark .bg-gray-100 {
+    background-color: hsl(var(--muted)) !important;
+  }
+
+  .dark .border-gray-200,
+  .dark .border-gray-100 {
+    border-color: hsl(var(--border)) !important;
+  }
+
   html[dir="rtl"] body {
     direction: rtl;
     text-align: right;
