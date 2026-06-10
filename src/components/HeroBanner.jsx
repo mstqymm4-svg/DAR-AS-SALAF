@@ -203,6 +203,8 @@ export default function HeroBanner() {
     opacity:      Number(read("hero_bg_opacity", "100")),
     blur:         Number(read("hero_bg_blur", "0")),
     brightness:   Number(read("hero_bg_brightness", "100")),
+    contrast:     Number(read("hero_bg_contrast", "100")),
+    saturation:   Number(read("hero_bg_saturation", "100")),
     overlayColor: read("hero_overlay_color", "#000000"),
     overlayAlpha: Number(read("hero_overlay_alpha", "30")),
     animSpeed:    Number(read("hero_anim_speed", "5")),
@@ -232,6 +234,8 @@ export default function HeroBanner() {
         opacity:      Number(read("hero_bg_opacity", "100")),
         blur:         Number(read("hero_bg_blur", "0")),
         brightness:   Number(read("hero_bg_brightness", "100")),
+        contrast:     Number(read("hero_bg_contrast", "100")),
+        saturation:   Number(read("hero_bg_saturation", "100")),
         overlayColor: read("hero_overlay_color", "#000000"),
         overlayAlpha: Number(read("hero_overlay_alpha", "30")),
         animSpeed:    Number(read("hero_anim_speed", "5")),
@@ -266,7 +270,7 @@ export default function HeroBanner() {
   };
 
   const bgFilterStyle = {
-    filter: `blur(${s.blur}px) brightness(${s.brightness / 100})`,
+    filter: `blur(${s.blur}px) brightness(${s.brightness / 100}) contrast(${(s.contrast||100) / 100}) saturate(${(s.saturation||100) / 100})`,
     opacity: s.opacity / 100,
     transform: s.zoom ? "scale(1.05)" : undefined,
   };
