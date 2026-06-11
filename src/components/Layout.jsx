@@ -5,40 +5,49 @@ import { base44 } from "@/api/base44Client";
 import { useT } from "@/lib/i18n";
 import { getSetting, subscribeToSettings } from "@/lib/settingsStore";
 
+// Icon map for nav items stored in settings
+const ICON_MAP = { Home, BookOpen, Heart, Settings, Code };
+
+const DEFAULT_NAV_ITEMS = [
+  { id: "home",      label: "الرئيسية",  path: "/",          icon: "Home",     visible: true },
+  { id: "books",     label: "المكتبة",   path: "/books",     icon: "BookOpen", visible: true },
+  { id: "favorites", label: "المفضلة",   path: "/favorites", icon: "Heart",    visible: true },
+  { id: "settings",  label: "الإعدادات", path: "/settings",  icon: "Settings", visible: true },
+  { id: "dev",       label: "المطور",    path: "/dev",       icon: "Code",     visible: false },
+];
+
+function parseNavItems(raw, showDev) {
+  try {
+    const items = JSON.parse(raw || "null") || DEFAULT_NAV_ITEMS;
+    return items.map(item =>
+      // If it's the dev item, respect the show_dev_nav toggle as additional gate
+      item.id === "dev" ? { ...item, visible: item.visible && showDev !== false } : item
+    ).filter(i => i.visible);
+  } catch {
+    return DEFAULT_NAV_ITEMS.filter(i => i.id !== "dev" || showDev !== false);
+  }
+}
+
 export default function Layout() {
   const location = useLocation();
-  const [user, setUser] = useState(null);
   const t = useT();
 
-  const [showDevNav, setShowDevNav] = useState(() => getSetting("show_dev_nav") !== "false");
-  const [logoUrl, setLogoUrl] = useState(() => getSetting("logo_url"));
-  const [appNameOverride, setAppNameOverride] = useState(() => getSetting("app_name"));
+  const [navItems, setNavItems] = useState(() =>
+    parseNavItems(getSetting("nav_items"), getSetting("show_dev_nav") !== "false")
+  );
+  const [logoUrl, setLogoUrl]             = useState(() => getSetting("logo_url"));
+  const [appNameOverride, setAppNameOverride]     = useState(() => getSetting("app_name"));
   const [appSubtitleOverride, setAppSubtitleOverride] = useState(() => getSetting("app_subtitle"));
 
   useEffect(() => {
-    // Sync from settingsStore events (real-time)
     const unsub = subscribeToSettings((s) => {
-      setShowDevNav(s.show_dev_nav !== "false");
+      const showDev = s.show_dev_nav !== "false";
+      setNavItems(parseNavItems(s.nav_items, showDev));
       setLogoUrl(s.logo_url || "");
       setAppNameOverride(s.app_name || "");
       setAppSubtitleOverride(s.app_subtitle || "");
     });
-    // Also legacy storage event
-    const handler = () => setShowDevNav(getSetting("show_dev_nav") !== "false");
-    window.addEventListener("storage", handler);
-    return () => { unsub(); window.removeEventListener("storage", handler); };
-  }, []);
-
-  const navItems = [
-    { path: "/",          icon: Home,     label: t.navHome },
-    { path: "/books",     icon: BookOpen, label: t.navBooks },
-    { path: "/favorites", icon: Heart,    label: t.navFav },
-    { path: "/settings",  icon: Settings, label: t.navSettings },
-    ...(showDevNav ? [{ path: "/dev", icon: Code, label: "Dev" }] : []),
-  ];
-
-  useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    return unsub;
   }, []);
 
   // Apply dir, lang, font globally whenever language changes
@@ -50,11 +59,8 @@ export default function Layout() {
       html.style.setProperty("--font-app", t.fontFamily);
       document.body.style.fontFamily = t.fontFamily;
     }
-    // Nastaliq Urdu needs extra line-height to prevent letter overlap
     document.body.style.lineHeight = t.langCode === "ur" ? "2.8" : "";
   }, [t.dir, t.langCode, t.fontFamily]);
-
-  // logoUrl and appName now reactive via settingsStore state above
 
   return (
     <div dir={t.dir} lang={t.langCode} className="min-h-screen bg-background" style={{ fontFamily: t.fontFamily }}>
@@ -75,6 +81,7 @@ export default function Layout() {
             </Link>
             <nav className="hidden md:flex items-center gap-1">
               {navItems.map((item) => {
+                const Icon = ICON_MAP[item.icon] || Home;
                 const isActive = location.pathname === item.path;
                 return (
                   <Link
@@ -86,7 +93,7 @@ export default function Layout() {
                         : "text-muted-foreground hover:text-foreground hover:bg-muted"
                     }`}
                   >
-                    <item.icon className="w-4 h-4" />
+                    <Icon className="w-4 h-4" />
                     {item.label}
                   </Link>
                 );
@@ -108,6 +115,7 @@ export default function Layout() {
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-xl border-t border-border">
         <div className="flex items-center justify-around py-2 px-4">
           {navItems.map((item) => {
+            const Icon = ICON_MAP[item.icon] || Home;
             const isActive = location.pathname === item.path;
             return (
               <Link
@@ -117,7 +125,7 @@ export default function Layout() {
                   isActive ? "text-primary" : "text-muted-foreground"
                 }`}
               >
-                <item.icon className={`w-5 h-5 ${isActive ? "fill-primary/20" : ""}`} />
+                <Icon className={`w-5 h-5 ${isActive ? "fill-primary/20" : ""}`} />
                 <span className="text-[10px] font-medium">{item.label}</span>
               </Link>
             );
