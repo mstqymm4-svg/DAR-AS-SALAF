@@ -69,7 +69,7 @@ export default function BookCard({ book, isFavorite, onToggleFavorite, index = 0
               {book.category}
             </span>
           </div>
-          <h3 className="font-bold text-foreground text-sm leading-relaxed line-clamp-2 mb-1 group-hover:text-primary transition-colors" style={{ fontFamily: "var(--font-title, var(--font-heading, inherit))" }}>
+          <h3 className="font-bold text-foreground leading-relaxed line-clamp-2 mb-1 group-hover:text-primary transition-colors text-sm" style={{ fontFamily: "var(--font-title, var(--font-heading, inherit))" }}>
             {book.title}
           </h3>
           <p className="text-xs text-muted-foreground" style={{ fontFamily: "var(--font-title, var(--font-heading, inherit))" }}>{book.author}</p>
