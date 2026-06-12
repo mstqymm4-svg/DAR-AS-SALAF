@@ -55,7 +55,7 @@ export default function BookCard({ book, isFavorite, onToggleFavorite, index = 0
           <Link
             to={`/read/${book.id}`}
             onClick={(e) => e.stopPropagation()}
-            className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-1.5 py-2.5 hover:bg-primary backdrop-blur-sm text-primary-foreground text-xs font-bold transition-all duration-300 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 opacity-0 bg-[#0c10e9]/[0.8]">
+            className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-1.5 py-2.5 hover:bg-primary backdrop-blur-sm text-primary-foreground text-xs font-bold transition-all duration-300 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 bg-[#0004f5]/[0.8] opacity-10">
             
             <BookMarked className="w-3.5 h-3.5" />
             {t.readBook}
