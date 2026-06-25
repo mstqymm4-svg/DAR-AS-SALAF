@@ -55,7 +55,7 @@ export default function BookCard({ book, isFavorite, onToggleFavorite, index = 0
           <Link
             to={`/read/${book.id}`}
             onClick={(e) => e.stopPropagation()}
-            className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-1.5 py-2.5 hover:bg-primary backdrop-blur-sm text-primary-foreground text-xs font-bold transition-all duration-300 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 opacity-0 bg-blue-800/[0.8]">
+            className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-1.5 py-2.5 bg-primary/80 hover:bg-primary backdrop-blur-sm text-primary-foreground text-xs font-bold transition-all duration-300 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 opacity-0">
             
             <BookMarked className="w-3.5 h-3.5" />
             {t.readBook}
@@ -69,7 +69,7 @@ export default function BookCard({ book, isFavorite, onToggleFavorite, index = 0
               {book.category}
             </span>
           </div>
-          <h3 className="font-bold text-foreground leading-relaxed line-clamp-2 mb-1 group-hover:text-primary transition-colors text-sm" style={{ fontFamily: "var(--font-title, var(--font-heading, inherit))" }}>
+          <h3 className="font-bold text-foreground text-sm leading-relaxed line-clamp-2 mb-1 group-hover:text-primary transition-colors" style={{ fontFamily: "var(--font-title, var(--font-heading, inherit))" }}>
             {book.title}
           </h3>
           <p className="text-xs text-muted-foreground" style={{ fontFamily: "var(--font-title, var(--font-heading, inherit))" }}>{book.author}</p>

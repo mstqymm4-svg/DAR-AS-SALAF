@@ -11,13 +11,11 @@ import { useEffect } from 'react';
 import { loadSettings } from '@/lib/settingsStore';
 import { initThemeEngine } from '@/lib/themeEngine';
 import { base44 } from '@/api/base44Client';
-// ── Apply theme immediately from localStorage — before first render ──
+// Apply theme immediately from localStorage before any renders
 try {
-  const themeMode = localStorage.getItem("devs_theme_mode")
-    || (localStorage.getItem("devs_dark_mode") === "true" ? "dark" : "light");
-  const systemDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
-  const isDark = themeMode === "dark" ? true : themeMode === "auto" ? systemDark : false;
-  document.documentElement.classList.toggle("dark", isDark);
+  const lsMode = localStorage.getItem("devs_theme_mode") || (localStorage.getItem("devs_dark_mode") === "true" ? "dark" : "light");
+  if (lsMode === "dark") document.documentElement.classList.add("dark");
+  else if (lsMode === "light") document.documentElement.classList.remove("dark");
 } catch(e) {}
 import Home from './pages/Home';
 import Books from './pages/Books';

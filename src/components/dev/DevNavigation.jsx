@@ -11,7 +11,7 @@ const DEFAULT_NAV_ITEMS = [
   { id: "books",     label: "المكتبة",   path: "/books",     icon: "BookOpen", visible: true },
   { id: "favorites", label: "المفضلة",   path: "/favorites", icon: "Heart",    visible: true },
   { id: "settings",  label: "الإعدادات", path: "/settings",  icon: "Settings", visible: true },
-  { id: "dev",       label: "المطور",    path: "/dev",       icon: "Code",     visible: true },
+  { id: "dev",       label: "المطور",    path: "/dev",       icon: "Code",     visible: false },
 ];
 
 export default function DevNavigation() {
@@ -91,19 +91,12 @@ export default function DevNavigation() {
       </div>
 
       {/* Dev Nav Toggle */}
-      <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 flex items-center justify-between">
+      <div className="bg-card border border-border rounded-2xl p-4 flex items-center justify-between">
         <div>
-          <Label className="text-sm font-bold flex items-center gap-2">🛠️ زر المطور في شريط التنقل</Label>
-          <p className="text-xs text-muted-foreground mt-0.5">إظهار أو إخفاء رابط لوحة التحكم في شريط التنقل</p>
+          <Label className="text-sm font-bold">زر المطور في شريط التنقل</Label>
+          <p className="text-xs text-muted-foreground mt-0.5">إظهار رابط لوحة التحكم</p>
         </div>
-        <Switch
-          checked={showDevNav}
-          onCheckedChange={v => {
-            setShowDevNav(v);
-            setSetting("show_dev_nav", String(v));
-            toast.success(v ? "تم إظهار زر المطور ✓" : "تم إخفاء زر المطور ✓");
-          }}
-        />
+        <Switch checked={showDevNav} onCheckedChange={v => { setShowDevNav(v); setSetting("show_dev_nav", String(v)); }} />
       </div>
 
       {/* Nav Items */}
