@@ -331,7 +331,7 @@ export default function HeroBanner() {
         {renderBg()}
 
         {/* Overlay */}
-        <div className="absolute inset-0 opacity-100 rounded-[10011px]" style={overlayStyle} />
+        <div className="absolute inset-0 opacity-100 rounded-md" style={overlayStyle} />
 
         {/* Subtle Islamic decoration */}
         {!["video_mp4", "video_webm"].includes(s.bgType) &&
