@@ -11,8 +11,8 @@ import { motion } from "framer-motion";
 import { useT, TRANSLATIONS } from "@/lib/i18n";
 
 const ls = {
-  get: (k, fb = "") => { try { return localStorage.getItem(k) || fb; } catch(e) { return fb; } },
-  set: (k, v) => { try { localStorage.setItem(k, v); } catch(e) {} },
+  get: (k, fb = "") => {try {return localStorage.getItem(k) || fb;} catch (e) {return fb;}},
+  set: (k, v) => {try {localStorage.setItem(k, v);} catch (e) {}}
 };
 
 export default function Settings() {
@@ -57,7 +57,7 @@ export default function Settings() {
     setDarkMode(val);
     document.documentElement.classList.toggle("dark", val);
     // حفظ دائم
-    try { localStorage.setItem("dev_dark_mode", String(val)); } catch(e) {}
+    try {localStorage.setItem("dev_dark_mode", String(val));} catch (e) {}
   };
 
   const handleSavePreferences = async () => {
@@ -77,8 +77,8 @@ export default function Settings() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-      </div>
-    );
+      </div>);
+
   }
 
   return (
@@ -127,7 +127,7 @@ export default function Settings() {
             </div>
             <div className="flex items-center gap-2">
               <Sun className="w-4 h-4 text-muted-foreground" />
-              <Switch checked={darkMode} onCheckedChange={handleToggleDark} />
+              <Switch checked={darkMode} onCheckedChange={handleToggleDark} className="text-4xl" />
               <Moon className="w-4 h-4 text-muted-foreground" />
             </div>
           </div>
@@ -189,19 +189,19 @@ export default function Settings() {
           </div>
           <div className="grid grid-cols-2 gap-2 mb-4">
             {[
-              { code:"ar", name:"العربية" },
-              { code:"en", name:"English" },
-              { code:"fr", name:"Français" },
-              { code:"ur", name:"اردو" },
-              { code:"hi", name:"हिंदी" },
-              { code:"tr", name:"Türkçe" },
-            ].map(({ code, name }) => (
-              <label key={code} className={`flex items-center gap-2 p-3 rounded-xl border-2 cursor-pointer transition-all ${appLang === code ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"}`}>
+            { code: "ar", name: "العربية" },
+            { code: "en", name: "English" },
+            { code: "fr", name: "Français" },
+            { code: "ur", name: "اردو" },
+            { code: "hi", name: "हिंदी" },
+            { code: "tr", name: "Türkçe" }].
+            map(({ code, name }) =>
+            <label key={code} className={`flex items-center gap-2 p-3 rounded-xl border-2 cursor-pointer transition-all ${appLang === code ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"}`}>
                 <input type="radio" name="appLang" value={code} checked={appLang === code} onChange={() => setAppLang(code)} className="hidden" />
                 <div className={`w-4 h-4 rounded-full border-2 shrink-0 ${appLang === code ? "border-primary bg-primary" : "border-border"}`} />
                 <span className="text-sm font-medium">{name}</span>
               </label>
-            ))}
+            )}
           </div>
           <Button onClick={handleSaveAppLang} className="gap-2 rounded-xl w-full">
             <Save className="w-4 h-4" /> {t.applyLang}
@@ -222,6 +222,6 @@ export default function Settings() {
           </Button>
         </motion.div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
