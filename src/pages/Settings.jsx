@@ -127,7 +127,7 @@ export default function Settings() {
             </div>
             <div className="flex items-center gap-2">
               <Sun className="w-4 h-4 text-muted-foreground" />
-              <Switch checked={darkMode} onCheckedChange={handleToggleDark} className="text-xs text-justify lowercase underline" />
+              <Switch checked={darkMode} onCheckedChange={handleToggleDark} className="text-xs line-through italic normal-case text-left rounded-[10007px]" />
               <Moon className="w-4 h-4 text-muted-foreground" />
             </div>
           </div>
