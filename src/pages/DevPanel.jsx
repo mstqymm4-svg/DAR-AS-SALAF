@@ -36,7 +36,7 @@ import DevTheme from "@/components/dev/DevTheme";
 import DevTranslations from "@/components/dev/DevTranslations";
 
 // ─── Font / Color exports (used by settingsStore) ─────────────────────────────
-export { FONT_PRESETS, FONT_ROLES } from "@/components/dev/DevFonts";
+export { FONT_PRESETS, FONT_ROLES } from "@/lib/fontConstants";
 
 // ─── Password ─────────────────────────────────────────────────────────────────
 const DEV_PASSWORD_KEY = "dev_panel_password";
