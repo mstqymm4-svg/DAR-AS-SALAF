@@ -4,7 +4,11 @@
  * caching, and progress tracking for large books.
  */
 import { base44 } from "@/api/base44Client";
-import { getSetting } from "@/lib/settingsStore";
+
+// Read setting from localStorage directly to avoid circular import with settingsStore
+function getSetting(key) {
+  try { return localStorage.getItem("devs_" + key) || ""; } catch(e) { return ""; }
+}
 
 // ─── Default languages ───────────────────────────────────────────────────────
 const DEFAULT_LANGUAGES = [
