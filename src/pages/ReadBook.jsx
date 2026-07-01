@@ -1,13 +1,17 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ArrowRight, BookOpen } from "lucide-react";
+import { ArrowRight, BookOpen, Globe } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import PdfViewer from "@/components/PdfViewer";
+import TranslationPanel from "@/components/TranslationPanel";
 
 export default function ReadBook() {
   const { id } = useParams();
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [translateOpen, setTranslateOpen] = useState(false);
+  const [displayMode, setDisplayMode] = useState("side");
 
   useEffect(() => {
     base44.entities.Book.filter({ id }).then((books) => {
@@ -34,6 +38,8 @@ export default function ReadBook() {
 
   }
 
+  const showPdf = !translateOpen || displayMode === "side";
+
   return (
     <div className="flex flex-col" style={{ height: "100dvh" }}>
       {/* Top Bar */}
@@ -43,17 +49,34 @@ export default function ReadBook() {
           <span className="hidden sm:inline">{book.title}</span>
           <span className="sm:hidden">رجوع</span>
         </Link>
-        <a href={book.pdf_url} download target="_blank" rel="noopener noreferrer">
-          
-
-
-          
-        </a>
+        <Button
+          size="sm"
+          variant={translateOpen ? "default" : "outline"}
+          onClick={() => setTranslateOpen(!translateOpen)}
+          className="gap-1.5"
+        >
+          <Globe className="w-4 h-4" />
+          <span className="hidden sm:inline">ترجمة ذكية</span>
+        </Button>
       </div>
 
-      {/* PDF Viewer */}
-      <div className="flex-1 overflow-hidden relative">
-        <PdfViewer url={book.pdf_url} title={book.title} />
+      {/* Content: PDF + Translation Panel */}
+      <div className="flex-1 flex overflow-hidden">
+        {showPdf && (
+          <div className={`${translateOpen && displayMode === "side" ? "w-1/2 border-l border-border" : "w-full"} h-full overflow-hidden`}>
+            <PdfViewer url={book.pdf_url} title={book.title} />
+          </div>
+        )}
+        {translateOpen && (
+          <div className={`${displayMode === "only" ? "w-full" : "w-1/2"} h-full overflow-hidden`}>
+            <TranslationPanel
+              book={book}
+              onClose={() => setTranslateOpen(false)}
+              displayMode={displayMode}
+              onDisplayModeChange={setDisplayMode}
+            />
+          </div>
+        )}
       </div>
     </div>);
 
