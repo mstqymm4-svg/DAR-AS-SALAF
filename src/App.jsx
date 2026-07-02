@@ -25,6 +25,7 @@ import Admin from './pages/Admin';
 import Settings from './pages/Settings';
 import DevPanel from './pages/DevPanel';
 import ReadBook from './pages/ReadBook';
+import Videos from './pages/Videos';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -71,6 +72,7 @@ const AuthenticatedApp = () => {
         <Route path="/settings" element={<Settings />} />
         <Route path="/dev" element={<DevPanel />} />
         <Route path="/read/:id" element={<ReadBook />} />
+        <Route path="/videos" element={<Videos />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>
     </Routes>

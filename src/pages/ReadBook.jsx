@@ -3,7 +3,7 @@ import { useParams, useSearchParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { ArrowRight, BookOpen, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import PdfViewer from "@/components/PdfViewer";
+import FlipBookViewer from "@/components/FlipBookViewer";
 import TranslationPanel from "@/components/TranslationPanel";
 
 export default function ReadBook() {
@@ -26,7 +26,6 @@ export default function ReadBook() {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
       </div>);
-
   }
 
   if (!book || !book.pdf_url) {
@@ -36,7 +35,6 @@ export default function ReadBook() {
         <h3 className="text-lg font-bold mb-2">لا يوجد ملف PDF لهذا الكتاب</h3>
         <Link to="/books" className="text-primary text-sm hover:underline">العودة للمكتبة</Link>
       </div>);
-
   }
 
   const showPdf = !translateOpen || displayMode === "side";
@@ -61,11 +59,11 @@ export default function ReadBook() {
         </Button>
       </div>
 
-      {/* Content: PDF + Translation Panel */}
+      {/* Content: FlipBook + Translation Panel */}
       <div className="flex-1 flex overflow-hidden">
         {showPdf && (
           <div className={`${translateOpen && displayMode === "side" ? "w-1/2 border-l border-border" : "w-full"} h-full overflow-hidden`}>
-            <PdfViewer url={book.pdf_url} title={book.title} />
+            <FlipBookViewer pdfUrl={book.pdf_url} title={book.title} language={book.language === "الإنجليزية" ? "en" : "ar"} />
           </div>
         )}
         {translateOpen && (
@@ -80,5 +78,4 @@ export default function ReadBook() {
         )}
       </div>
     </div>);
-
 }
