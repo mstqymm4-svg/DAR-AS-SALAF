@@ -6,13 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Globe, X, FileText, BookOpen, Trash2, RefreshCw, Columns2, Eye, StopCircle, CheckCircle2, AlertCircle } from "lucide-react";
+import { Loader2, Globe, X, FileText, BookOpen, Trash2, RefreshCw, Columns2, Eye, StopCircle, CheckCircle2, AlertCircle, ScanText, FileSearch, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   getActiveLanguages, extractPdfText, getGlossary, translatePage, translateRange,
   translateFullBook, translateChapter, deleteTranslations, retranslatePage,
-  getBookTranslations, cancelTranslation,
+  getBookTranslations, cancelTranslation, inspectBook,
 } from "@/lib/translationEngine";
 
 export default function TranslationPanel({ book, onClose, displayMode, onDisplayModeChange }) {
@@ -30,6 +30,8 @@ export default function TranslationPanel({ book, onClose, displayMode, onDisplay
   const [extracting, setExtracting] = useState(false);
   const [progress, setProgress] = useState(null);
   const [error, setError] = useState("");
+  const [bookInfo, setBookInfo] = useState(null);
+  const [inspecting, setInspecting] = useState(false);
 
   // Load languages
   useEffect(() => {
@@ -59,6 +61,22 @@ export default function TranslationPanel({ book, onClose, displayMode, onDisplay
   const isRTL = selectedLangObj?.rtl ?? true;
   const fontFamily = selectedLangObj?.font_family || "";
 
+  // ─── Inspect book ──────────────────────────────────────────────────────
+  const handleInspect = async () => {
+    if (!book?.pdf_url) { toast.error("لا يوجد ملف PDF"); return; }
+    setInspecting(true);
+    try {
+      const info = await inspectBook(book.pdf_url, book.id);
+      setBookInfo(info);
+      if (info.needs_ocr) toast.info("الكتاب يحتاج OCR — سيتم استخراج النص بالذكاء الاصطناعي");
+      else toast.success(`الكتاب يحتوي على نص — ${info.total_pages} صفحة`);
+    } catch (e) {
+      toast.error("فشل فحص الكتاب");
+    } finally {
+      setInspecting(false);
+    }
+  };
+
   // ─── Translate handlers ─────────────────────────────────────────────────
   const handleTranslate = async () => {
     if (!selectedLang) {
@@ -72,12 +90,20 @@ export default function TranslationPanel({ book, onClose, displayMode, onDisplay
 
     try {
       setExtracting(true);
-      toast.info("جاري استخراج نص الكتاب...");
-      const extractedData = await extractPdfText(book.pdf_url, book.id);
+      toast.info("جاري استخراج نص الكتاب (مع OCR تلقائي للصفحات المصورة)...");
+      const extractedData = await extractPdfText(book.pdf_url, book.id, (p) => {
+        setProgress(p);
+      });
       setExtracting(false);
 
       if (extractedData?.table_of_contents?.length > 0) {
         setChapters(extractedData.table_of_contents);
+      }
+
+      if (extractedData?.extraction_method === "ocr") {
+        toast.success("تم استخراج النص بالكامل عبر OCR الذكي");
+      } else if (extractedData?.extraction_method === "mixed") {
+        toast.success(`تم استخراج النص (نص مباشر + OCR لـ ${extractedData.pages_without_text} صفحة)`);
       }
 
       const glossary = await getGlossary(selectedLang);
@@ -191,6 +217,39 @@ export default function TranslationPanel({ book, onClose, displayMode, onDisplay
 
       {/* Controls */}
       <div className="p-3 space-y-3 border-b border-border shrink-0">
+        {/* Book inspection */}
+        <div className="flex items-center gap-2">
+          <Button onClick={handleInspect} variant="outline" size="sm" className="flex-1 h-8 text-xs gap-1.5" disabled={inspecting}>
+            {inspecting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileSearch className="w-3.5 h-3.5" />}
+            فحص الكتاب
+          </Button>
+          {bookInfo && (
+            <div className="flex items-center gap-1.5 text-[10px]">
+              {bookInfo.has_text ? (
+                <span className="px-2 py-1 rounded-lg bg-green-500/10 text-green-600 font-medium flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" /> نص
+                </span>
+              ) : null}
+              {bookInfo.needs_ocr ? (
+                <span className="px-2 py-1 rounded-lg bg-amber-500/10 text-amber-600 font-medium flex items-center gap-1">
+                  <ScanText className="w-3 h-3" /> OCR
+                </span>
+              ) : null}
+              {bookInfo.total_pages > 0 && (
+                <span className="px-2 py-1 rounded-lg bg-muted text-muted-foreground font-medium">
+                  {bookInfo.total_pages} ص
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Source language badge */}
+        <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+          <Sparkles className="w-3 h-3" />
+          <span>اللغة المصدر: الأردية (اردو) — الترجمة الذكية تحافظ على المصطلحات الشرعية</span>
+        </div>
+
         {/* Language selector */}
         <div>
           <Label className="text-xs mb-1 block">لغة الترجمة</Label>
@@ -304,7 +363,15 @@ export default function TranslationPanel({ book, onClose, displayMode, onDisplay
               <div className="flex items-center gap-2 text-xs">
                 <Loader2 className="w-3 h-3 animate-spin text-primary" />
                 <span className="text-muted-foreground">
-                  {extracting ? "استخراج نص الكتاب..." : progress?.cancelled ? "إيقاف الترجمة..." : "جاري الترجمة..."}
+                  {extracting
+                    ? progress?.phase === "ocr"
+                      ? `جاري OCR للصفحات المصورة... ${progress.current}/${progress.total}`
+                      : "استخراج نص الكتاب..."
+                    : progress?.cancelled
+                    ? "إيقاف الترجمة..."
+                    : progress?.phase === "translate"
+                    ? "جاري الترجمة..."
+                    : "جاري المعالجة..."}
                 </span>
                 {progress && !progress.cancelled && (
                   <span className="mr-auto font-mono text-primary">

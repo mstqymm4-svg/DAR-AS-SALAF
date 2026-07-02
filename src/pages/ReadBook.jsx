@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useSearchParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { ArrowRight, BookOpen, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,9 +8,10 @@ import TranslationPanel from "@/components/TranslationPanel";
 
 export default function ReadBook() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [translateOpen, setTranslateOpen] = useState(false);
+  const [translateOpen, setTranslateOpen] = useState(searchParams.get("translate") === "true");
   const [displayMode, setDisplayMode] = useState("side");
 
   useEffect(() => {
