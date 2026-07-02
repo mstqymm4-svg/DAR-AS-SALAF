@@ -81,21 +81,21 @@ export default function Home() {
         transition={{ duration: 0.5, delay: 0.2 }}
         className="mb-10 -mt-4">
         
+          <a
+          href={youtubeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-l from-red-600/10 to-red-500/5 border border-red-200/50 hover:border-red-400/50 hover:shadow-md hover:shadow-red-500/10 transition-all group text-[#000000] hidden">
           
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-red-500/30 group-hover:scale-105 transition-transform bg-[#e21246]">
+              <Youtube className="w-6 h-6 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-sm text-foreground">{youtubeLabel || t.youtubeBtn}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{youtubeSubText || t.youtubeSub}</p>
+            </div>
+            <ExternalLink className="w-4 h-4 text-muted-foreground shrink-0 group-hover:text-red-500 transition-colors" />
+          </a>
         </motion.section>
       }
 
