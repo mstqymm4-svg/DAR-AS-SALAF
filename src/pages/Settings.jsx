@@ -69,8 +69,8 @@ export default function Settings() {
 
   const handleSaveAppLang = () => {
     ls.set("dev_app_lang", appLang);
-    toast.success(t.applyLang + " ✓ — " + (t.dir === "rtl" ? "أعد تحميل الصفحة" : "Reload the page"));
-    setTimeout(() => window.location.reload(), 1000);
+    window.dispatchEvent(new Event("app-lang-change"));
+    toast.success(t.applyLang + " ✓");
   };
 
   if (loading) {

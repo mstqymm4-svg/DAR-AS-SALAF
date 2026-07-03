@@ -7,17 +7,32 @@ import {
   ZoomIn, ZoomOut, Moon, Sun, List, X, Maximize,
 } from "lucide-react";
 import { toast } from "sonner";
+import { loadPdfDocument } from "@/lib/pdfLoader";
+import PdfCanvasPage from "@/components/PdfCanvasPage";
+import TranslatedTextPage from "@/components/TranslatedTextPage";
 
-export default function FlipBookViewer({ pdfUrl, title, language = "ar" }) {
-  // RTL for Arabic/Urdu, LTR for English
+/**
+ * Professional PDF / translated-text viewer with realistic page-flip animation.
+ * Supports books of any size (lazy page loading via pdfjs — only current page is rendered).
+ *
+ * Props:
+ *   pdfUrl        — URL of the PDF file (for original mode)
+ *   title         — book title (used for bookmark/lastpage storage keys)
+ *   language      — "ar" | "ur" | "en" | "hi" (determines RTL/LTR)
+ *   translations  — array of { page_number, translated_text } (for translated mode; pass null for PDF mode)
+ */
+export default function FlipBookViewer({ pdfUrl, title, language = "ar", translations = null }) {
+  const isTranslatedMode = translations !== null;
   const isRTL = language === "ar" || language === "ur" || language === "fa";
 
   const containerRef = useRef(null);
   const touchStartX = useRef(0);
 
+  const [pdf, setPdf] = useState(null);
+  const [pdfError, setPdfError] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [direction, setDirection] = useState(0); // 1=forward, -1=back
+  const [totalPages, setTotalPages] = useState(0);
+  const [direction, setDirection] = useState(0);
   const [isFlipping, setIsFlipping] = useState(false);
 
   const [zoom, setZoom] = useState(1);
@@ -40,10 +55,27 @@ export default function FlipBookViewer({ pdfUrl, title, language = "ar" }) {
     localStorage.setItem(`lastpage_${title}`, String(currentPage));
   }, [currentPage, title]);
 
-  // For PDF rendering, we use the PDF.js viewer per-page approach
-  // We use the PDF.js page parameter to load only the needed page
-  const pageSrc = `${pdfUrl}#page=${currentPage}&toolbar=0&navpanes=0&view=FitH`;
+  // Load PDF document (original mode only)
+  useEffect(() => {
+    if (isTranslatedMode) {
+      setTotalPages(translations.length);
+      return;
+    }
+    if (!pdfUrl) return;
+    let cancelled = false;
+    setPdfError("");
+    loadPdfDocument(pdfUrl).then((doc) => {
+      if (!cancelled) {
+        setPdf(doc);
+        setTotalPages(doc.numPages);
+      }
+    }).catch((e) => {
+      if (!cancelled) setPdfError("فشل تحميل ملف PDF: " + (e.message || "خطأ غير معروف"));
+    });
+    return () => { cancelled = true; };
+  }, [pdfUrl, isTranslatedMode, translations]);
 
+  // Navigation
   const goNext = useCallback(() => {
     if (currentPage >= totalPages || isFlipping) return;
     setDirection(isRTL ? -1 : 1);
@@ -51,7 +83,7 @@ export default function FlipBookViewer({ pdfUrl, title, language = "ar" }) {
     setTimeout(() => {
       setCurrentPage((p) => Math.min(p + 1, totalPages));
       setIsFlipping(false);
-    }, 350);
+    }, 300);
   }, [currentPage, totalPages, isFlipping, isRTL]);
 
   const goPrev = useCallback(() => {
@@ -61,7 +93,7 @@ export default function FlipBookViewer({ pdfUrl, title, language = "ar" }) {
     setTimeout(() => {
       setCurrentPage((p) => Math.max(p - 1, 1));
       setIsFlipping(false);
-    }, 350);
+    }, 300);
   }, [currentPage, isFlipping, isRTL]);
 
   // Keyboard navigation
@@ -73,24 +105,17 @@ export default function FlipBookViewer({ pdfUrl, title, language = "ar" }) {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [goNext, goPrev, isRTL, showGoTo]);
-
-  // Detect total pages from PDF (best effort via iframe)
-  useEffect(() => {
-    // Default to a large number; user can navigate freely
-    // PDF.js viewer will handle page bounds
-    setTotalPages(999);
-  }, []);
+  }, [goNext, goPrev, isRTL]);
 
   const handleGoTo = () => {
     const num = Number(goToPage);
-    if (num >= 1) {
+    if (num >= 1 && num <= totalPages) {
       setDirection(num > currentPage ? 1 : -1);
       setIsFlipping(true);
       setTimeout(() => {
         setCurrentPage(num);
         setIsFlipping(false);
-      }, 350);
+      }, 300);
     }
     setShowGoTo(false);
     setGoToPage("");
@@ -105,6 +130,14 @@ export default function FlipBookViewer({ pdfUrl, title, language = "ar" }) {
     toast.success(bookmarks.includes(currentPage) ? "أُزيل العلامة" : "تم وضع علامة");
   };
 
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      containerRef.current?.requestFullscreen?.();
+    } else {
+      document.exitFullscreen?.();
+    }
+  };
+
   const handleTouchStart = (e) => {
     touchStartX.current = e.touches[0].clientX;
   };
@@ -115,6 +148,29 @@ export default function FlipBookViewer({ pdfUrl, title, language = "ar" }) {
     if (diff > 0) isRTL ? goNext() : goPrev();
     else isRTL ? goPrev() : goNext();
   };
+
+  // Loading / error states
+  if (pdfError) {
+    return (
+      <div className="flex items-center justify-center h-full p-8">
+        <div className="text-center">
+          <p className="text-destructive text-sm">{pdfError}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isTranslatedMode && !pdf) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  const showPage = isTranslatedMode
+    ? translations.length > 0
+    : pdf !== null;
 
   return (
     <div
@@ -128,55 +184,51 @@ export default function FlipBookViewer({ pdfUrl, title, language = "ar" }) {
       <div className="flex-1 relative flex items-center justify-center overflow-hidden px-2 py-2">
         {/* Click zones for navigation */}
         <button
-          className="absolute left-0 top-0 bottom-0 w-1/4 z-10 cursor-w-resize"
+          className="absolute left-0 top-0 bottom-0 w-1/4 z-10"
           onClick={() => isRTL ? goNext() : goPrev()}
           aria-label="السابق"
         />
         <button
-          className="absolute right-0 top-0 bottom-0 w-1/4 z-10 cursor-e-resize"
+          className="absolute right-0 top-0 bottom-0 w-1/4 z-10"
           onClick={() => isRTL ? goPrev() : goNext()}
           aria-label="التالي"
         />
 
         {/* Page with flip animation */}
-        <AnimatePresence mode="wait" custom={direction}>
-          <motion.div
-            key={currentPage}
-            custom={direction}
-            initial={{
-              rotateY: direction > 0 ? 90 : -90,
-              opacity: 0,
-            }}
-            animate={{
-              rotateY: 0,
-              opacity: 1,
-            }}
-            exit={{
-              rotateY: direction > 0 ? -90 : 90,
-              opacity: 0,
-            }}
-            transition={{ duration: 0.35, ease: "easeInOut" }}
-            style={{
-              width: "100%",
-              maxWidth: "700px",
-              height: "100%",
-              transformStyle: "preserve-3d",
-              transformOrigin: isRTL ? "right center" : "left center",
-            }}
-            className="bg-white rounded-lg shadow-2xl overflow-hidden"
-          >
-            <iframe
-              src={pageSrc}
-              className="w-full h-full border-0"
-              title={`${title} - صفحة ${currentPage}`}
+        {showPage && (
+          <AnimatePresence mode="wait" custom={direction}>
+            <motion.div
+              key={currentPage}
+              custom={direction}
+              initial={{ rotateY: direction > 0 ? 80 : -80, opacity: 0 }}
+              animate={{ rotateY: 0, opacity: 1 }}
+              exit={{ rotateY: direction > 0 ? -80 : 80, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
               style={{
-                transform: `scale(${zoom})`,
-                transformOrigin: "center center",
-                transition: "transform 0.2s",
+                width: "100%",
+                maxWidth: "700px",
+                height: "100%",
+                transformStyle: "preserve-3d",
+                transformOrigin: isRTL ? "right center" : "left center",
               }}
-            />
-          </motion.div>
-        </AnimatePresence>
+            >
+              {isTranslatedMode ? (
+                <TranslatedTextPage
+                  translation={translations[currentPage - 1]}
+                  darkMode={darkMode}
+                  lang={language}
+                />
+              ) : (
+                <PdfCanvasPage
+                  pdf={pdf}
+                  pageNumber={currentPage}
+                  zoom={zoom}
+                  darkMode={darkMode}
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
+        )}
 
         {/* Navigation arrows */}
         <button
@@ -214,6 +266,8 @@ export default function FlipBookViewer({ pdfUrl, title, language = "ar" }) {
                 <Input
                   type="number"
                   autoFocus
+                  min="1"
+                  max={totalPages}
                   placeholder="رقم الصفحة"
                   value={goToPage}
                   onChange={(e) => setGoToPage(e.target.value)}
@@ -242,7 +296,7 @@ export default function FlipBookViewer({ pdfUrl, title, language = "ar" }) {
                 <span className={`font-mono font-bold ${darkMode ? "text-gray-200" : "text-foreground"}`}>
                   {currentPage}
                 </span>
-                <span className={darkMode ? "text-gray-400" : "text-muted-foreground"}>/ {totalPages > 900 ? "∞" : totalPages}</span>
+                <span className={darkMode ? "text-gray-400" : "text-muted-foreground"}>/ {totalPages}</span>
               </div>
 
               {/* Center: tools */}
@@ -278,6 +332,12 @@ export default function FlipBookViewer({ pdfUrl, title, language = "ar" }) {
                   title={darkMode ? "وضع نهاري" : "وضع ليلي"}>
                   {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                 </button>
+
+                <button onClick={toggleFullscreen}
+                  className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${darkMode ? "hover:bg-gray-700 text-gray-300" : "hover:bg-muted text-muted-foreground"}`}
+                  title="ملء الشاشة">
+                  <Maximize className="w-4 h-4" />
+                </button>
               </div>
 
               {/* Right: bookmarks list */}
@@ -287,9 +347,13 @@ export default function FlipBookViewer({ pdfUrl, title, language = "ar" }) {
                     <button className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${darkMode ? "hover:bg-gray-700 text-gray-300" : "hover:bg-muted text-muted-foreground"}`}>
                       <List className="w-4 h-4" />
                     </button>
-                    <div className={`absolute bottom-full mb-2 left-0 ${isRTL ? "left-0" : "right-0"} w-32 rounded-xl border ${darkMode ? "border-gray-700 bg-gray-800" : "border-border bg-card"} shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all max-h-48 overflow-y-auto`}>
+                    <div className={`absolute bottom-full mb-2 ${isRTL ? "left-0" : "right-0"} w-32 rounded-xl border ${darkMode ? "border-gray-700 bg-gray-800" : "border-border bg-card"} shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all max-h-48 overflow-y-auto z-30`}>
                       {bookmarks.map((p) => (
-                        <button key={p} onClick={() => { setCurrentPage(p); }}
+                        <button key={p} onClick={() => {
+                          setDirection(p > currentPage ? 1 : -1);
+                          setIsFlipping(true);
+                          setTimeout(() => { setCurrentPage(p); setIsFlipping(false); }, 300);
+                        }}
                           className={`w-full px-3 py-2 text-xs text-right hover:bg-muted ${darkMode ? "text-gray-300 hover:bg-gray-700" : ""}`}>
                           صفحة {p}
                         </button>

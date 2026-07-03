@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+
 // ─── Centralised translation strings ───────────────────────────────────────
 export const TRANSLATIONS = {
   ar: {
@@ -455,7 +457,18 @@ const LANG_META = {
 };
 
 export function useT() {
-  const lang = ls.get("dev_app_lang", "ar");
+  const [lang, setLang] = useState(() => ls.get("dev_app_lang", "ar"));
+
+  useEffect(() => {
+    const handler = () => setLang(ls.get("dev_app_lang", "ar"));
+    window.addEventListener("app-lang-change", handler);
+    window.addEventListener("storage", handler);
+    return () => {
+      window.removeEventListener("app-lang-change", handler);
+      window.removeEventListener("storage", handler);
+    };
+  }, []);
+
   const t = TRANSLATIONS[lang] || TRANSLATIONS["ar"];
   const meta = LANG_META[lang] || LANG_META["ar"];
   const customName = ls.get("dev_app_name", "");
