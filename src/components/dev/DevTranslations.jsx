@@ -10,11 +10,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import {
   Globe, Languages, BookText, Trash2, Plus, Pencil, Ban, Check, BarChart3,
-  Play, Square, Eye, RefreshCw, Library, Loader2,
+  Play, Square, Eye, RefreshCw, Library, Loader2, AlertTriangle, FileSearch,
+  ScanText, FileText, RotateCw,
 } from "lucide-react";
 import {
   getAllLanguages, ensureDefaultLanguages, getTranslationStats, getAllTranslatedBooks,
-  getAllGlossary, deleteTranslations, cancelTranslation,
+  getAllGlossary, deleteTranslations, cancelTranslation, getErrorLog, inspectBook,
+  retryFailedPage,
 } from "@/lib/translationEngine";
 import { getSetting, setSetting } from "@/lib/settingsStore";
 
@@ -466,6 +468,200 @@ function SettingsTab() {
   );
 }
 
+// ─── Error Log Tab ────────────────────────────────────────────────────────────
+function ErrorLogTab() {
+  const [errors, setErrors] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setErrors(await getErrorLog());
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const handleRetry = async (err) => {
+    try {
+      const books = await base44.entities.Book.filter({ id: err.book_id });
+      if (books.length === 0) { toast.error("الكتاب غير موجود"); return; }
+      const book = books[0];
+      toast.info(`إعادة معالجة الصفحة ${err.page_number}...`);
+      await retryFailedPage(book, err.page_number, err.target_language);
+      toast.success("تمت المعالجة بنجاح");
+      load();
+    } catch (e) {
+      toast.error(e.message || "فشلت إعادة المعالجة");
+    }
+  };
+
+  const handleClearErrors = async () => {
+    if (!confirm("حذف جميع سجلات الأخطاء؟")) return;
+    await base44.entities.Translation.deleteMany({ status: "error" });
+    toast.success("تم مسح سجل الأخطاء");
+    load();
+  };
+
+  const ERROR_TYPE_LABELS = {
+    extraction_failed: "فشل الاستخراج",
+    ocr_failed: "فشل OCR",
+    translation_failed: "فشل الترجمة",
+    quality_check_failed: "فشل فحص الجودة",
+    empty_text: "نص فارغ",
+    other: "أخرى",
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-bold flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-destructive" /> سجل الأخطاء ({errors.length})
+        </h3>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={load}>
+            <RefreshCw className="w-4 h-4 ml-1" /> تحديث
+          </Button>
+          {errors.length > 0 && (
+            <Button size="sm" variant="outline" onClick={handleClearErrors} className="text-destructive hover:text-destructive">
+              <Trash2 className="w-4 h-4 ml-1" /> مسح الكل
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {loading ? (
+        <Loader2 className="w-5 h-5 animate-spin text-primary mx-auto" />
+      ) : errors.length === 0 ? (
+        <div className="text-center py-12">
+          <Check className="w-12 h-12 text-green-500 mx-auto mb-3" />
+          <p className="text-sm text-muted-foreground">لا توجد أخطاء — كل شيء يعمل بسلاسة</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {errors.map((err) => (
+            <div key={err.id} className="bg-card border border-destructive/20 rounded-xl p-3 space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-bold truncate">{err.book_title || "كتاب بدون عنوان"}</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-destructive/10 text-destructive font-medium">
+                      {ERROR_TYPE_LABELS[err.error_type] || err.error_type || "خطأ"}
+                    </span>
+                    {err.target_language && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                        {err.target_language}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">{err.error_message}</p>
+                  <p className="text-[10px] text-muted-foreground/60 mt-1">
+                    صفحة {err.page_number} • {new Date(err.updated_date).toLocaleString("ar")}
+                  </p>
+                </div>
+                <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0" onClick={() => handleRetry(err)}>
+                  <RotateCw className="w-3.5 h-3.5 text-primary" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Book Inspection Tab ──────────────────────────────────────────────────────
+function InspectTab() {
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [inspecting, setInspecting] = useState(null);
+  const [results, setResults] = useState({});
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const allBooks = await base44.entities.Book.list("-updated_date", 100);
+    setBooks((allBooks || []).filter((b) => b.pdf_url));
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const handleInspect = async (book) => {
+    setInspecting(book.id);
+    try {
+      const info = await inspectBook(book.pdf_url, book.id);
+      setResults((prev) => ({ ...prev, [book.id]: info }));
+      if (info.needs_ocr) toast.info(`"${book.title}" يحتاج OCR`);
+      else toast.success(`"${book.title}" يحتوي على نص (${info.total_pages} صفحة)`);
+    } catch (e) {
+      toast.error("فشل الفحص");
+    } finally {
+      setInspecting(null);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-bold flex items-center gap-2">
+          <FileSearch className="w-4 h-4 text-primary" /> فحص الكتب ({books.length})
+        </h3>
+        <Button size="sm" variant="outline" onClick={load}>
+          <RefreshCw className="w-4 h-4 ml-1" /> تحديث
+        </Button>
+      </div>
+
+      <p className="text-xs text-muted-foreground bg-muted/30 rounded-lg p-3">
+        افحص كل كتاب لمعرفة: هل يحتوي على نص قابل للترجمة؟ هل يحتاج OCR؟ عدد الصفحات؟
+      </p>
+
+      {loading ? (
+        <Loader2 className="w-5 h-5 animate-spin text-primary mx-auto" />
+      ) : (
+        <div className="space-y-2">
+          {books.map((book) => {
+            const info = results[book.id];
+            return (
+              <div key={book.id} className="bg-card border border-border rounded-xl p-3 space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold truncate">{book.title}</p>
+                    <p className="text-xs text-muted-foreground">{book.author}</p>
+                  </div>
+                  <Button size="sm" variant="outline" onClick={() => handleInspect(book)} disabled={inspecting === book.id}>
+                    {inspecting === book.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileSearch className="w-3.5 h-3.5" />}
+                    <span className="mr-1">فحص</span>
+                  </Button>
+                </div>
+
+                {info && (
+                  <div className="flex items-center gap-2 flex-wrap pt-1">
+                    {info.has_text ? (
+                      <span className="text-[10px] px-2 py-1 rounded-lg bg-green-500/10 text-green-600 font-medium flex items-center gap-1">
+                        <FileText className="w-3 h-3" /> نص مباشر ({info.pages_with_text} صفحة)
+                      </span>
+                    ) : null}
+                    {info.needs_ocr ? (
+                      <span className="text-[10px] px-2 py-1 rounded-lg bg-amber-500/10 text-amber-600 font-medium flex items-center gap-1">
+                        <ScanText className="w-3 h-3" /> يحتاج OCR ({info.pages_without_text} صفحة)
+                      </span>
+                    ) : null}
+                    {info.total_pages > 0 && (
+                      <span className="text-[10px] px-2 py-1 rounded-lg bg-muted text-muted-foreground font-medium">
+                        الإجمالي: {info.total_pages} صفحة
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function DevTranslations() {
   const [tab, setTab] = useState("stats");
@@ -473,18 +669,22 @@ export default function DevTranslations() {
   return (
     <div className="space-y-4">
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="grid grid-cols-2 md:grid-cols-5 w-full">
-          <TabsTrigger value="stats" className="text-xs gap-1"><BarChart3 className="w-3.5 h-3.5" /> إحصائيات</TabsTrigger>
-          <TabsTrigger value="languages" className="text-xs gap-1"><Languages className="w-3.5 h-3.5" /> اللغات</TabsTrigger>
-          <TabsTrigger value="glossary" className="text-xs gap-1"><BookText className="w-3.5 h-3.5" /> القاموس</TabsTrigger>
-          <TabsTrigger value="books" className="text-xs gap-1"><Library className="w-3.5 h-3.5" /> الكتب</TabsTrigger>
-          <TabsTrigger value="settings" className="text-xs gap-1"><Globe className="w-3.5 h-3.5" /> الإعدادات</TabsTrigger>
+        <TabsList className="grid grid-cols-2 md:grid-cols-7 w-full h-auto">
+          <TabsTrigger value="stats" className="text-xs gap-1 py-1.5"><BarChart3 className="w-3.5 h-3.5" /> إحصائيات</TabsTrigger>
+          <TabsTrigger value="inspect" className="text-xs gap-1 py-1.5"><FileSearch className="w-3.5 h-3.5" /> فحص الكتب</TabsTrigger>
+          <TabsTrigger value="languages" className="text-xs gap-1 py-1.5"><Languages className="w-3.5 h-3.5" /> اللغات</TabsTrigger>
+          <TabsTrigger value="glossary" className="text-xs gap-1 py-1.5"><BookText className="w-3.5 h-3.5" /> القاموس</TabsTrigger>
+          <TabsTrigger value="books" className="text-xs gap-1 py-1.5"><Library className="w-3.5 h-3.5" /> الكتب</TabsTrigger>
+          <TabsTrigger value="errors" className="text-xs gap-1 py-1.5"><AlertTriangle className="w-3.5 h-3.5" /> سجل الأخطاء</TabsTrigger>
+          <TabsTrigger value="settings" className="text-xs gap-1 py-1.5"><Globe className="w-3.5 h-3.5" /> الإعدادات</TabsTrigger>
         </TabsList>
 
         <TabsContent value="stats" className="mt-4"><StatsTab /></TabsContent>
+        <TabsContent value="inspect" className="mt-4"><InspectTab /></TabsContent>
         <TabsContent value="languages" className="mt-4"><LanguagesTab /></TabsContent>
         <TabsContent value="glossary" className="mt-4"><GlossaryTab /></TabsContent>
         <TabsContent value="books" className="mt-4"><BooksTab /></TabsContent>
+        <TabsContent value="errors" className="mt-4"><ErrorLogTab /></TabsContent>
         <TabsContent value="settings" className="mt-4"><SettingsTab /></TabsContent>
       </Tabs>
     </div>

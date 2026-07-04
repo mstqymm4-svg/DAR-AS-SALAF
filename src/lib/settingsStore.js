@@ -143,7 +143,7 @@ let _cache = { ...DEFAULT_SETTINGS };
 let _userEmail = "";
 
 // ─── Apply settings to DOM ────────────────────────────────────────────────────
-import { FONT_PRESETS, FONT_ROLES } from "@/pages/DevPanel";
+import { FONT_PRESETS, FONT_ROLES } from "@/lib/fontConstants";
 
 function applyColorVar(cssVar, hslValue) {
   if (hslValue) document.documentElement.style.setProperty(cssVar, hslValue);

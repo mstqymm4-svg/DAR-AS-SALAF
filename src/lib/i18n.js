@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+
 // ─── Centralised translation strings ───────────────────────────────────────
 export const TRANSLATIONS = {
   ar: {
@@ -72,6 +74,17 @@ export const TRANSLATIONS = {
     close: "إغلاق",
     bookNotFound: "الكتاب غير موجود",
     bookNotFoundSub: "ربما تم حذف هذا الكتاب",
+    navVideos: "فيديوهات",
+    translateBook: "ترجمة الكتاب",
+    videosTitle: "الفيديوهات",
+    videosSub: "شاهد الفيديوهات داخل التطبيق مباشرة",
+    featuredVideos: "فيديوهات مميزة",
+    recentVideos: "أحدث الفيديوهات",
+    noVideos: "لا توجد فيديوهات",
+    searchVideo: "ابحث عن فيديو...",
+    videoChannels: "قنوات الفيديو",
+    play: "تشغيل",
+    all: "الكل",
   },
   en: {
     dir: "ltr",
@@ -145,6 +158,17 @@ export const TRANSLATIONS = {
     close: "Close",
     bookNotFound: "Book not found",
     bookNotFoundSub: "This book may have been deleted",
+    navVideos: "Videos",
+    translateBook: "Translate Book",
+    videosTitle: "Videos",
+    videosSub: "Watch videos directly in the app",
+    featuredVideos: "Featured Videos",
+    recentVideos: "Latest Videos",
+    noVideos: "No videos available",
+    searchVideo: "Search for a video...",
+    videoChannels: "Video Channels",
+    play: "Play",
+    all: "All",
   },
   fr: {
     dir: "ltr",
@@ -218,6 +242,17 @@ export const TRANSLATIONS = {
     close: "Fermer",
     bookNotFound: "Livre introuvable",
     bookNotFoundSub: "Ce livre a peut-être été supprimé",
+    navVideos: "Vidéos",
+    translateBook: "Traduire le Livre",
+    videosTitle: "Vidéos",
+    videosSub: "Regardez des vidéos directement dans l'application",
+    featuredVideos: "Vidéos en Vedette",
+    recentVideos: "Dernières Vidéos",
+    noVideos: "Aucune vidéo disponible",
+    searchVideo: "Rechercher une vidéo...",
+    videoChannels: "Chaînes Vidéo",
+    play: "Lire",
+    all: "Tout",
   },
   ur: {
     dir: "rtl",
@@ -291,6 +326,17 @@ export const TRANSLATIONS = {
     close: "بند کریں",
     bookNotFound: "کتاب نہیں ملی",
     bookNotFoundSub: "شاید یہ کتاب حذف کر دی گئی ہو",
+    navVideos: "ویڈیوز",
+    translateBook: "کتاب کا ترجمہ",
+    videosTitle: "ویڈیوز",
+    videosSub: "ایپ میں براہ راست ویڈیوز دیکھیں",
+    featuredVideos: "نمایاں ویڈیوز",
+    recentVideos: "تازہ ویڈیوز",
+    noVideos: "کوئی ویڈیو دستیاب نہیں",
+    searchVideo: "ویڈیو تلاش کریں...",
+    videoChannels: "ویڈیو چینلز",
+    play: "چلائیں",
+    all: "سب",
   },
   hi: {
     dir: "ltr",
@@ -364,6 +410,17 @@ export const TRANSLATIONS = {
     close: "बंद करें",
     bookNotFound: "पुस्तक नहीं मिली",
     bookNotFoundSub: "यह पुस्तक शायद हटा दी गई है",
+    navVideos: "वीडियो",
+    translateBook: "पुस्तक का अनुवाद",
+    videosTitle: "वीडियो",
+    videosSub: "ऐप में सीधे वीडियो देखें",
+    featuredVideos: "विशेष वीडियो",
+    recentVideos: "नवीनतम वीडियो",
+    noVideos: "कोई वीडियो उपलब्ध नहीं",
+    searchVideo: "वीडियो खोजें...",
+    videoChannels: "वीडियो चैनल",
+    play: "चलाएं",
+    all: "सभी",
   },
   tr: {
     dir: "ltr",
@@ -437,6 +494,17 @@ export const TRANSLATIONS = {
     close: "Kapat",
     bookNotFound: "Kitap bulunamadı",
     bookNotFoundSub: "Bu kitap silinmiş olabilir",
+    navVideos: "Videolar",
+    translateBook: "Kitabı Çevir",
+    videosTitle: "Videolar",
+    videosSub: "Uygulama içinde videoları doğrudan izleyin",
+    featuredVideos: "Öne Çıkan Videolar",
+    recentVideos: "Son Videolar",
+    noVideos: "Video bulunamadı",
+    searchVideo: "Video ara...",
+    videoChannels: "Video Kanalları",
+    play: "Oynat",
+    all: "Tümü",
   },
 };
 
@@ -455,7 +523,18 @@ const LANG_META = {
 };
 
 export function useT() {
-  const lang = ls.get("dev_app_lang", "ar");
+  const [lang, setLang] = useState(() => ls.get("dev_app_lang", "ar"));
+
+  useEffect(() => {
+    const handler = () => setLang(ls.get("dev_app_lang", "ar"));
+    window.addEventListener("app-lang-change", handler);
+    window.addEventListener("storage", handler);
+    return () => {
+      window.removeEventListener("app-lang-change", handler);
+      window.removeEventListener("storage", handler);
+    };
+  }, []);
+
   const t = TRANSLATIONS[lang] || TRANSLATIONS["ar"];
   const meta = LANG_META[lang] || LANG_META["ar"];
   const customName = ls.get("dev_app_name", "");

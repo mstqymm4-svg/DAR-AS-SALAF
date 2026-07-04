@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { useT, TRANSLATIONS } from "@/lib/i18n";
+import { setThemeMode, getThemeState, subscribeToTheme } from "@/lib/themeEngine";
 
 const ls = {
   get: (k, fb = "") => {try {return localStorage.getItem(k) || fb;} catch (e) {return fb;}},
@@ -20,7 +21,7 @@ export default function Settings() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => getThemeState().isDark);
   const [notifications, setNotifications] = useState(true);
   const [language, setLanguage] = useState("العربية");
   const [fullName, setFullName] = useState("");
@@ -28,11 +29,8 @@ export default function Settings() {
 
   useEffect(() => {
     loadUser();
-    // قراءة الوضع الليلي المحفوظ
-    const saved = localStorage.getItem("dev_dark_mode");
-    const isDark = saved !== null ? saved === "true" : document.documentElement.classList.contains("dark");
-    setDarkMode(isDark);
-    document.documentElement.classList.toggle("dark", isDark);
+    const unsub = subscribeToTheme(({ isDark }) => setDarkMode(isDark));
+    return unsub;
   }, []);
 
   const loadUser = async () => {
@@ -55,9 +53,7 @@ export default function Settings() {
 
   const handleToggleDark = (val) => {
     setDarkMode(val);
-    document.documentElement.classList.toggle("dark", val);
-    // حفظ دائم
-    try {localStorage.setItem("dev_dark_mode", String(val));} catch (e) {}
+    setThemeMode(val ? "dark" : "light");
   };
 
   const handleSavePreferences = async () => {
@@ -69,8 +65,8 @@ export default function Settings() {
 
   const handleSaveAppLang = () => {
     ls.set("dev_app_lang", appLang);
-    toast.success(t.applyLang + " ✓ — " + (t.dir === "rtl" ? "أعد تحميل الصفحة" : "Reload the page"));
-    setTimeout(() => window.location.reload(), 1000);
+    window.dispatchEvent(new Event("app-lang-change"));
+    toast.success(t.applyLang + " ✓");
   };
 
   if (loading) {
@@ -127,7 +123,7 @@ export default function Settings() {
             </div>
             <div className="flex items-center gap-2">
               <Sun className="w-4 h-4 text-muted-foreground" />
-              <Switch checked={darkMode} onCheckedChange={handleToggleDark} className="text-xs line-through italic normal-case text-left rounded-[10007px]" />
+              <Switch checked={darkMode} onCheckedChange={handleToggleDark} />
               <Moon className="w-4 h-4 text-muted-foreground" />
             </div>
           </div>
