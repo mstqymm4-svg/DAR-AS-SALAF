@@ -5,7 +5,6 @@ import { BookOpen, ArrowLeft, Sparkles, Youtube, ExternalLink } from "lucide-rea
 import BookCard from "../components/BookCard";
 import CategoryChip, { categories } from "../components/CategoryChip";
 import HeroBanner from "../components/HeroBanner";
-import SocialChannelsSection from "../components/SocialChannelsSection";
 import { motion } from "framer-motion";
 import { useT } from "@/lib/i18n";
 import { getSetting, subscribeToSettings } from "@/lib/settingsStore";
@@ -158,9 +157,6 @@ export default function Home() {
           <p className="text-sm text-muted-foreground">{t.emptyLibSub}</p>
         </div>
       }
-
-      {/* Social Channels */}
-      <SocialChannelsSection />
     </div>);
 
 }

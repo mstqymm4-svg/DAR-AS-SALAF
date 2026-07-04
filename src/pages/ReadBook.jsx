@@ -1,21 +1,17 @@
 import { useState, useEffect } from "react";
-import { useParams, useSearchParams, Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ArrowRight, BookOpen, Globe, Languages } from "lucide-react";
+import { ArrowRight, BookOpen, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import FlipBookViewer from "@/components/FlipBookViewer";
+import PdfViewer from "@/components/PdfViewer";
 import TranslationPanel from "@/components/TranslationPanel";
-import { getBookTranslations } from "@/lib/translationEngine";
 
 export default function ReadBook() {
   const { id } = useParams();
-  const [searchParams] = useSearchParams();
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [translateOpen, setTranslateOpen] = useState(searchParams.get("translate") === "true");
-  const [viewMode, setViewMode] = useState("original");
-  const [translatedLang, setTranslatedLang] = useState("");
-  const [translations, setTranslations] = useState([]);
+  const [translateOpen, setTranslateOpen] = useState(false);
+  const [displayMode, setDisplayMode] = useState("side");
 
   useEffect(() => {
     base44.entities.Book.filter({ id }).then((books) => {
@@ -24,20 +20,12 @@ export default function ReadBook() {
     });
   }, [id]);
 
-  const handleViewTranslated = async (lang) => {
-    if (!book?.id) return;
-    setTranslatedLang(lang);
-    const trans = await getBookTranslations(book.id, lang);
-    setTranslations(trans);
-    setViewMode("translated");
-    setTranslateOpen(false);
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
       </div>);
+
   }
 
   if (!book || !book.pdf_url) {
@@ -47,57 +35,48 @@ export default function ReadBook() {
         <h3 className="text-lg font-bold mb-2">لا يوجد ملف PDF لهذا الكتاب</h3>
         <Link to="/books" className="text-primary text-sm hover:underline">العودة للمكتبة</Link>
       </div>);
+
   }
 
-  const bookLang = book.language === "الإنجليزية" ? "en" : book.language === "الهندية" ? "hi" : "ar";
+  const showPdf = !translateOpen || displayMode === "side";
 
   return (
     <div className="flex flex-col" style={{ height: "100dvh" }}>
+      {/* Top Bar */}
       <div className="bg-card border-b border-border px-4 py-2 flex items-center justify-between gap-3 shrink-0">
-        <Link to={`/book/${book.id}`} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors min-w-0">
-          <ArrowRight className="w-4 h-4 shrink-0" />
-          <span className="hidden sm:inline truncate">{book.title}</span>
+        <Link to={`/book/${book.id}`} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <ArrowRight className="w-4 h-4" />
+          <span className="hidden sm:inline">{book.title}</span>
           <span className="sm:hidden">رجوع</span>
         </Link>
-        <div className="flex items-center gap-2">
-          {viewMode === "translated" &&
-          <>
-              <span className="text-xs text-muted-foreground hidden sm:inline">النسخة المترجمة</span>
-              <Button size="sm" variant="outline" onClick={() => setViewMode("original")} className="gap-1.5 h-8">
-                <Languages className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">الأصلية</span>
-              </Button>
-            </>
-          }
-          
-
-
-
-
-
-
-
-          
-        </div>
+        <Button
+          size="sm"
+          variant={translateOpen ? "default" : "outline"}
+          onClick={() => setTranslateOpen(!translateOpen)}
+          className="gap-1.5"
+        >
+          <Globe className="w-4 h-4" />
+          <span className="hidden sm:inline">ترجمة ذكية</span>
+        </Button>
       </div>
 
+      {/* Content: PDF + Translation Panel */}
       <div className="flex-1 flex overflow-hidden">
-        <div className={`flex-1 h-full overflow-hidden ${translateOpen ? "hidden sm:block sm:w-1/2 sm:border-l sm:border-border" : "w-full"}`}>
-          {viewMode === "original" ?
-          <FlipBookViewer pdfUrl={book.pdf_url} title={book.title} language={bookLang} /> :
-
-          <FlipBookViewer translations={translations} title={book.title} language={translatedLang} />
-          }
-        </div>
-        {translateOpen &&
-        <div className="w-full sm:w-1/2 h-full overflow-hidden">
-            <TranslationPanel
-            book={book}
-            onClose={() => setTranslateOpen(false)}
-            onViewTranslated={handleViewTranslated} />
-          
+        {showPdf && (
+          <div className={`${translateOpen && displayMode === "side" ? "w-1/2 border-l border-border" : "w-full"} h-full overflow-hidden`}>
+            <PdfViewer url={book.pdf_url} title={book.title} />
           </div>
-        }
+        )}
+        {translateOpen && (
+          <div className={`${displayMode === "only" ? "w-full" : "w-1/2"} h-full overflow-hidden`}>
+            <TranslationPanel
+              book={book}
+              onClose={() => setTranslateOpen(false)}
+              displayMode={displayMode}
+              onDisplayModeChange={setDisplayMode}
+            />
+          </div>
+        )}
       </div>
     </div>);
 

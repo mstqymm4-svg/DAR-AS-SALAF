@@ -5,7 +5,7 @@ import {
   LayoutDashboard, BookOpen, Type, Palette, Layers, Sliders,
   Navigation, Image, Users, HardDrive, Archive, Activity,
   KeyRound, Zap, Settings, ChevronRight, Moon, Sun, Check, Menu, X,
-  ImagePlay, GalleryHorizontal, Paintbrush, Languages, Share2, Video
+  ImagePlay, GalleryHorizontal, Paintbrush, Languages
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,11 +34,9 @@ import DevBackgroundLibrary from "@/components/dev/DevBackgroundLibrary";
 import DevBackgroundManager from "@/components/dev/DevBackgroundManager";
 import DevTheme from "@/components/dev/DevTheme";
 import DevTranslations from "@/components/dev/DevTranslations";
-import DevSocialChannels from "@/components/dev/DevSocialChannels";
-import DevVideos from "@/components/dev/DevVideos";
 
 // ─── Font / Color exports (used by settingsStore) ─────────────────────────────
-export { FONT_PRESETS, FONT_ROLES } from "@/lib/fontConstants";
+export { FONT_PRESETS, FONT_ROLES } from "@/components/dev/DevFonts";
 
 // ─── Password ─────────────────────────────────────────────────────────────────
 const DEV_PASSWORD_KEY = "dev_panel_password";
@@ -68,8 +66,6 @@ const TABS = [
   { id: "background",   label: "إدارة الخلفيات",     icon: ImagePlay },
   { id: "bg_library",   label: "مكتبة الخلفيات",     icon: GalleryHorizontal },
   { id: "translations",  label: "إدارة الترجمة الذكية", icon: Languages },
-  { id: "social",        label: "قنوات التواصل",        icon: Share2 },
-  { id: "videos",        label: "إدارة الفيديوهات",      icon: Video },
 ];
 
 export default function DevPanel() {
@@ -148,8 +144,6 @@ export default function DevPanel() {
     background:   DevBackgroundManager,
     bg_library:   DevBackgroundLibrary,
     translations:  DevTranslations,
-    social:        DevSocialChannels,
-    videos:        DevVideos,
   }[activeTab] || DevDashboard;
 
   return (
