@@ -1,13 +1,21 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useSearchParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ArrowRight, BookOpen } from "lucide-react";
-import PdfViewer from "@/components/PdfViewer";
+import { ArrowRight, BookOpen, Globe, Languages } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import FlipBookViewer from "@/components/FlipBookViewer";
+import TranslationPanel from "@/components/TranslationPanel";
+import { getBookTranslations } from "@/lib/translationEngine";
 
 export default function ReadBook() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [translateOpen, setTranslateOpen] = useState(searchParams.get("translate") === "true");
+  const [viewMode, setViewMode] = useState("original");
+  const [translatedLang, setTranslatedLang] = useState("");
+  const [translations, setTranslations] = useState([]);
 
   useEffect(() => {
     base44.entities.Book.filter({ id }).then((books) => {
@@ -15,6 +23,15 @@ export default function ReadBook() {
       setLoading(false);
     });
   }, [id]);
+
+  const handleViewTranslated = async (lang) => {
+    if (!book?.id) return;
+    setTranslatedLang(lang);
+    const trans = await getBookTranslations(book.id, lang);
+    setTranslations(trans);
+    setViewMode("translated");
+    setTranslateOpen(false);
+  };
 
   if (loading) {
     return (
@@ -32,17 +49,55 @@ export default function ReadBook() {
       </div>);
   }
 
+  const bookLang = book.language === "الإنجليزية" ? "en" : book.language === "الهندية" ? "hi" : "ar";
+
   return (
     <div className="flex flex-col" style={{ height: "100dvh" }}>
-      <div className="bg-card border-b border-border px-4 py-2 flex items-center gap-2 shrink-0">
+      <div className="bg-card border-b border-border px-4 py-2 flex items-center justify-between gap-3 shrink-0">
         <Link to={`/book/${book.id}`} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors min-w-0">
           <ArrowRight className="w-4 h-4 shrink-0" />
           <span className="hidden sm:inline truncate">{book.title}</span>
           <span className="sm:hidden">رجوع</span>
         </Link>
+        <div className="flex items-center gap-2">
+          {viewMode === "translated" && (
+            <>
+              <span className="text-xs text-muted-foreground hidden sm:inline">النسخة المترجمة</span>
+              <Button size="sm" variant="outline" onClick={() => setViewMode("original")} className="gap-1.5 h-8">
+                <Languages className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">الأصلية</span>
+              </Button>
+            </>
+          )}
+          <Button
+            size="sm"
+            variant={translateOpen ? "default" : "outline"}
+            onClick={() => setTranslateOpen(!translateOpen)}
+            className="gap-1.5 h-8"
+          >
+            <Globe className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">ترجمة ذكية</span>
+          </Button>
+        </div>
       </div>
-      <div className="flex-1 overflow-hidden">
-        <PdfViewer url={book.pdf_url} title={book.title} />
+
+      <div className="flex-1 flex overflow-hidden">
+        <div className={`flex-1 h-full overflow-hidden ${translateOpen ? "hidden sm:block sm:w-1/2 sm:border-l sm:border-border" : "w-full"}`}>
+          {viewMode === "original" ? (
+            <FlipBookViewer pdfUrl={book.pdf_url} title={book.title} language={bookLang} />
+          ) : (
+            <FlipBookViewer translations={translations} title={book.title} language={translatedLang} />
+          )}
+        </div>
+        {translateOpen && (
+          <div className="w-full sm:w-1/2 h-full overflow-hidden">
+            <TranslationPanel
+              book={book}
+              onClose={() => setTranslateOpen(false)}
+              onViewTranslated={handleViewTranslated}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

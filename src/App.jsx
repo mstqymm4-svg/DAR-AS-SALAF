@@ -7,30 +7,38 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import Layout from './components/Layout';
 import SaveStatusIndicator from './components/SaveStatusIndicator';
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { loadSettings } from '@/lib/settingsStore';
 import { initThemeEngine } from '@/lib/themeEngine';
 import { base44 } from '@/api/base44Client';
+
 // Apply theme immediately from localStorage before any renders
 try {
   const lsMode = localStorage.getItem("devs_theme_mode") || (localStorage.getItem("devs_dark_mode") === "true" ? "dark" : "light");
   if (lsMode === "dark") document.documentElement.classList.add("dark");
   else if (lsMode === "light") document.documentElement.classList.remove("dark");
 } catch(e) {}
-import Home from './pages/Home';
-import Books from './pages/Books';
-import BookDetails from './pages/BookDetails';
-import Favorites from './pages/Favorites';
-import Admin from './pages/Admin';
-import Settings from './pages/Settings';
-import DevPanel from './pages/DevPanel';
-import ReadBook from './pages/ReadBook';
-import Videos from './pages/Videos';
+
+// Lazy-load pages for faster initial load
+const Home = lazy(() => import('./pages/Home'));
+const Books = lazy(() => import('./pages/Books'));
+const BookDetails = lazy(() => import('./pages/BookDetails'));
+const Favorites = lazy(() => import('./pages/Favorites'));
+const Admin = lazy(() => import('./pages/Admin'));
+const Settings = lazy(() => import('./pages/Settings'));
+const DevPanel = lazy(() => import('./pages/DevPanel'));
+const ReadBook = lazy(() => import('./pages/ReadBook'));
+const Videos = lazy(() => import('./pages/Videos'));
+
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-[60vh]">
+    <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+  </div>
+);
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
 
-  // Load settings from DB on app start, then init theme
   useEffect(() => {
     base44.auth.me()
       .then(u => loadSettings(u?.email))
@@ -38,7 +46,6 @@ const AuthenticatedApp = () => {
       .finally(() => initThemeEngine());
   }, []);
 
-  // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
@@ -47,42 +54,39 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Handle authentication errors
   if (authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
       navigateToLogin();
       return null;
     }
   }
 
-  // Render the main app
   return (
     <>
     <SaveStatusIndicator />
-    <Routes>
-      <Route element={<Layout />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/books" element={<Books />} />
-        <Route path="/book/:id" element={<BookDetails />} />
-        <Route path="/favorites" element={<Favorites />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/dev" element={<DevPanel />} />
-        <Route path="/read/:id" element={<ReadBook />} />
-        <Route path="/videos" element={<Videos />} />
-        <Route path="*" element={<PageNotFound />} />
-      </Route>
-    </Routes>
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/books" element={<Books />} />
+          <Route path="/book/:id" element={<BookDetails />} />
+          <Route path="/favorites" element={<Favorites />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/dev" element={<DevPanel />} />
+          <Route path="/read/:id" element={<ReadBook />} />
+          <Route path="/videos" element={<Videos />} />
+          <Route path="*" element={<PageNotFound />} />
+        </Route>
+      </Routes>
+    </Suspense>
     </>
   );
 };
 
-
 function App() {
-
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>

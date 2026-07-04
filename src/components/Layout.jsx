@@ -32,7 +32,7 @@ export default function Layout() {
   const navItems = [
     { path: "/",          icon: Home,     label: t.navHome },
     { path: "/books",     icon: BookOpen, label: t.navBooks },
-    { path: "/videos",    icon: Video,    label: "فيديوهات" },
+    { path: "/videos",    icon: Video,    label: t.navVideos },
     { path: "/favorites", icon: Heart,    label: t.navFav },
     { path: "/settings",  icon: Settings, label: t.navSettings },
     ...(showDevNav ? [{ path: "/dev", icon: Code, label: "Dev" }] : []),

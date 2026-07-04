@@ -7,8 +7,10 @@ import { Play, Heart, Share2, Star, Search, Video, Tv, Clock } from "lucide-reac
 import { toast } from "sonner";
 import VideoPlayer from "@/components/VideoPlayer";
 import { getThumbnail } from "@/components/dev/DevVideos";
+import { useT } from "@/lib/i18n";
 
 export default function Videos() {
+  const t = useT();
   const [videos, setVideos] = useState([]);
   const [channels, setChannels] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -52,14 +54,14 @@ export default function Videos() {
       : [...favorites, videoId];
     setFavorites(next);
     localStorage.setItem("video_favorites", JSON.stringify(next));
-    toast.success(favorites.includes(videoId) ? "أُزيل من المفضلة" : "أُضيف للمفضلة");
+    toast.success(favorites.includes(videoId) ? t.removeFav : t.addFav);
   };
 
   const handleShare = async (video) => {
     if (navigator.share) {
       try { await navigator.share({ title: video.title, url: video.youtube_url }); } catch(e) {}
     } else {
-      try { await navigator.clipboard.writeText(video.youtube_url); toast.success("تم نسخ الرابط"); } catch(e) {}
+      try { await navigator.clipboard.writeText(video.youtube_url); toast.success("✓"); } catch(e) {}
     }
   };
 
@@ -83,8 +85,8 @@ export default function Videos() {
           </span>
         )}
         {video.is_featured && (
-          <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-amber-500 text-white text-[10px] font-bold flex items-center gap-1">
-            <Star className="w-2.5 h-2.5 fill-white" /> مميز
+         <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-amber-500 text-white text-[10px] font-bold flex items-center gap-1">
+          <Star className="w-2.5 h-2.5 fill-white" /> {t.featured}
           </span>
         )}
       </div>
@@ -96,7 +98,7 @@ export default function Videos() {
         {video.description && <p className="text-[10px] text-muted-foreground line-clamp-2 mb-2">{video.description}</p>}
         <div className="flex items-center gap-1">
           <Button size="sm" className="flex-1 h-8 text-xs gap-1" onClick={() => setPlayingVideo(video)}>
-            <Play className="w-3.5 h-3.5" /> تشغيل
+            <Play className="w-3.5 h-3.5" /> {t.play}
           </Button>
           <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => toggleFavorite(video.id)}>
             <Heart className={`w-3.5 h-3.5 ${favorites.includes(video.id) ? "fill-red-500 text-red-500" : ""}`} />
@@ -123,9 +125,9 @@ export default function Videos() {
       <div className="bg-gradient-to-l from-primary/10 to-transparent py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-2xl font-black mb-2 flex items-center gap-2">
-            <Video className="w-6 h-6 text-primary" /> الفيديوهات
+            <Video className="w-6 h-6 text-primary" /> {t.videosTitle}
           </h1>
-          <p className="text-sm text-muted-foreground">شاهد الفيديوهات داخل التطبيق مباشرة</p>
+          <p className="text-sm text-muted-foreground">{t.videosSub}</p>
         </div>
       </div>
 
@@ -134,7 +136,7 @@ export default function Videos() {
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input placeholder="ابحث عن فيديو..." value={search} onChange={(e) => setSearch(e.target.value)}
+            <Input placeholder={t.searchVideo} value={search} onChange={(e) => setSearch(e.target.value)}
               className="pr-9" />
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1">
@@ -143,7 +145,7 @@ export default function Videos() {
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap border-2 transition-all shrink-0 ${
                   category === cat ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground hover:border-primary/30"
                 }`}>
-                {cat === "all" ? "الكل" : cat}
+                {cat === "all" ? t.all : cat}
               </button>
             ))}
           </div>
@@ -153,7 +155,7 @@ export default function Videos() {
         {featured.length > 0 && category === "all" && !search && (
           <section>
             <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
-              <Star className="w-5 h-5 text-amber-500 fill-amber-500" /> فيديوهات مميزة
+              <Star className="w-5 h-5 text-amber-500 fill-amber-500" /> {t.featuredVideos}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {featured.slice(0, 3).map((v) => <VideoCard key={v.id} video={v} />)}
@@ -164,12 +166,12 @@ export default function Videos() {
         {/* Recent */}
         <section>
           <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
-            <Clock className="w-5 h-5 text-primary" /> أحدث الفيديوهات
+            <Clock className="w-5 h-5 text-primary" /> {t.recentVideos}
           </h2>
           {recent.length === 0 ? (
             <div className="text-center py-12">
               <Video className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-              <p className="text-sm text-muted-foreground">لا توجد فيديوهات</p>
+              <p className="text-sm text-muted-foreground">{t.noVideos}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -182,7 +184,7 @@ export default function Videos() {
         {channels.length > 0 && (
           <section>
             <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
-              <Tv className="w-5 h-5 text-primary" /> قنوات الفيديو
+              <Tv className="w-5 h-5 text-primary" /> {t.videoChannels}
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {channels.map((ch) => (
