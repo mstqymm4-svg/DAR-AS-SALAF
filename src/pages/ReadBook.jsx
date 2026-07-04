@@ -69,15 +69,15 @@ export default function ReadBook() {
               </Button>
             </>
           }
-          <Button
-            size="sm"
-            variant={translateOpen ? "default" : "outline"}
-            onClick={() => setTranslateOpen(!translateOpen)}
-            className="gap-1.5 h-8 hidden">
-            
-            <Globe className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">ترجمة ذكية</span>
-          </Button>
+          
+
+
+
+
+
+
+
+          
         </div>
       </div>
 
