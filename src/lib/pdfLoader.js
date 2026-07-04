@@ -4,9 +4,9 @@
  * Supports books of any size (100 – 5000+ pages) with lazy page loading.
  */
 import * as pdfjsLib from "pdfjs-dist";
-import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+import PdfWorker from "pdfjs-dist/build/pdf.worker.min.mjs?worker";
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
+pdfjsLib.GlobalWorkerOptions.workerPort = new PdfWorker();
 
 // Cache loaded PDF documents (url -> pdf proxy)
 const _docCache = new Map();
