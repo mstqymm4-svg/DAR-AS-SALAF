@@ -60,21 +60,21 @@ export default function ReadBook() {
           <span className="sm:hidden">رجوع</span>
         </Link>
         <div className="flex items-center gap-2">
-          {viewMode === "translated" && (
-            <>
+          {viewMode === "translated" &&
+          <>
               <span className="text-xs text-muted-foreground hidden sm:inline">النسخة المترجمة</span>
               <Button size="sm" variant="outline" onClick={() => setViewMode("original")} className="gap-1.5 h-8">
                 <Languages className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">الأصلية</span>
               </Button>
             </>
-          )}
+          }
           <Button
             size="sm"
             variant={translateOpen ? "default" : "outline"}
             onClick={() => setTranslateOpen(!translateOpen)}
-            className="gap-1.5 h-8"
-          >
+            className="gap-1.5 h-8 hidden">
+            
             <Globe className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">ترجمة ذكية</span>
           </Button>
@@ -83,22 +83,22 @@ export default function ReadBook() {
 
       <div className="flex-1 flex overflow-hidden">
         <div className={`flex-1 h-full overflow-hidden ${translateOpen ? "hidden sm:block sm:w-1/2 sm:border-l sm:border-border" : "w-full"}`}>
-          {viewMode === "original" ? (
-            <FlipBookViewer pdfUrl={book.pdf_url} title={book.title} language={bookLang} />
-          ) : (
-            <FlipBookViewer translations={translations} title={book.title} language={translatedLang} />
-          )}
+          {viewMode === "original" ?
+          <FlipBookViewer pdfUrl={book.pdf_url} title={book.title} language={bookLang} /> :
+
+          <FlipBookViewer translations={translations} title={book.title} language={translatedLang} />
+          }
         </div>
-        {translateOpen && (
-          <div className="w-full sm:w-1/2 h-full overflow-hidden">
+        {translateOpen &&
+        <div className="w-full sm:w-1/2 h-full overflow-hidden">
             <TranslationPanel
-              book={book}
-              onClose={() => setTranslateOpen(false)}
-              onViewTranslated={handleViewTranslated}
-            />
+            book={book}
+            onClose={() => setTranslateOpen(false)}
+            onViewTranslated={handleViewTranslated} />
+          
           </div>
-        )}
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 }
