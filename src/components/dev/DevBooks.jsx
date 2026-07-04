@@ -57,11 +57,16 @@ export default function DevBooks() {
     if (!form.title || !form.author) { toast.error("أدخل العنوان والمؤلف"); return; }
     setSaving(true);
     const data = { ...form, pages_count: form.pages_count ? Number(form.pages_count) : null, rating: Number(form.rating)||0 };
-    if (editBook) await base44.entities.Book.update(editBook.id, data);
-    else await base44.entities.Book.create(data);
-    toast.success(editBook ? "تم التحديث ✓" : "تمت الإضافة ✓");
+    if (editBook) {
+      const updated = await base44.entities.Book.update(editBook.id, data);
+      setBooks(prev => prev.map(b => b.id === editBook.id ? { ...b, ...updated } : b));
+      toast.success("تم التحديث ✓");
+    } else {
+      const created = await base44.entities.Book.create(data);
+      setBooks(prev => [created, ...prev]);
+      toast.success("تمت الإضافة ✓");
+    }
     setShowAdd(false);
-    loadBooks();
     setSaving(false);
   };
 
