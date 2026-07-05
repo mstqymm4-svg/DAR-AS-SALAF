@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { useT } from "@/lib/i18n";
 import { getBooks, getFavoriteIds, toggleFavorite } from "@/lib/offlineSync";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { useContentRefresh } from "@/hooks/useContentSync";
 
 export default function Books() {
   const t = useT();
@@ -32,6 +33,9 @@ export default function Books() {
   }, [categoryParam]);
 
   useEffect(() => { loadData(); }, []);
+
+  // Auto-refresh when books change in background
+  useContentRefresh(["books"], loadData);
 
   const loadData = async () => {
     const u = await base44.auth.me().catch(() => null);

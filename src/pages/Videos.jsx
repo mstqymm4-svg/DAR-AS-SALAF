@@ -10,6 +10,7 @@ import { getThumbnail } from "@/components/dev/DevVideos";
 import { useT } from "@/lib/i18n";
 import { getVideos, getVideoChannels } from "@/lib/offlineSync";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { useContentRefresh } from "@/hooks/useContentSync";
 import SmartImage from "@/components/SmartImage";
 
 export default function Videos() {
@@ -25,7 +26,7 @@ export default function Videos() {
     try { return JSON.parse(localStorage.getItem("video_favorites") || "[]"); } catch(e) { return []; }
   });
 
-  useEffect(() => {
+  const loadData = () => {
     Promise.all([
       getVideos(),
       getVideoChannels(),
@@ -34,7 +35,12 @@ export default function Videos() {
       setChannels(chData || []);
       setLoading(false);
     });
-  }, []);
+  };
+
+  useEffect(() => { loadData(); }, []);
+
+  // Auto-refresh when videos or channels change in background
+  useContentRefresh(["videos", "channels"], loadData);
 
   const categories = useMemo(() => {
     const set = new Set(videos.map((v) => v.category).filter(Boolean));

@@ -4,17 +4,23 @@ import { Tv } from "lucide-react";
 import { motion } from "framer-motion";
 import { useT } from "@/lib/i18n";
 import { getVideoChannels } from "@/lib/offlineSync";
+import { useContentRefresh } from "@/hooks/useContentSync";
 import SmartImage from "./SmartImage";
 
 export default function HomeChannels() {
   const t = useT();
   const [channels, setChannels] = useState([]);
 
-  useEffect(() => {
+  const loadData = () => {
     getVideoChannels()
       .then((data) => setChannels((data || []).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))))
       .catch(() => {});
-  }, []);
+  };
+
+  useEffect(() => { loadData(); }, []);
+
+  // Auto-refresh when channels change in background
+  useContentRefresh(["channels"], loadData);
 
   if (channels.length === 0) return null;
 

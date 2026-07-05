@@ -4,18 +4,24 @@ import { toast } from "sonner";
 import { getChannelTypeInfo } from "@/components/dev/DevSocialChannels";
 import { ExternalLink, Share2, ChevronLeft } from "lucide-react";
 import { getSocialChannels } from "@/lib/offlineSync";
+import { useContentRefresh } from "@/hooks/useContentSync";
 import SmartImage from "./SmartImage";
 
 export default function SocialChannelsSection() {
   const [channels, setChannels] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const loadData = () => {
     getSocialChannels()
       .then((data) => setChannels((data || []).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { loadData(); }, []);
+
+  // Auto-refresh when social channels change in background
+  useContentRefresh(["social"], loadData);
 
   if (loading) return null;
   if (channels.length === 0) return null;

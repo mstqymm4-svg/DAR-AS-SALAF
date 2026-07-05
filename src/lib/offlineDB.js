@@ -71,6 +71,12 @@ export async function getCachedBook(id) {
   return reqAsPromise(store.get(id));
 }
 
+export async function deleteCachedBook(id) {
+  const store = await tx("books", "readwrite");
+  store.delete(id);
+  await reqAsPromise(store.transaction.done);
+}
+
 // ─── PDFs ─────────────────────────────────────────────────────────────────────
 export async function cachePdf(url, buffer, bookId, title) {
   const store = await tx("pdfs", "readwrite");
@@ -173,6 +179,12 @@ export async function getCachedVideos() {
   return reqAsPromise(store.getAll());
 }
 
+export async function deleteCachedVideo(id) {
+  const store = await tx("videos", "readwrite");
+  store.delete(id);
+  await reqAsPromise(store.transaction.done);
+}
+
 // ─── Video Channels ───────────────────────────────────────────────────────────
 export async function cacheVideoChannels(channels) {
   const store = await tx("channels", "readwrite");
@@ -187,6 +199,12 @@ export async function getCachedVideoChannels() {
   return reqAsPromise(store.getAll());
 }
 
+export async function deleteCachedVideoChannel(id) {
+  const store = await tx("channels", "readwrite");
+  store.delete(id);
+  await reqAsPromise(store.transaction.done);
+}
+
 // ─── Social Channels ──────────────────────────────────────────────────────────
 export async function cacheSocialChannels(channels) {
   const store = await tx("social", "readwrite");
@@ -199,6 +217,12 @@ export async function cacheSocialChannels(channels) {
 export async function getCachedSocialChannels() {
   const store = await tx("social");
   return reqAsPromise(store.getAll());
+}
+
+export async function deleteCachedSocialChannel(id) {
+  const store = await tx("social", "readwrite");
+  store.delete(id);
+  await reqAsPromise(store.transaction.done);
 }
 
 // ─── Settings ─────────────────────────────────────────────────────────────────

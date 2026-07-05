@@ -7,6 +7,7 @@ import { SkeletonGrid } from "../components/Skeleton";
 import { useT } from "@/lib/i18n";
 import { getBooks, getFavoriteIds, toggleFavorite } from "@/lib/offlineSync";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { useContentRefresh } from "@/hooks/useContentSync";
 
 export default function Favorites() {
   const t = useT();
@@ -17,6 +18,9 @@ export default function Favorites() {
   const { isOnline } = useOnlineStatus();
 
   useEffect(() => { loadFavorites(); }, []);
+
+  // Auto-refresh when books change (e.g., a favorited book gets updated or deleted)
+  useContentRefresh(["books"], loadFavorites);
 
   const loadFavorites = async () => {
     const u = await base44.auth.me().catch(() => null);

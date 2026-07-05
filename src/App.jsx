@@ -11,8 +11,10 @@ import { useEffect, lazy, Suspense } from 'react';
 import { loadSettings } from '@/lib/settingsStore';
 import { initThemeEngine } from '@/lib/themeEngine';
 import { base44 } from '@/api/base44Client';
-import { syncPendingFavorites, fullSync } from '@/lib/offlineSync';
+import { syncPendingFavorites } from '@/lib/offlineSync';
+import { startContentSyncEngine } from '@/lib/contentSyncEngine';
 import LogoLoader from './components/LogoLoader';
+import SyncStatusBadge from './components/SyncStatusBadge';
 
 // Apply theme immediately from localStorage before any renders
 try {
@@ -45,30 +47,19 @@ const AuthenticatedApp = () => {
     base44.auth.me()
       .then(u => {
         loadSettings(u?.email);
-        // Background sync all data for offline use
-        fullSync().catch(() => {});
+        if (u) syncPendingFavorites(u.email).catch(() => {});
       })
       .catch(() => {
         loadSettings();
-        fullSync().catch(() => {});
       })
       .finally(() => initThemeEngine());
   }, []);
 
-  // Auto-sync everything when back online
+  // Start the smart content sync engine (replaces manual fullSync calls)
+  // — syncs on app open, every 5 min, on "online", and on tab focus
   useEffect(() => {
-    const handleOnline = () => {
-      base44.auth.me()
-        .then(u => {
-          if (u) syncPendingFavorites(u.email);
-          fullSync().catch(() => {});
-        })
-        .catch(() => {
-          fullSync().catch(() => {});
-        });
-    };
-    window.addEventListener("online", handleOnline);
-    return () => window.removeEventListener("online", handleOnline);
+    const cleanup = startContentSyncEngine();
+    return cleanup;
   }, []);
 
   if (isLoadingPublicSettings || isLoadingAuth) {
@@ -91,6 +82,7 @@ const AuthenticatedApp = () => {
   return (
     <>
     <SaveStatusIndicator />
+    <SyncStatusBadge />
     <Suspense fallback={<PageLoader />}>
       <Routes>
         <Route element={<Layout />}>

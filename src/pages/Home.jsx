@@ -12,6 +12,7 @@ import { useT } from "@/lib/i18n";
 import { getSetting, subscribeToSettings } from "@/lib/settingsStore";
 import { getFeaturedBooks, getRecentBooks, getFavoriteIds, toggleFavorite } from "@/lib/offlineSync";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { useContentRefresh } from "@/hooks/useContentSync";
 
 export default function Home() {
   const t = useT();
@@ -35,6 +36,9 @@ export default function Home() {
     });
     return unsub;
   }, []);
+
+  // Auto-refresh when content changes in background
+  useContentRefresh(["books", "videos", "channels", "social"], loadData);
 
   const loadData = async () => {
     const u = await base44.auth.me().catch(() => null);
