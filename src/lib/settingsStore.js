@@ -13,7 +13,7 @@ import { base44 } from "@/api/base44Client";
 export const DEFAULT_SETTINGS = {
   app_name:          "المكتبة الدينية",
   app_subtitle:      "نور العلم والمعرفة",
-  logo_url:          "",
+  logo_url:          "https://media.base44.com/images/public/69c8e483a69a0d215eee4ef7/6482533e8_IMG_2785.png",
   // Colors (HSL strings)
   color_bg:          "",
   color_fg:          "",
