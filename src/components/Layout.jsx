@@ -55,11 +55,11 @@ export default function Layout() {
   return (
     <div dir={t.dir} lang={t.langCode} className="min-h-screen bg-background" style={{ fontFamily: t.fontFamily }}>
       {/* Top Header */}
-      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border safe-area-top">
+      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-2xl border-b border-border safe-area-top shadow-sm shadow-black/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center overflow-hidden shrink-0 group-hover:scale-105 transition-transform">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center overflow-hidden shrink-0 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-primary/30 transition-all">
                 {logoUrl
                   ? <img src={logoUrl} alt="logo" className="w-full h-full object-cover" />
                   : <BookOpen className="w-5 h-5 text-primary-foreground" />}
@@ -76,9 +76,9 @@ export default function Layout() {
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    className={`relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                       isActive
-                        ? "bg-primary text-primary-foreground shadow-sm"
+                        ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
                         : "text-muted-foreground hover:text-foreground hover:bg-muted"
                     }`}
                   >
@@ -88,7 +88,7 @@ export default function Layout() {
                 );
               })}
             </nav>
-            <Link to="/books" className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors">
+            <Link to="/books" className="md:hidden p-2.5 rounded-xl hover:bg-muted transition-colors active:scale-95">
               <BookOpen className="w-5 h-5 text-muted-foreground" />
             </Link>
           </div>
@@ -110,15 +110,15 @@ export default function Layout() {
       </AnimatePresence>
 
       {/* Bottom Nav — Mobile Only */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-t border-border">
-        <div className="flex items-center justify-around py-2 px-2 safe-area-bottom">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-2xl border-t border-border shadow-lg shadow-black/5">
+        <div className="flex items-center justify-around py-1.5 px-2 safe-area-bottom">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`relative flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all duration-200 ${
+                className={`relative flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all duration-200 ${
                   isActive ? "text-primary" : "text-muted-foreground"
                 }`}
               >
@@ -128,7 +128,7 @@ export default function Layout() {
                     className="absolute -top-2 left-1/2 -translate-x-1/2 w-8 h-1 rounded-full bg-primary"
                   />
                 )}
-                <item.icon className={`w-5 h-5 ${isActive ? "fill-primary/20" : ""}`} />
+                <item.icon className={`w-5 h-5 transition-transform ${isActive ? "fill-primary/20 scale-110" : ""}`} />
                 <span className="text-[10px] font-medium">{item.label}</span>
               </Link>
             );

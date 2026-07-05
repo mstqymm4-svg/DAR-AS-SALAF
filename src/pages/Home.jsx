@@ -104,16 +104,18 @@ export default function Home() {
           href={youtubeUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-l from-red-600/10 to-red-500/5 border border-red-200/50 dark:border-red-500/20 hover:border-red-400/50 hover:shadow-md hover:shadow-red-500/10 transition-all group">
+          className="flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-l from-red-600/15 via-red-500/8 to-transparent border border-red-200/50 dark:border-red-500/20 hover:border-red-400/60 hover:shadow-xl hover:shadow-red-500/10 transition-all group overflow-hidden relative">
           
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-red-500/30 group-hover:scale-105 transition-transform bg-[#e21246]">
-              <Youtube className="w-6 h-6 text-white" />
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-red-500/30 group-hover:scale-110 group-hover:rotate-3 transition-transform bg-gradient-to-br from-[#e21246] to-[#b00d3a]">
+              <Youtube className="w-7 h-7 text-white" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-bold text-sm text-foreground">{youtubeLabel || t.youtubeBtn}</p>
               <p className="text-xs text-muted-foreground mt-0.5">{youtubeSubText || t.youtubeSub}</p>
             </div>
-            <ExternalLink className="w-4 h-4 text-muted-foreground shrink-0 group-hover:text-red-500 transition-colors" />
+            <div className="w-9 h-9 rounded-full bg-red-500/10 flex items-center justify-center shrink-0 group-hover:bg-red-500/20 transition-colors">
+              <ExternalLink className="w-4 h-4 text-red-500 shrink-0 group-hover:scale-110 transition-transform" />
+            </div>
           </a>
         </motion.section>
       }
@@ -123,10 +125,12 @@ export default function Home() {
       <section className="mb-12">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-accent" />
+              <span className="w-8 h-8 rounded-lg bg-accent/15 flex items-center justify-center">
+                <Sparkles className="w-4 h-4 text-accent" />
+              </span>
               {t.featuredBooks}
             </h2>
-            <Link to="/books" className="text-sm text-primary font-medium hover:underline flex items-center gap-1">
+            <Link to="/books" className="text-sm text-primary font-bold hover:underline flex items-center gap-1 hover:gap-2 transition-all">
               {t.viewAll}
               <ArrowLeft className="w-3.5 h-3.5" />
             </Link>
@@ -143,10 +147,12 @@ export default function Home() {
       <section className="mb-12">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-primary" />
+            <span className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center">
+              <BookOpen className="w-4 h-4 text-primary" />
+            </span>
             {t.recentBooks}
           </h2>
-          <Link to="/books" className="text-sm text-primary font-medium hover:underline flex items-center gap-1">
+          <Link to="/books" className="text-sm text-primary font-bold hover:underline flex items-center gap-1 hover:gap-2 transition-all">
             {t.viewAll}
             <ArrowLeft className="w-3.5 h-3.5" />
           </Link>
@@ -160,7 +166,9 @@ export default function Home() {
 
       {recentBooks.length === 0 && featuredBooks.length === 0 &&
       <div className="text-center py-20">
-          <BookOpen className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
+          <div className="w-20 h-20 rounded-3xl bg-muted flex items-center justify-center mx-auto mb-4">
+            <BookOpen className="w-10 h-10 text-muted-foreground/30" />
+          </div>
           <h3 className="text-lg font-bold text-foreground mb-2">{t.emptyLib}</h3>
           <p className="text-sm text-muted-foreground">{t.emptyLibSub}</p>
         </div>

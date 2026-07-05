@@ -98,10 +98,10 @@ export default function BookDetails() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-700 dark:text-orange-400 text-xs font-medium mb-4"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-700 dark:text-orange-400 text-xs font-bold mb-4"
         >
           <WifiOff className="w-4 h-4" />
-          تعمل بدون اتصال
+          {t.offlineMode}
         </motion.div>
       )}
       <Link to="/books" className="hidden md:inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors">
@@ -117,11 +117,11 @@ export default function BookDetails() {
         
         {/* Cover */}
         <div className="md:col-span-1">
-          <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5 border border-border flex items-center justify-center">
+          <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/15 to-primary/5 border border-border flex items-center justify-center shadow-lg shadow-primary/10">
             {book.cover_image ?
-            <SmartImage src={book.cover_image} alt={book.title} className="w-full h-full object-cover" fallback={() => <BookOpen className="w-12 h-12 text-primary/30" />} /> :
+            <SmartImage src={book.cover_image} alt={book.title} className="w-full h-full object-cover" fallback={() => <BookOpen className="w-16 h-16 text-primary/30" />} /> :
 
-            <BookOpen className="w-12 h-12 text-primary/30" />
+            <BookOpen className="w-16 h-16 text-primary/30" />
             }
           </div>
         </div>
@@ -130,7 +130,7 @@ export default function BookDetails() {
         <div className="md:col-span-2">
           <div className="flex items-start justify-between gap-4 mb-4">
             <div>
-              <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full bg-muted text-muted-foreground font-medium mb-3">
+              <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full bg-primary/10 text-primary font-semibold mb-3">
                 {book.category}
               </span>
               <h1 className="text-2xl md:text-3xl font-black text-foreground leading-tight">{book.title}</h1>
@@ -138,16 +138,16 @@ export default function BookDetails() {
             {user &&
             <button
             onClick={handleToggleFavorite}
-            className="shrink-0 w-11 h-11 rounded-xl border border-border flex items-center justify-center hover:bg-muted transition-colors">
+            className="shrink-0 w-11 h-11 rounded-xl border border-border flex items-center justify-center hover:bg-muted hover:border-primary/30 active:scale-95 transition-all">
 
-              <Heart className={`w-5 h-5 ${isFavorite ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
+              <Heart className={`w-5 h-5 transition-all ${isFavorite ? "fill-red-500 text-red-500 scale-110" : "text-muted-foreground"}`} />
             </button>
             }
           </div>
 
           <div className="flex items-center gap-2 text-muted-foreground mb-6">
             <User className="w-4 h-4" />
-            <span className="text-sm">{book.author}</span>
+            <span className="text-sm font-medium">{book.author}</span>
           </div>
 
           {book.rating > 0 &&
@@ -163,14 +163,14 @@ export default function BookDetails() {
 
           <div className="grid grid-cols-2 gap-3 mb-6">
             {book.pages_count &&
-            <div className="p-4 rounded-xl bg-muted/50 border border-border">
+            <div className="p-4 rounded-xl bg-muted/50 border border-border hover:border-primary/20 transition-colors">
                 <FileText className="w-4 h-4 text-muted-foreground mb-1" />
                 <p className="text-lg font-bold text-foreground">{book.pages_count}</p>
                 <p className="text-xs text-muted-foreground">{t.pages}</p>
               </div>
             }
             {book.language &&
-            <div className="p-4 rounded-xl bg-muted/50 border border-border">
+            <div className="p-4 rounded-xl bg-muted/50 border border-border hover:border-primary/20 transition-colors">
                 <BookOpen className="w-4 h-4 text-muted-foreground mb-1" />
                 <p className="text-lg font-bold text-foreground">{book.language}</p>
                 <p className="text-xs text-muted-foreground">{t.language}</p>
@@ -188,30 +188,30 @@ export default function BookDetails() {
           {book.pdf_url &&
           <div className="space-y-2">
             <Link to={`/read/${book.id}`} className="block">
-              <Button className="w-full gap-2 h-12 rounded-xl text-sm font-bold">
+              <Button className="w-full gap-2 h-12 rounded-xl text-sm font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow">
                 <BookMarked className="w-4 h-4" />
                 {t.readBook}
               </Button>
             </Link>
             {isOnline && !pdfDownloaded && !downloading && (
-              <Button variant="outline" onClick={handleDownload} className="w-full gap-2 h-10 rounded-xl text-sm">
+              <Button variant="outline" onClick={handleDownload} className="w-full gap-2 h-10 rounded-xl text-sm hover:border-primary/30">
                 <Download className="w-4 h-4" />
                 تنزيل للقراءة بدون إنترنت
               </Button>
             )}
             {downloading && (
-              <div className="w-full px-4 py-2 rounded-xl border border-primary/20 bg-primary/5">
-                <div className="flex items-center justify-between text-xs mb-1">
+              <div className="w-full px-4 py-3 rounded-xl border border-primary/20 bg-primary/5">
+                <div className="flex items-center justify-between text-xs mb-2">
                   <span className="text-muted-foreground">جاري التنزيل...</span>
                   <span className="font-bold text-primary">{downloadProgress}%</span>
                 </div>
-                <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                  <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${downloadProgress}%` }} />
+                <div className="h-2 rounded-full bg-muted overflow-hidden">
+                  <div className="h-full bg-gradient-to-l from-primary to-primary/80 rounded-full transition-all" style={{ width: `${downloadProgress}%` }} />
                 </div>
               </div>
             )}
             {pdfDownloaded && (
-              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-500/5 border border-green-500/20 text-green-700 dark:text-green-400 text-xs font-medium">
+              <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-green-500/5 border border-green-500/20 text-green-700 dark:text-green-400 text-xs font-bold">
                 <CheckCircle className="w-4 h-4" />
                 متوفر للقراءة بدون إنترنت
               </div>

@@ -87,14 +87,14 @@ export default function Books() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-700 dark:text-orange-400 text-xs font-medium mb-4"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-700 dark:text-orange-400 text-xs font-bold mb-4"
         >
           <WifiOff className="w-4 h-4" />
-          تعمل بدون اتصال — البيانات محفوظة محلياً
+          {t.offlineMode}
         </motion.div>
       )}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-foreground mb-2">{t.library}</h1>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-foreground mb-1">{t.library}</h1>
         <p className="text-sm text-muted-foreground">{t.librarySub}</p>
       </div>
 
@@ -104,13 +104,13 @@ export default function Books() {
         onClear={() => { setAiResults(null); setAiLabel(""); }}
       />
 
-      <div className="relative mb-6">
-        <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+      <div className="relative mb-6 group">
+        <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
         <Input
           placeholder={t.searchPlaceholder}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pr-11 h-12 rounded-xl bg-card border-border text-sm"
+          className="pr-11 h-12 rounded-xl bg-card border-border text-sm focus-visible:border-primary focus-visible:ring-primary/20 transition-colors"
         />
       </div>
 

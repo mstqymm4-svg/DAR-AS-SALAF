@@ -27,10 +27,12 @@ export default function HomeChannels() {
     <section className="mb-12">
       <div className="flex items-center justify-between mb-5">
         <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-          <Tv className="w-5 h-5 text-primary" />
+          <span className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center">
+            <Tv className="w-4 h-4 text-primary" />
+          </span>
           {t.videoChannels}
         </h2>
-        <Link to="/videos" className="text-sm text-primary font-medium hover:underline flex items-center gap-1">
+        <Link to="/videos" className="text-sm text-primary font-bold hover:underline flex items-center gap-1 hover:gap-2 transition-all">
           {t.viewAll}
           <ArrowLeft className="w-3.5 h-3.5" />
         </Link>
@@ -48,22 +50,22 @@ export default function HomeChannels() {
           >
             <Link
               to="/videos"
-              className="group block bg-card border border-border rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300"
+              className="group block bg-card border border-border rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 hover:border-primary/30 transition-all duration-300"
             >
               <div className="aspect-video bg-gradient-to-br from-red-500/15 to-primary/5 flex items-center justify-center relative overflow-hidden">
                 {ch.channel_logo ? (
                   <SmartImage
                     src={ch.channel_logo}
                     alt={ch.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    fallback={() => <Tv className="w-10 h-10 text-red-500/40" />}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    fallback={() => <Tv className="w-12 h-12 text-red-500/40" />}
                   />
                 ) : (
-                  <Tv className="w-10 h-10 text-red-500/40" />
+                  <Tv className="w-12 h-12 text-red-500/40" />
                 )}
                 {/* Play overlay on hover */}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 flex items-center justify-center transition-all duration-300">
-                  <PlayCircle className="w-10 h-10 text-white opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all duration-300" />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 flex items-center justify-center transition-all duration-300">
+                  <PlayCircle className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 scale-50 group-hover:scale-100 transition-all duration-300 drop-shadow-lg" />
                 </div>
               </div>
               <div className="p-3 text-center">

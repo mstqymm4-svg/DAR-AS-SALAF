@@ -45,12 +45,13 @@ export default function CategoryChip({ category, isActive, onClick }) {
 
   return (
     <motion.button
-      whileTap={{ scale: 0.95 }}
+      whileTap={{ scale: 0.92 }}
+      whileHover={{ y: -2 }}
       onClick={() => onClick?.(category.name)}
-      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap border-2 transition-all duration-200 shrink-0 ${
+      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap border transition-all duration-200 shrink-0 ${
         isActive
-          ? "border-primary bg-primary text-primary-foreground shadow-md shadow-primary/20"
-          : `border-border bg-card text-muted-foreground ${colorClass}`
+          ? "border-primary bg-primary text-primary-foreground shadow-lg shadow-primary/25"
+          : `border-border bg-card text-muted-foreground hover:shadow-md ${colorClass}`
       }`}
     >
       <span className="text-base">{category.emoji}</span>

@@ -42,11 +42,11 @@ export default function SocialChannelsSection() {
   return (
     <section className="px-4 sm:px-6 lg:px-8 py-8 max-w-6xl mx-auto" dir="rtl">
       <div className="text-center mb-6">
-        <h2 className="text-xl font-black mb-1">قنواتنا على التواصل الاجتماعي</h2>
+        <h2 className="text-xl font-bold mb-1">قنواتنا على التواصل الاجتماعي</h2>
         <p className="text-sm text-muted-foreground">تابعنا وتواصل معنا عبر منصاتنا</p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
         {channels.map((ch) => {
           const typeInfo = getChannelTypeInfo(ch.channel_type);
           const Icon = typeInfo.icon;
@@ -56,22 +56,22 @@ export default function SocialChannelsSection() {
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="bg-card border border-border rounded-2xl p-4 flex flex-col items-center text-center hover:shadow-lg transition-shadow group"
+              className="bg-card border border-border rounded-2xl p-4 flex flex-col items-center text-center hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 hover:border-primary/30 transition-all group"
             >
-              <div className={`w-14 h-14 rounded-2xl ${typeInfo.bg} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
+              <div className={`w-16 h-16 rounded-2xl ${typeInfo.bg} flex items-center justify-center mb-3 group-hover:scale-110 group-hover:rotate-3 transition-transform shadow-sm`}>
                 {ch.icon_url
-                  ? <SmartImage src={ch.icon_url} alt={ch.name} className="w-full h-full rounded-2xl object-cover" fallback={() => <Icon className={`w-7 h-7 ${typeInfo.color}`} />} />
-                  : <Icon className={`w-7 h-7 ${typeInfo.color}`} />}
+                  ? <SmartImage src={ch.icon_url} alt={ch.name} className="w-full h-full rounded-2xl object-cover" fallback={() => <Icon className={`w-8 h-8 ${typeInfo.color}`} />} />
+                  : <Icon className={`w-8 h-8 ${typeInfo.color}`} />}
               </div>
               <p className="text-sm font-bold mb-1 truncate w-full">{ch.name}</p>
               {ch.description && <p className="text-[10px] text-muted-foreground line-clamp-2 mb-3">{ch.description}</p>}
-              <div className="flex gap-1.5 mt-auto">
+              <div className="flex gap-1.5 mt-auto w-full">
                 <a href={ch.url} target="_blank" rel="noopener noreferrer"
-                  className="flex-1 flex items-center justify-center gap-1 bg-primary text-primary-foreground text-xs font-medium px-3 py-2 rounded-lg hover:bg-primary/90 transition-colors">
+                  className="flex-1 flex items-center justify-center gap-1 bg-primary text-primary-foreground text-xs font-bold px-3 py-2 rounded-xl hover:bg-primary/90 transition-colors active:scale-95 shadow-sm">
                   فتح <ExternalLink className="w-3 h-3" />
                 </a>
                 <button onClick={() => handleShare(ch)}
-                  className="flex items-center justify-center w-9 h-9 rounded-lg border border-border hover:bg-muted transition-colors">
+                  className="flex items-center justify-center w-9 h-9 rounded-xl border border-border hover:bg-muted hover:border-primary/30 transition-colors active:scale-95">
                   <Share2 className="w-3.5 h-3.5 text-muted-foreground" />
                 </button>
               </div>
