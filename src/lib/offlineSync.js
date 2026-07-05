@@ -136,6 +136,167 @@ export async function downloadMultiplePdfs(books, onProgress) {
   return { done, failed };
 }
 
+// ─── Videos sync ──────────────────────────────────────────────────────────────
+export async function syncVideos(onProgress) {
+  const allVideos = await base44.entities.Video.list('-created_date', 1000);
+  const visibleVideos = allVideos.filter(v => v.visible !== false);
+  await db.cacheVideos(visibleVideos);
+
+  // Cache thumbnails
+  for (const v of visibleVideos) {
+    if (!v.thumbnail) continue;
+    const existing = await db.getCachedImage(v.thumbnail);
+    if (!existing) {
+      try {
+        const res = await fetch(v.thumbnail);
+        if (res.ok) {
+          const blob = await res.blob();
+          await db.cacheImage(v.thumbnail, blob);
+        }
+      } catch(e) {}
+    }
+  }
+
+  await db.setMeta("videosCount", visibleVideos.length);
+  return { total: visibleVideos.length };
+}
+
+/**
+ * Get all videos — from API if online, from cache if offline.
+ */
+export async function getVideos() {
+  if (isOnline()) {
+    try {
+      const videos = await base44.entities.Video.list('-sort_order', 1000);
+      const visible = videos.filter(v => v.visible !== false);
+      db.cacheVideos(visible).catch(() => {});
+      return visible;
+    } catch(e) {
+      return db.getCachedVideos();
+    }
+  }
+  return db.getCachedVideos();
+}
+
+// ─── Video Channels sync ──────────────────────────────────────────────────────
+export async function syncVideoChannels(onProgress) {
+  const allChannels = await base44.entities.VideoChannel.list('-sort_order', 1000);
+  const visibleChannels = allChannels.filter(c => c.visible !== false);
+  await db.cacheVideoChannels(visibleChannels);
+
+  // Cache channel logos
+  for (const c of visibleChannels) {
+    if (!c.channel_logo) continue;
+    const existing = await db.getCachedImage(c.channel_logo);
+    if (!existing) {
+      try {
+        const res = await fetch(c.channel_logo);
+        if (res.ok) {
+          const blob = await res.blob();
+          await db.cacheImage(c.channel_logo, blob);
+        }
+      } catch(e) {}
+    }
+  }
+
+  await db.setMeta("channelsCount", visibleChannels.length);
+  return { total: visibleChannels.length };
+}
+
+/**
+ * Get video channels — from API if online, from cache if offline.
+ */
+export async function getVideoChannels() {
+  if (isOnline()) {
+    try {
+      const channels = await base44.entities.VideoChannel.list('-sort_order', 1000);
+      const visible = channels.filter(c => c.visible !== false);
+      db.cacheVideoChannels(visible).catch(() => {});
+      return visible;
+    } catch(e) {
+      return db.getCachedVideoChannels();
+    }
+  }
+  return db.getCachedVideoChannels();
+}
+
+// ─── Social Channels sync ─────────────────────────────────────────────────────
+export async function syncSocialChannels() {
+  const allChannels = await base44.entities.SocialChannel.list('-sort_order', 1000);
+  const visibleChannels = allChannels.filter(c => c.visible !== false);
+  await db.cacheSocialChannels(visibleChannels);
+
+  // Cache icons
+  for (const c of visibleChannels) {
+    if (!c.icon_url) continue;
+    const existing = await db.getCachedImage(c.icon_url);
+    if (!existing) {
+      try {
+        const res = await fetch(c.icon_url);
+        if (res.ok) {
+          const blob = await res.blob();
+          await db.cacheImage(c.icon_url, blob);
+        }
+      } catch(e) {}
+    }
+  }
+
+  return { total: visibleChannels.length };
+}
+
+/**
+ * Get social channels — from API if online, from cache if offline.
+ */
+export async function getSocialChannels() {
+  if (isOnline()) {
+    try {
+      const channels = await base44.entities.SocialChannel.list('-sort_order', 1000);
+      const visible = channels.filter(c => c.visible !== false);
+      db.cacheSocialChannels(visible).catch(() => {});
+      return visible;
+    } catch(e) {
+      return db.getCachedSocialChannels();
+    }
+  }
+  return db.getCachedSocialChannels();
+}
+
+// ─── Settings sync ────────────────────────────────────────────────────────────
+export async function syncSettings() {
+  const allSettings = await base44.entities.AppSettings.list('-created_date', 1000);
+  await db.cacheSettings(allSettings);
+  return { total: allSettings.length };
+}
+
+/**
+ * Get setting value — from API if online, from cache if offline.
+ */
+export async function getSettingValue(key) {
+  if (isOnline()) {
+    try {
+      const settings = await base44.entities.AppSettings.filter({ setting_key: key });
+      if (settings.length > 0) {
+        db.cacheSettings(settings).catch(() => {});
+        return settings[0].setting_value;
+      }
+    } catch(e) {
+      return db.getCachedSetting(key);
+    }
+  }
+  return db.getCachedSetting(key);
+}
+
+// ─── Image helper ─────────────────────────────────────────────────────────────
+/**
+ * Get an image URL — returns blob URL if cached offline, or original URL if online.
+ */
+export async function getImageUrl(originalUrl) {
+  if (!originalUrl) return null;
+  const cached = await db.getCachedImage(originalUrl);
+  if (cached) return URL.createObjectURL(cached.blob);
+  return originalUrl;
+}
+
 // ─── Check for updates ────────────────────────────────────────────────────────
 export async function checkForUpdates() {
   const lastSync = await db.getMeta("lastSync");
@@ -350,6 +511,22 @@ export async function fullSync(onProgress) {
   const booksResult = await syncBooks(onProgress);
   onProgress?.({ step: "books", status: "done", result: booksResult });
 
+  onProgress?.({ step: "videos", status: "started" });
+  const videosResult = await syncVideos().catch(() => ({ total: 0 }));
+  onProgress?.({ step: "videos", status: "done", result: videosResult });
+
+  onProgress?.({ step: "channels", status: "started" });
+  const channelsResult = await syncVideoChannels().catch(() => ({ total: 0 }));
+  onProgress?.({ step: "channels", status: "done", result: channelsResult });
+
+  onProgress?.({ step: "social", status: "started" });
+  const socialResult = await syncSocialChannels().catch(() => ({ total: 0 }));
+  onProgress?.({ step: "social", status: "done", result: socialResult });
+
+  onProgress?.({ step: "settings", status: "started" });
+  await syncSettings().catch(() => {});
+  onProgress?.({ step: "settings", status: "done" });
+
   // Sync pending favorites
   try {
     const u = await base44.auth.me().catch(() => null);
@@ -360,5 +537,5 @@ export async function fullSync(onProgress) {
     }
   } catch(e) {}
 
-  return booksResult;
+  return { ...booksResult, videos: videosResult.total, channels: channelsResult.total };
 }

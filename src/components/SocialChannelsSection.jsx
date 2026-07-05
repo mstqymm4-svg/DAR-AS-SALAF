@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { getChannelTypeInfo } from "@/components/dev/DevSocialChannels";
 import { ExternalLink, Share2, ChevronLeft } from "lucide-react";
+import { getSocialChannels } from "@/lib/offlineSync";
+import SmartImage from "./SmartImage";
 
 export default function SocialChannelsSection() {
   const [channels, setChannels] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.entities.SocialChannel.filter({ visible: true })
+    getSocialChannels()
       .then((data) => setChannels((data || []).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))))
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -53,7 +54,7 @@ export default function SocialChannelsSection() {
             >
               <div className={`w-14 h-14 rounded-2xl ${typeInfo.bg} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
                 {ch.icon_url
-                  ? <img src={ch.icon_url} alt={ch.name} className="w-full h-full rounded-2xl object-cover" />
+                  ? <SmartImage src={ch.icon_url} alt={ch.name} className="w-full h-full rounded-2xl object-cover" fallback={() => <Icon className={`w-7 h-7 ${typeInfo.color}`} />} />
                   : <Icon className={`w-7 h-7 ${typeInfo.color}`} />}
               </div>
               <p className="text-sm font-bold mb-1 truncate w-full">{ch.name}</p>

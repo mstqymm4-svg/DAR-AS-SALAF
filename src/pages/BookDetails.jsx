@@ -8,6 +8,7 @@ import { useT } from "@/lib/i18n";
 import { getBook, getFavoriteIds, toggleFavorite, downloadBookPdf, isPdfDownloaded } from "@/lib/offlineSync";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { toast } from "sonner";
+import SmartImage from "@/components/SmartImage";
 
 export default function BookDetails() {
   const { id } = useParams();
@@ -116,7 +117,7 @@ export default function BookDetails() {
         <div className="md:col-span-1">
           <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5 border border-border flex items-center justify-center">
             {book.cover_image ?
-            <img src={book.cover_image} alt={book.title} className="w-full h-full object-cover" /> :
+            <SmartImage src={book.cover_image} alt={book.title} className="w-full h-full object-cover" fallback={() => <BookOpen className="w-12 h-12 text-primary/30" />} /> :
 
             <BookOpen className="w-12 h-12 text-primary/30" />
             }

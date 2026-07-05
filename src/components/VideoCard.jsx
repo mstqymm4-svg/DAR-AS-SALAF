@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
-import { Play, Heart, Share2, Star, Clock } from "lucide-react";
+import { Play, Heart, Share2, Star, Clock, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
+import SmartImage from "./SmartImage";
 
 export default function VideoCard({ video, isFavorite, onToggleFavorite, onPlay, onShare, index = 0 }) {
   const t = useT();
@@ -16,11 +17,11 @@ export default function VideoCard({ video, isFavorite, onToggleFavorite, onPlay,
       {/* Thumbnail */}
       <div className="relative aspect-video bg-muted cursor-pointer" onClick={() => onPlay(video)}>
         {video.thumbnail && (
-          <img
+          <SmartImage
             src={video.thumbnail}
             alt={video.title}
-            loading="lazy"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            fallback={() => <Video className="w-8 h-8 text-muted-foreground/30" />}
           />
         )}
         <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">

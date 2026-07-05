@@ -1,17 +1,18 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
 import { Tv } from "lucide-react";
 import { motion } from "framer-motion";
 import { useT } from "@/lib/i18n";
+import { getVideoChannels } from "@/lib/offlineSync";
+import SmartImage from "./SmartImage";
 
 export default function HomeChannels() {
   const t = useT();
   const [channels, setChannels] = useState([]);
 
   useEffect(() => {
-    base44.entities.VideoChannel.filter({ visible: true })
-      .then((data) => setChannels(data || []))
+    getVideoChannels()
+      .then((data) => setChannels((data || []).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))))
       .catch(() => {});
   }, []);
 
@@ -42,7 +43,7 @@ export default function HomeChannels() {
             >
               <div className="aspect-video bg-gradient-to-br from-red-500/15 to-red-600/5 flex items-center justify-center relative overflow-hidden">
                 {ch.channel_logo ? (
-                  <img src={ch.channel_logo} alt={ch.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <SmartImage src={ch.channel_logo} alt={ch.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" fallback={() => <Tv className="w-10 h-10 text-red-500/40" />} />
                 ) : (
                   <Tv className="w-10 h-10 text-red-500/40" />
                 )}

@@ -11,7 +11,7 @@ import { useEffect, lazy, Suspense } from 'react';
 import { loadSettings } from '@/lib/settingsStore';
 import { initThemeEngine } from '@/lib/themeEngine';
 import { base44 } from '@/api/base44Client';
-import { syncPendingFavorites } from '@/lib/offlineSync';
+import { syncPendingFavorites, fullSync } from '@/lib/offlineSync';
 import LogoLoader from './components/LogoLoader';
 
 // Apply theme immediately from localStorage before any renders
@@ -43,17 +43,29 @@ const AuthenticatedApp = () => {
 
   useEffect(() => {
     base44.auth.me()
-      .then(u => loadSettings(u?.email))
-      .catch(() => loadSettings())
+      .then(u => {
+        loadSettings(u?.email);
+        // Background sync all data for offline use
+        fullSync().catch(() => {});
+      })
+      .catch(() => {
+        loadSettings();
+        fullSync().catch(() => {});
+      })
       .finally(() => initThemeEngine());
   }, []);
 
-  // Auto-sync pending favorites when back online
+  // Auto-sync everything when back online
   useEffect(() => {
     const handleOnline = () => {
       base44.auth.me()
-        .then(u => { if (u) syncPendingFavorites(u.email); })
-        .catch(() => {});
+        .then(u => {
+          if (u) syncPendingFavorites(u.email);
+          fullSync().catch(() => {});
+        })
+        .catch(() => {
+          fullSync().catch(() => {});
+        });
     };
     window.addEventListener("online", handleOnline);
     return () => window.removeEventListener("online", handleOnline);

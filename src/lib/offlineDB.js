@@ -2,16 +2,20 @@
  * offlineDB — IndexedDB wrapper for Dar Al-Uloom offline storage
  *
  * Stores:
- * - books:    book metadata (key = book.id)
- * - pdfs:     PDF ArrayBuffers (key = pdfUrl)
- * - images:   cover image blobs (key = imageUrl)
- * - favorites: local favorites (key = bookId)
- * - pending:  pending sync operations (key = opId)
- * - meta:     key-value metadata (lastSync, offlineEnabled, etc.)
+ * - books:       book metadata (key = book.id)
+ * - pdfs:        PDF ArrayBuffers (key = pdfUrl)
+ * - images:      cover/book image blobs (key = imageUrl)
+ * - favorites:   local favorites (key = bookId)
+ * - pending:     pending sync operations (key = opId)
+ * - meta:        key-value metadata (lastSync, offlineEnabled, etc.)
+ * - videos:      video metadata (key = video.id)
+ * - channels:    video channel metadata (key = channel.id)
+ * - social:      social channel metadata (key = channel.id)
+ * - settings:    app settings cache (key = setting_key)
  */
 
 const DB_NAME = "dar_al_ulum_offline";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 let _db = null;
 
@@ -27,6 +31,10 @@ function openDB() {
       if (!db.objectStoreNames.contains("favorites")) db.createObjectStore("favorites", { keyPath: "bookId" });
       if (!db.objectStoreNames.contains("pending"))   db.createObjectStore("pending",   { keyPath: "id", autoIncrement: true });
       if (!db.objectStoreNames.contains("meta"))      db.createObjectStore("meta",      { keyPath: "key" });
+      if (!db.objectStoreNames.contains("videos"))    db.createObjectStore("videos",    { keyPath: "id" });
+      if (!db.objectStoreNames.contains("channels"))  db.createObjectStore("channels",  { keyPath: "id" });
+      if (!db.objectStoreNames.contains("social"))    db.createObjectStore("social",    { keyPath: "id" });
+      if (!db.objectStoreNames.contains("settings"))  db.createObjectStore("settings",  { keyPath: "setting_key" });
     };
     req.onsuccess = (e) => { _db = e.target.result; resolve(_db); };
     req.onerror   = (e) => reject(e.target.error);
@@ -151,6 +159,68 @@ export async function deletePendingOp(id) {
   await reqAsPromise(store.transaction.done);
 }
 
+// ─── Videos ───────────────────────────────────────────────────────────────────
+export async function cacheVideos(videos) {
+  const store = await tx("videos", "readwrite");
+  for (const v of videos) {
+    store.put({ ...v, _cached_at: Date.now() });
+  }
+  await reqAsPromise(store.transaction.done);
+}
+
+export async function getCachedVideos() {
+  const store = await tx("videos");
+  return reqAsPromise(store.getAll());
+}
+
+// ─── Video Channels ───────────────────────────────────────────────────────────
+export async function cacheVideoChannels(channels) {
+  const store = await tx("channels", "readwrite");
+  for (const c of channels) {
+    store.put({ ...c, _cached_at: Date.now() });
+  }
+  await reqAsPromise(store.transaction.done);
+}
+
+export async function getCachedVideoChannels() {
+  const store = await tx("channels");
+  return reqAsPromise(store.getAll());
+}
+
+// ─── Social Channels ──────────────────────────────────────────────────────────
+export async function cacheSocialChannels(channels) {
+  const store = await tx("social", "readwrite");
+  for (const c of channels) {
+    store.put({ ...c, _cached_at: Date.now() });
+  }
+  await reqAsPromise(store.transaction.done);
+}
+
+export async function getCachedSocialChannels() {
+  const store = await tx("social");
+  return reqAsPromise(store.getAll());
+}
+
+// ─── Settings ─────────────────────────────────────────────────────────────────
+export async function cacheSettings(settings) {
+  const store = await tx("settings", "readwrite");
+  for (const s of settings) {
+    store.put({ ...s, _cached_at: Date.now() });
+  }
+  await reqAsPromise(store.transaction.done);
+}
+
+export async function getCachedSettings() {
+  const store = await tx("settings");
+  return reqAsPromise(store.getAll());
+}
+
+export async function getCachedSetting(key) {
+  const store = await tx("settings");
+  const rec = await reqAsPromise(store.get(key));
+  return rec ? rec.setting_value : null;
+}
+
 // ─── Meta ─────────────────────────────────────────────────────────────────────
 export async function getMeta(key) {
   const store = await tx("meta");
@@ -166,7 +236,7 @@ export async function setMeta(key, value) {
 
 // ─── Storage management ───────────────────────────────────────────────────────
 export async function clearAllCache() {
-  const stores = ["books", "pdfs", "images", "pending"];
+  const stores = ["books", "pdfs", "images", "pending", "videos", "channels", "social", "settings"];
   for (const s of stores) {
     const store = await tx(s, "readwrite");
     store.clear();
@@ -175,7 +245,7 @@ export async function clearAllCache() {
 }
 
 export async function getStorageEstimate() {
-  let booksCount = 0, pdfsCount = 0, imagesCount = 0, pdfsSize = 0, imagesSize = 0;
+  let booksCount = 0, pdfsCount = 0, imagesCount = 0, pdfsSize = 0, imagesSize = 0, videosCount = 0;
 
   const books = await getCachedBooks();
   booksCount = books.length;
@@ -188,6 +258,9 @@ export async function getStorageEstimate() {
   imagesCount = images.length;
   imagesSize = images.reduce((sum, i) => sum + (i.size || 0), 0);
 
+  const videos = await getCachedVideos();
+  videosCount = videos.length;
+
   const totalSize = pdfsSize + imagesSize;
   const navEstimate = navigator.storage?.estimate ? await navigator.storage.estimate() : {};
 
@@ -195,6 +268,7 @@ export async function getStorageEstimate() {
     booksCount,
     pdfsCount,
     imagesCount,
+    videosCount,
     pdfsSize,
     imagesSize,
     totalSize,

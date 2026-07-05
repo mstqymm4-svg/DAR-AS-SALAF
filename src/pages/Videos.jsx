@@ -1,17 +1,20 @@
 import { useState, useEffect, useMemo } from "react";
-import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
-import { Play, Star, Search, Video, Tv, Clock } from "lucide-react";
+import { Play, Star, Search, Video, Tv, Clock, WifiOff } from "lucide-react";
 import { toast } from "sonner";
 import VideoPlayer from "@/components/VideoPlayer";
 import VideoCard from "@/components/VideoCard";
 import { PageSpinner } from "@/components/Skeleton";
 import { getThumbnail } from "@/components/dev/DevVideos";
 import { useT } from "@/lib/i18n";
+import { getVideos, getVideoChannels } from "@/lib/offlineSync";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import SmartImage from "@/components/SmartImage";
 
 export default function Videos() {
   const t = useT();
+  const { isOnline } = useOnlineStatus();
   const [videos, setVideos] = useState([]);
   const [channels, setChannels] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,8 +27,8 @@ export default function Videos() {
 
   useEffect(() => {
     Promise.all([
-      base44.entities.Video.filter({ visible: true }).catch(() => []),
-      base44.entities.VideoChannel.filter({ visible: true }).catch(() => []),
+      getVideos(),
+      getVideoChannels(),
     ]).then(([vData, chData]) => {
       setVideos(vData || []);
       setChannels(chData || []);
@@ -70,6 +73,12 @@ export default function Videos() {
 
   return (
     <div className="pb-8" dir="rtl">
+      {!isOnline && (
+        <div className="flex items-center gap-2 px-4 py-2 mx-4 mt-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-700 dark:text-orange-400 text-xs font-medium">
+          <WifiOff className="w-4 h-4" />
+          تعمل بدون اتصال — البيانات محفوظة محلياً
+        </div>
+      )}
       {/* Header */}
       <div className="bg-gradient-to-l from-primary/10 to-transparent py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
@@ -155,7 +164,7 @@ export default function Videos() {
                   className="bg-card border border-border rounded-xl p-4 flex flex-col items-center text-center hover:shadow-md transition-shadow">
                   <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center mb-2 overflow-hidden">
                     {ch.channel_logo
-                      ? <img src={ch.channel_logo} alt={ch.name} className="w-full h-full rounded-xl object-cover" />
+                      ? <SmartImage src={ch.channel_logo} alt={ch.name} className="w-full h-full rounded-xl object-cover" fallback={() => <Tv className="w-6 h-6 text-red-500" />} />
                       : <Tv className="w-6 h-6 text-red-500" />}
                   </div>
                   <p className="text-sm font-bold truncate w-full">{ch.name}</p>

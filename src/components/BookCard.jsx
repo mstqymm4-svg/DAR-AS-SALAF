@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Heart, Star, BookOpen, BookMarked } from "lucide-react";
 import { motion } from "framer-motion";
 import { useT } from "@/lib/i18n";
+import SmartImage from "./SmartImage";
 
 const categoryColors = {
   "القرآن وعلومه": "from-emerald-500/20 to-emerald-600/5",
@@ -39,11 +40,11 @@ export default function BookCard({ book, isFavorite, onToggleFavorite, index = 0
         {/* Cover Image */}
         <div className={`relative h-44 bg-gradient-to-br ${gradient} flex items-center justify-center overflow-hidden`}>
           {book.cover_image ? (
-            <img
+            <SmartImage
               src={book.cover_image}
               alt={book.title}
-              loading="lazy"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              fallback={() => <BookOpen className="w-10 h-10 text-primary/30" />}
             />
           ) : (
             <BookOpen className="w-10 h-10 text-primary/30" />
