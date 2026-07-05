@@ -119,10 +119,15 @@ export default function DevBooks() {
     }
 
     setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    setForm(p => ({...p, [field]: file_url}));
-    setUploading(false);
-    toast.success("تم الرفع ✓");
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setForm(p => ({...p, [field]: file_url}));
+      toast.success("تم الرفع ✓");
+    } catch (err) {
+      toast.error("فشل رفع الغلاف: " + (err?.message || "خطأ غير معروف"));
+    } finally {
+      setUploading(false);
+    }
   };
 
   const toggleSelect = (id) => setSelected(prev => prev.includes(id) ? prev.filter(x=>x!==id) : [...prev, id]);
@@ -221,12 +226,19 @@ export default function DevBooks() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label className="text-xs">غلاف الكتاب</Label>
-                <label className="cursor-pointer block mt-1">
-                  <input type="file" accept="image/*" onChange={e=>uploadFile(e,"cover_image",setCoverUploading)} className="hidden" />
-                  <div className={`flex items-center justify-center gap-1 h-9 rounded-xl border-2 border-dashed transition-colors ${form.cover_image?"border-primary bg-primary/5":"border-border hover:border-primary/40"}`}>
-                    {coverUploading ? <div className="w-3 h-3 border-2 border-primary/20 border-t-primary rounded-full animate-spin" /> : form.cover_image ? <><Check className="w-3.5 h-3.5 text-primary"/><span className="text-xs text-primary">تم</span></> : <><Upload className="w-3.5 h-3.5 text-muted-foreground"/><span className="text-xs text-muted-foreground">رفع غلاف</span></>}
+                <div className="flex items-center gap-3 mt-1">
+                  <div className="w-12 h-16 rounded-lg bg-muted border border-border overflow-hidden flex items-center justify-center shrink-0">
+                    {form.cover_image
+                      ? <img src={form.cover_image} alt="غلاف" className="w-full h-full object-cover" />
+                      : <BookOpen className="w-4 h-4 text-muted-foreground" />}
                   </div>
-                </label>
+                  <label className="cursor-pointer flex-1">
+                    <input type="file" accept="image/*" onChange={e=>uploadFile(e,"cover_image",setCoverUploading)} className="hidden" />
+                    <div className={`flex items-center justify-center gap-1 h-9 rounded-xl border-2 border-dashed transition-colors ${form.cover_image?"border-primary bg-primary/5":"border-border hover:border-primary/40"}`}>
+                      {coverUploading ? <><div className="w-3 h-3 border-2 border-primary/20 border-t-primary rounded-full animate-spin" /><span className="text-xs text-primary">جاري الرفع...</span></> : form.cover_image ? <><Check className="w-3.5 h-3.5 text-primary"/><span className="text-xs text-primary">تم الرفع</span></> : <><Upload className="w-3.5 h-3.5 text-muted-foreground"/><span className="text-xs text-muted-foreground">رفع غلاف</span></>}
+                    </div>
+                  </label>
+                </div>
               </div>
               <div>
                 <Label className="text-xs">ملف PDF</Label>
