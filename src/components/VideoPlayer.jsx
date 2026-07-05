@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Maximize, Minimize, Play, Pause, RotateCcw, Volume2, VolumeX, Share2 } from "lucide-react";
 import { extractYoutubeId } from "@/components/dev/DevVideos";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 function formatTime(seconds) {
   if (!seconds || isNaN(seconds)) return "0:00";
@@ -14,6 +15,7 @@ function formatTime(seconds) {
 }
 
 export default function VideoPlayer({ video, onClose }) {
+  const t = useT();
   const containerRef = useRef(null);
   const playerInstanceRef = useRef(null);
   const hideTimerRef = useRef(null);
@@ -166,7 +168,7 @@ export default function VideoPlayer({ video, onClose }) {
     if (navigator.share) {
       try { await navigator.share({ title: video.title, url: video.youtube_url }); } catch(e) {}
     } else {
-      try { await navigator.clipboard.writeText(video.youtube_url); toast.success("تم نسخ الرابط"); } catch(e) {}
+      try { await navigator.clipboard.writeText(video.youtube_url); toast.success(t.linkCopied); } catch(e) {}
     }
   };
 
@@ -182,8 +184,8 @@ export default function VideoPlayer({ video, onClose }) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95" dir="rtl">
         <div className="text-center text-white p-8">
-          <p className="text-lg font-bold mb-2">رابط الفيديو غير صالح</p>
-          <button onClick={onClose} className="text-primary hover:underline">إغلاق</button>
+          <p className="text-lg font-bold mb-2">{t.invalidVideoUrl}</p>
+          <button onClick={onClose} className="text-primary hover:underline">{t.close}</button>
         </div>
       </div>
     );
@@ -282,7 +284,7 @@ export default function VideoPlayer({ video, onClose }) {
                   <button onClick={togglePlay} className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors">
                     {playing ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
                   </button>
-                  <button onClick={handleRestart} className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors" title="إعادة التشغيل">
+                  <button onClick={handleRestart} className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors" title={t.restartPlayback}>
                     <RotateCcw className="w-5 h-5" />
                   </button>
                   <button onClick={toggleMute} className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors">

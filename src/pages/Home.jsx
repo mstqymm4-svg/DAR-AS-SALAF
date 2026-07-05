@@ -25,7 +25,7 @@ export default function Home() {
   const [user, setUser] = useState(null);
 
   const [youtubeUrl, setYoutubeUrl] = useState(() => getSetting("youtube_url") || "");
-  const [youtubeLabel, setYoutubeLabel] = useState(() => getSetting("youtube_label") || "قناتنا على يوتيوب");
+  const [youtubeLabel, setYoutubeLabel] = useState(() => getSetting("youtube_label") || t.youtubeBtn);
   const [youtubeSubText, setYoutubeSubText] = useState(() => getSetting("youtube_sub") || "");
   const { isOnline } = useOnlineStatus();
 
@@ -49,7 +49,7 @@ export default function Home() {
     loadData();
     const unsub = subscribeToSettings((s) => {
       setYoutubeUrl(s.youtube_url || "");
-      setYoutubeLabel(s.youtube_label || "قناتنا على يوتيوب");
+      setYoutubeLabel(s.youtube_label || t.youtubeBtn);
       setYoutubeSubText(s.youtube_sub || "");
     });
     return unsub;
@@ -85,7 +85,7 @@ export default function Home() {
           className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-700 dark:text-orange-400 text-xs font-medium mb-4 mt-2"
         >
           <WifiOff className="w-4 h-4" />
-          تعمل بدون اتصال — البيانات محفوظة محلياً
+          {t.offlineMode}
         </motion.div>
       )}
 
