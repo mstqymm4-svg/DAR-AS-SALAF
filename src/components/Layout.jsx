@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { BookOpen, Home, Heart, Settings, Code, Video } from "lucide-react";
+import { BookOpen, Home, Heart, Settings, Code, Video, Info, MessageCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
@@ -135,6 +135,25 @@ export default function Layout() {
           })}
         </div>
       </nav>
-    </div>
-  );
-}
+
+      {/* Footer — Desktop Only */}
+      <footer className="hidden md:block border-t border-border bg-card/50 mt-auto">
+       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+         <div className="flex items-center justify-between">
+           <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} {appNameOverride || t.appName}</p>
+           <nav className="flex items-center gap-5">
+             <Link to="/about" className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
+               <Info className="w-3.5 h-3.5" />
+               عن التطبيق
+             </Link>
+             <Link to="/contact" className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
+               <MessageCircle className="w-3.5 h-3.5" />
+               تواصل معنا
+             </Link>
+           </nav>
+         </div>
+       </div>
+      </footer>
+      </div>
+      );
+      }

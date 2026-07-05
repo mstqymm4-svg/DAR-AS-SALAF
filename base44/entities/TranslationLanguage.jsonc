@@ -27,6 +27,11 @@
     "font_family": {
       "type": "string",
       "title": "\u0627\u0644\u062e\u0637"
+    },
+    "description": {
+      "type": "string",
+      "title": "\u0627\u0644\u0648\u0635\u0641",
+      "maxLength": 1000
     }
   },
   "required": [

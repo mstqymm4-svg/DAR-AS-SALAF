@@ -33,6 +33,8 @@ const Settings = lazy(() => import('./pages/Settings'));
 const DevPanel = lazy(() => import('./pages/DevPanel'));
 const ReadBook = lazy(() => import('./pages/ReadBook'));
 const Videos = lazy(() => import('./pages/Videos'));
+const About = lazy(() => import('./pages/About'));
+const Contact = lazy(() => import('./pages/Contact'));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
@@ -95,6 +97,8 @@ const AuthenticatedApp = () => {
           <Route path="/dev" element={<DevPanel />} />
           <Route path="/read/:id" element={<ReadBook />} />
           <Route path="/videos" element={<Videos />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="*" element={<PageNotFound />} />
         </Route>
       </Routes>
