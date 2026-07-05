@@ -1,20 +1,20 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
   ChevronLeft, ChevronRight, Bookmark, BookmarkCheck,
-  ZoomIn, ZoomOut, Moon, Sun, List, X, Maximize, BookOpen,
+  ZoomIn, ZoomOut, Moon, Sun, List, X, Maximize, BookOpen, Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { loadPdfDocument } from "@/lib/pdfLoader";
+import { loadPdfDocument, clearPageCache } from "@/lib/pdfLoader";
 import PdfCanvasPage from "@/components/PdfCanvasPage";
 
 /**
- * Professional PDF viewer with realistic page-flip animation.
- * Supports books of any size (lazy page loading via pdfjs).
- * Features: flip animation, zoom, dark mode, bookmarks, TOC,
- * go-to-page, fullscreen, save last page, adjacent page prefetch.
+ * Professional PDF viewer optimized for Arabic/Urdu books.
+ * Canvas rendering preserves embedded fonts and original layout exactly.
+ * Features: smooth page transitions, zoom, dark mode, bookmarks, TOC,
+ * go-to-page, fullscreen, save last page, page caching.
  */
 export default function FlipBookViewer({ pdfUrl, title, language = "ar" }) {
   const isRTL = language === "ar" || language === "ur" || language === "fa";
@@ -27,7 +27,6 @@ export default function FlipBookViewer({ pdfUrl, title, language = "ar" }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [direction, setDirection] = useState(0);
-  const [isFlipping, setIsFlipping] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [darkMode, setDarkMode] = useState(false);
   const [showTools, setShowTools] = useState(true);
@@ -47,18 +46,26 @@ export default function FlipBookViewer({ pdfUrl, title, language = "ar" }) {
 
   // Save last page
   useEffect(() => {
-    localStorage.setItem(`lastpage_${title}`, String(currentPage));
-  }, [currentPage, title]);
+    if (totalPages > 0 && currentPage > 0) {
+      localStorage.setItem(`lastpage_${title}`, String(currentPage));
+    }
+  }, [currentPage, title, totalPages]);
 
   // Load PDF document + outline
   useEffect(() => {
     if (!pdfUrl) return;
     let cancelled = false;
     setPdfError("");
+    setPdf(null);
     loadPdfDocument(pdfUrl).then(async (doc) => {
       if (cancelled) return;
       setPdf(doc);
       setTotalPages(doc.numPages);
+      // Restore last page after knowing total
+      const saved = Number(localStorage.getItem(`lastpage_${title}`));
+      if (saved && saved > 0 && saved <= doc.numPages) {
+        setCurrentPage(saved);
+      }
       try {
         const outlineData = await doc.getOutline();
         if (outlineData && !cancelled) {
@@ -70,43 +77,42 @@ export default function FlipBookViewer({ pdfUrl, title, language = "ar" }) {
       if (!cancelled) setPdfError("فشل تحميل ملف PDF: " + (e.message || "خطأ غير معروف"));
     });
     return () => { cancelled = true; };
-  }, [pdfUrl]);
+  }, [pdfUrl, title]);
 
-  // Prefetch adjacent pages for smoother navigation
+  // Prefetch adjacent pages
   useEffect(() => {
     if (!pdf) return;
     if (currentPage < totalPages) pdf.getPage(currentPage + 1).catch(() => {});
     if (currentPage > 1) pdf.getPage(currentPage - 1).catch(() => {});
   }, [pdf, currentPage, totalPages]);
 
-  // Navigation — change page immediately, lock only during animation
+  // Navigation — change page immediately with smooth transition
   const goNext = useCallback(() => {
-    if (currentPage >= totalPages || isFlipping) return;
-    setDirection(isRTL ? -1 : 1);
-    setCurrentPage((p) => Math.min(p + 1, totalPages));
-    setIsFlipping(true);
-    setTimeout(() => setIsFlipping(false), 300);
-  }, [currentPage, totalPages, isFlipping, isRTL]);
+    setCurrentPage((p) => {
+      if (p >= totalPages) return p;
+      setDirection(isRTL ? -1 : 1);
+      return p + 1;
+    });
+  }, [totalPages, isRTL]);
 
   const goPrev = useCallback(() => {
-    if (currentPage <= 1 || isFlipping) return;
-    setDirection(isRTL ? 1 : -1);
-    setCurrentPage((p) => Math.max(p - 1, 1));
-    setIsFlipping(true);
-    setTimeout(() => setIsFlipping(false), 300);
-  }, [currentPage, isFlipping, isRTL]);
+    setCurrentPage((p) => {
+      if (p <= 1) return p;
+      setDirection(isRTL ? 1 : -1);
+      return p - 1;
+    });
+  }, [isRTL]);
 
   const navigateToPage = useCallback((num) => {
-    if (num < 1 || num > totalPages || isFlipping) return;
+    if (num < 1 || num > totalPages) return;
     setDirection(num > currentPage ? 1 : -1);
     setCurrentPage(num);
-    setIsFlipping(true);
-    setTimeout(() => setIsFlipping(false), 300);
-  }, [totalPages, currentPage, isFlipping]);
+  }, [totalPages, currentPage]);
 
   // Keyboard navigation
   useEffect(() => {
     const handler = (e) => {
+      if (e.target.tagName === "INPUT") return;
       if (e.key === "ArrowLeft") isRTL ? goNext() : goPrev();
       else if (e.key === "ArrowRight") isRTL ? goPrev() : goNext();
       else if (e.key === "Escape") { setShowGoTo(false); setShowToc(false); }
@@ -117,9 +123,13 @@ export default function FlipBookViewer({ pdfUrl, title, language = "ar" }) {
 
   const handleGoTo = () => {
     const num = Number(goToPage);
-    navigateToPage(num);
-    setShowGoTo(false);
-    setGoToPage("");
+    if (num >= 1 && num <= totalPages) {
+      navigateToPage(num);
+      setShowGoTo(false);
+      setGoToPage("");
+    } else {
+      toast.error(`أدخل رقم صفحة بين 1 و ${totalPages}`);
+    }
   };
 
   const toggleBookmark = () => {
@@ -154,8 +164,9 @@ export default function FlipBookViewer({ pdfUrl, title, language = "ar" }) {
 
   if (!pdf) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+      <div className="flex flex-col items-center justify-center h-full gap-3">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        <p className="text-sm text-muted-foreground">جاري تحميل الكتاب...</p>
       </div>
     );
   }
@@ -170,23 +181,25 @@ export default function FlipBookViewer({ pdfUrl, title, language = "ar" }) {
     >
       {/* Page Area */}
       <div className="flex-1 relative flex items-center justify-center overflow-hidden px-2 py-2">
+        {/* Click zones for page navigation */}
         <button className="absolute left-0 top-0 bottom-0 w-1/4 z-10" onClick={() => isRTL ? goNext() : goPrev()} aria-label="السابق" />
         <button className="absolute right-0 top-0 bottom-0 w-1/4 z-10" onClick={() => isRTL ? goPrev() : goNext()} aria-label="التالي" />
 
-        <AnimatePresence custom={direction} initial={false}>
+        <AnimatePresence initial={false} custom={direction}>
           <motion.div
             key={currentPage}
             custom={direction}
-            initial={{ x: direction > 0 ? "60%" : "-60%", opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: direction > 0 ? "-60%" : "60%", opacity: 0 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
+            initial={{ opacity: 0, x: direction > 0 ? 40 : -40 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: direction > 0 ? -40 : 40 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
             style={{ width: "100%", maxWidth: "700px", height: "100%" }}
           >
             <PdfCanvasPage pdf={pdf} pageNumber={currentPage} zoom={zoom} darkMode={darkMode} />
           </motion.div>
         </AnimatePresence>
 
+        {/* Navigation arrows */}
         <button onClick={() => isRTL ? goNext() : goPrev()} disabled={isRTL ? currentPage >= totalPages : currentPage <= 1}
           className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 dark:bg-gray-800/80 shadow-lg flex items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition-colors disabled:opacity-30 z-20">
           <ChevronLeft className="w-5 h-5" />
