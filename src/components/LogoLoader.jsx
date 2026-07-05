@@ -4,22 +4,27 @@ import { getSetting } from "@/lib/settingsStore";
 /**
  * Dar Al-Uloom — Premium 3D Motion Logo Loader
  * Inner book stays fixed; D-frame detaches and orbits in 3D with
- * realistic depth (scale + blur + opacity), then merges back. Loop.
+ * realistic depth (scale + blur + opacity), subtle tilt per cycle,
+ * then merges back. Smooth 60fps loop with ease-in/out.
  */
 export default function LogoLoader({ size = 100, showName = true }) {
   const appName = getSetting("app_name") || "دار العلوم";
 
-  const dur = 3.6;
-  const times = [0, 0.08, 0.5, 0.92, 1];
-  const ease = [0.22, 1, 0.36, 1]; // expo-out for luxury feel
-  const tr = { duration: dur, repeat: Infinity, times, ease };
+  // ── Timing: smooth ease-in/out, professional luxury feel ──
+  const dur = 4;
+  const ease = [0.45, 0, 0.55, 1]; // symmetric ease-in-out
+  const tr = { duration: dur, repeat: Infinity, ease };
+
+  // Keyframes: starts at 0, accelerates, peaks at 180°, decelerates, completes 360°
+  // times ensure ease-in at start, ease-out at end for natural motion
+  const orbit = { duration: dur, repeat: Infinity, ease, times: [0, 0.25, 0.5, 0.75, 1] };
 
   return (
-    <div className="flex flex-col items-center justify-center gap-7" style={{ perspective: "1400px" }}>
+    <div className="flex flex-col items-center justify-center gap-7" style={{ perspective: "1600px" }}>
       <div style={{ width: size, height: size, position: "relative", transformStyle: "preserve-3d" }}>
 
         {/* ── Static inner: open book with refined pages ── */}
-        <svg viewBox="0 0 120 120" className="absolute inset-0 w-full h-full" style={{ transformStyle: "preserve-3d" }}>
+        <svg viewBox="0 0 120 120" className="absolute inset-0 w-full h-full" style={{ transformStyle: "preserve-3d", willChange: "transform" }}>
           <defs>
             <linearGradient id="dal-page-left" x1="0" y1="0" x2="1" y2="0.5">
               <stop offset="0%" stopColor="hsl(var(--primary))" />
@@ -28,10 +33,6 @@ export default function LogoLoader({ size = 100, showName = true }) {
             <linearGradient id="dal-page-right" x1="1" y1="0" x2="0" y2="0.5">
               <stop offset="0%" stopColor="hsl(var(--primary))" />
               <stop offset="100%" stopColor="hsl(var(--primary) / 0.55)" />
-            </linearGradient>
-            <linearGradient id="dal-spine" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(var(--primary))" />
-              <stop offset="100%" stopColor="hsl(var(--primary) / 0.7)" />
             </linearGradient>
           </defs>
 
@@ -52,34 +53,34 @@ export default function LogoLoader({ size = 100, showName = true }) {
         </svg>
 
         {/* ── Orbiting D-frame: 4-layer 3D rig ── */}
-        {/* Layer 1: orbital path (rotateY around vertical axis) */}
+        {/* Layer 1: orbital rotation around vertical Y axis */}
         <motion.div
-          style={{ position: "absolute", inset: 0, transformStyle: "preserve-3d" }}
-          animate={{ rotateY: [0, 15, 180, 345, 360] }}
-          transition={tr}
+          style={{ position: "absolute", inset: 0, transformStyle: "preserve-3d", willChange: "transform" }}
+          animate={{ rotateY: [0, 90, 180, 270, 360] }}
+          transition={orbit}
         >
-          {/* Layer 2: depth (z-translate + scale + opacity + blur) */}
+          {/* Layer 2: depth — z-translate creates 3D orbit illusion */}
           <motion.div
-            style={{ position: "absolute", inset: 0, transformStyle: "preserve-3d" }}
+            style={{ position: "absolute", inset: 0, transformStyle: "preserve-3d", willChange: "transform, opacity, filter" }}
             animate={{
-              z: [0, 22, -22, 22, 0],
-              scale: [1, 0.82, 0.55, 0.82, 1],
-              opacity: [1, 0.92, 0.35, 0.92, 1],
-              filter: ["blur(0px)", "blur(0.5px)", "blur(2px)", "blur(0.5px)", "blur(0px)"],
+              z: [0, 18, 0, -18, 0],
+              scale: [1, 0.88, 0.7, 0.88, 1],
+              opacity: [1, 0.9, 0.45, 0.9, 1],
+              filter: ["blur(0px)", "blur(0.4px)", "blur(1.5px)", "blur(0.4px)", "blur(0px)"],
             }}
-            transition={tr}
+            transition={orbit}
           >
-            {/* Layer 3: counter-rotate so D-frame keeps its orientation facing viewer */}
+            {/* Layer 3: counter-rotate so D-frame always faces viewer */}
             <motion.div
-              style={{ position: "absolute", inset: 0, transformStyle: "preserve-3d" }}
-              animate={{ rotateY: [0, -15, -180, -345, -360] }}
-              transition={tr}
+              style={{ position: "absolute", inset: 0, transformStyle: "preserve-3d", willChange: "transform" }}
+              animate={{ rotateY: [0, -90, -180, -270, -360] }}
+              transition={orbit}
             >
-              {/* Layer 4: subtle tilt for 3D richness */}
+              {/* Layer 4: subtle tilt 3° at peak, returns to 0 — gives liveliness */}
               <motion.div
-                style={{ position: "absolute", inset: 0, transformStyle: "preserve-3d" }}
-                animate={{ rotateX: [0, 6, 0, -6, 0] }}
-                transition={tr}
+                style={{ position: "absolute", inset: 0, transformStyle: "preserve-3d", willChange: "transform" }}
+                animate={{ rotateX: [0, 3, 0, -3, 0], rotateZ: [0, 2, 0, -2, 0] }}
+                transition={orbit}
               >
                 <svg viewBox="0 0 120 120" className="absolute inset-0 w-full h-full">
                   <defs>
@@ -106,9 +107,9 @@ export default function LogoLoader({ size = 100, showName = true }) {
         {/* ── Subtle ground shadow that pulses with orbit ── */}
         <motion.div
           className="absolute left-1/2 -translate-x-1/2 rounded-full bg-primary/10 blur-md"
-          style={{ bottom: -8, width: size * 0.7, height: 8 }}
-          animate={{ scale: [1, 0.7, 0.4, 0.7, 1], opacity: [0.3, 0.2, 0.08, 0.2, 0.3] }}
-          transition={tr}
+          style={{ bottom: -6, width: size * 0.65, height: 7, willChange: "transform, opacity" }}
+          animate={{ scale: [1, 0.75, 0.5, 0.75, 1], opacity: [0.25, 0.18, 0.08, 0.18, 0.25] }}
+          transition={orbit}
         />
       </div>
 
