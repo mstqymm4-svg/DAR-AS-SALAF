@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { ArrowRight, BookOpen, Eye } from "lucide-react";
 import FlipBookViewer from "@/components/FlipBookViewer";
 import NativePdfViewer from "@/components/NativePdfViewer";
+import PdfJsViewer from "@/components/PdfJsViewer";
 import { useT } from "@/lib/i18n";
 import { getBook } from "@/lib/offlineSync";
 
@@ -13,6 +14,7 @@ export default function ReadBook() {
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [useNativeViewer, setUseNativeViewer] = useState(false);
+  const [usePdfJsViewer, setUsePdfJsViewer] = useState(false);
 
   useEffect(() => {
     loadBook();
@@ -23,9 +25,9 @@ export default function ReadBook() {
       const b = await getBook(id);
       if (b) {
         setBook(b);
-        // Auto-select native viewer for Urdu books to fix letter shaping
+        // Auto-select PDF.js text-layer viewer for Urdu books to fix letter shaping
         if (b.language === "الأوردو" || b.language === "Urdu") {
-          setUseNativeViewer(true);
+          setUsePdfJsViewer(true);
         }
       }
     } catch(e) {}
@@ -59,20 +61,33 @@ export default function ReadBook() {
           <span className="hidden sm:inline">{book.title}</span>
           <span className="sm:hidden">رجوع</span>
         </Link>
-        <button
-          onClick={() => setUseNativeViewer((v) => !v)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-          title="تبديل العارض"
-        >
-          <Eye className="w-3.5 h-3.5" />
-          {useNativeViewer ? "عارض متواصل" : "عارض أصلي"}
-        </button>
+        <div className="flex items-center gap-1.5">
+          {[
+            { key: "flipbook", label: "فليب بوك", active: !useNativeViewer && !usePdfJsViewer, on: () => { setUseNativeViewer(false); setUsePdfJsViewer(false); } },
+            { key: "pdfjs", label: "PDF.js", active: usePdfJsViewer, on: () => { setUsePdfJsViewer(true); setUseNativeViewer(false); } },
+            { key: "native", label: "أصلي", active: useNativeViewer, on: () => { setUseNativeViewer(true); setUsePdfJsViewer(false); } },
+          ].map((opt) => (
+            <button
+              key={opt.key}
+              onClick={opt.on}
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                opt.active
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-primary/10 text-primary hover:bg-primary/20"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* PDF Viewer — toggle between canvas (FlipBook) and native iframe (correct Urdu shaping) */}
+      {/* PDF Viewer — three modes: FlipBook (canvas), PDF.js (text layer), Native (iframe) */}
       <div className="flex-1 overflow-hidden relative">
         {useNativeViewer ? (
           <NativePdfViewer pdfUrl={book.pdf_url} title={book.title} />
+        ) : usePdfJsViewer ? (
+          <PdfJsViewer pdfUrl={book.pdf_url} title={book.title} />
         ) : (
           <FlipBookViewer pdfUrl={book.pdf_url} title={book.title} language={t.langCode || "ar"} />
         )}
