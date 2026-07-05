@@ -79,35 +79,29 @@ export default function FlipBookViewer({ pdfUrl, title, language = "ar" }) {
     if (currentPage > 1) pdf.getPage(currentPage - 1).catch(() => {});
   }, [pdf, currentPage, totalPages]);
 
-  // Navigation
+  // Navigation — change page immediately, lock only during animation
   const goNext = useCallback(() => {
     if (currentPage >= totalPages || isFlipping) return;
     setDirection(isRTL ? -1 : 1);
+    setCurrentPage((p) => Math.min(p + 1, totalPages));
     setIsFlipping(true);
-    setTimeout(() => {
-      setCurrentPage((p) => Math.min(p + 1, totalPages));
-      setIsFlipping(false);
-    }, 300);
+    setTimeout(() => setIsFlipping(false), 300);
   }, [currentPage, totalPages, isFlipping, isRTL]);
 
   const goPrev = useCallback(() => {
     if (currentPage <= 1 || isFlipping) return;
     setDirection(isRTL ? 1 : -1);
+    setCurrentPage((p) => Math.max(p - 1, 1));
     setIsFlipping(true);
-    setTimeout(() => {
-      setCurrentPage((p) => Math.max(p - 1, 1));
-      setIsFlipping(false);
-    }, 300);
+    setTimeout(() => setIsFlipping(false), 300);
   }, [currentPage, isFlipping, isRTL]);
 
   const navigateToPage = useCallback((num) => {
     if (num < 1 || num > totalPages || isFlipping) return;
     setDirection(num > currentPage ? 1 : -1);
+    setCurrentPage(num);
     setIsFlipping(true);
-    setTimeout(() => {
-      setCurrentPage(num);
-      setIsFlipping(false);
-    }, 300);
+    setTimeout(() => setIsFlipping(false), 300);
   }, [totalPages, currentPage, isFlipping]);
 
   // Keyboard navigation
@@ -179,15 +173,15 @@ export default function FlipBookViewer({ pdfUrl, title, language = "ar" }) {
         <button className="absolute left-0 top-0 bottom-0 w-1/4 z-10" onClick={() => isRTL ? goNext() : goPrev()} aria-label="السابق" />
         <button className="absolute right-0 top-0 bottom-0 w-1/4 z-10" onClick={() => isRTL ? goPrev() : goNext()} aria-label="التالي" />
 
-        <AnimatePresence mode="wait" custom={direction}>
+        <AnimatePresence custom={direction} initial={false}>
           <motion.div
             key={currentPage}
             custom={direction}
-            initial={{ rotateY: direction > 0 ? 80 : -80, opacity: 0 }}
-            animate={{ rotateY: 0, opacity: 1 }}
-            exit={{ rotateY: direction > 0 ? -80 : 80, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            style={{ width: "100%", maxWidth: "700px", height: "100%", transformStyle: "preserve-3d", transformOrigin: isRTL ? "right center" : "left center" }}
+            initial={{ x: direction > 0 ? "60%" : "-60%", opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: direction > 0 ? "-60%" : "60%", opacity: 0 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            style={{ width: "100%", maxWidth: "700px", height: "100%" }}
           >
             <PdfCanvasPage pdf={pdf} pageNumber={currentPage} zoom={zoom} darkMode={darkMode} />
           </motion.div>
