@@ -1,18 +1,31 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { BookOpen, Users, HardDrive, Activity, TrendingUp, Star, FileText, Clock } from "lucide-react";
+import { BookOpen, Users, HardDrive, Activity, TrendingUp, Star, FileText, Clock, Video, Heart, Tv } from "lucide-react";
 
 export default function DevDashboard() {
-  const [stats, setStats] = useState({ total: 0, featured: 0, categories: 0, withPdf: 0 });
+  const [stats, setStats] = useState({ total: 0, featured: 0, categories: 0, withPdf: 0, videos: 0, channels: 0, favorites: 0 });
   const [recentBooks, setRecentBooks] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const books = await base44.entities.Book.list('-created_date', 1000);
+      const [books, videos, channels, favs] = await Promise.all([
+        base44.entities.Book.list('-created_date', 1000).catch(() => []),
+        base44.entities.Video.list('-created_date', 1000).catch(() => []),
+        base44.entities.VideoChannel.list('-created_date', 1000).catch(() => []),
+        base44.entities.Favorite.list('-created_date', 1000).catch(() => []),
+      ]);
       const cats = new Set(books.map(b => b.category));
-      setStats({ total: books.length, featured: books.filter(b=>b.is_featured).length, categories: cats.size, withPdf: books.filter(b=>b.pdf_url).length });
+      setStats({
+        total: books.length,
+        featured: books.filter(b=>b.is_featured).length,
+        categories: cats.size,
+        withPdf: books.filter(b=>b.pdf_url).length,
+        videos: videos.length,
+        channels: channels.length,
+        favorites: favs.length,
+      });
       setRecentBooks(books.slice(0, 8));
       setLoading(false);
     })();
@@ -43,6 +56,10 @@ export default function DevDashboard() {
         <StatCard icon={Star}      label="كتاب مميز"       value={stats.featured}   color="bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" />
         <StatCard icon={Activity}  label="تصنيف"           value={stats.categories} color="bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" />
         <StatCard icon={FileText}  label="كتاب بـ PDF"     value={stats.withPdf}    color="bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400" />
+        <StatCard icon={Video}     label="الفيديوهات"      value={stats.videos}     color="bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400" />
+        <StatCard icon={Tv}        label="القنوات"         value={stats.channels}   color="bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400" />
+        <StatCard icon={Heart}     label="المفضلة"         value={stats.favorites}  color="bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400" />
+        <StatCard icon={HardDrive} label="تغطية PDF"       value={stats.total ? Math.round((stats.withPdf/stats.total)*100) + "%" : "0%"} color="bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400" />
       </div>
 
       {/* PDF Coverage */}

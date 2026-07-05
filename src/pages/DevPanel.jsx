@@ -5,7 +5,7 @@ import {
   LayoutDashboard, BookOpen, Type, Palette, Layers, Sliders,
   Navigation, Image, Users, HardDrive, Archive, Activity,
   KeyRound, Zap, Settings, ChevronRight, Moon, Sun, Check, Menu, X,
-  ImagePlay, GalleryHorizontal, Paintbrush, Share2, Video, WifiOff
+  ImagePlay, GalleryHorizontal, Paintbrush, Share2, Video, WifiOff, Wrench, FlaskConical
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,6 +36,8 @@ import DevTheme from "@/components/dev/DevTheme";
 import DevSocialChannels from "@/components/dev/DevSocialChannels";
 import DevVideos from "@/components/dev/DevVideos";
 import DevOffline from "@/components/dev/DevOffline";
+import DevMaintenance from "@/components/dev/DevMaintenance";
+import DevTesting from "@/components/dev/DevTesting";
 
 // ─── Font / Color exports (used by settingsStore) ─────────────────────────────
 export { FONT_PRESETS, FONT_ROLES } from "@/lib/fontConstants";
@@ -70,6 +72,8 @@ const TABS = [
   { id: "social",        label: "قنوات التواصل",        icon: Share2 },
   { id: "videos",        label: "إدارة الفيديوهات",      icon: Video },
   { id: "offline",       label: "إدارة وضع عدم الاتصال",  icon: WifiOff },
+  { id: "maintenance",   label: "أدوات الصيانة",           icon: Wrench },
+  { id: "testing",       label: "أدوات الاختبار",          icon: FlaskConical },
 ];
 
 export default function DevPanel() {
@@ -150,6 +154,8 @@ export default function DevPanel() {
     social:        DevSocialChannels,
     videos:        DevVideos,
     offline:       DevOffline,
+    maintenance:   DevMaintenance,
+    testing:       DevTesting,
   }[activeTab] || DevDashboard;
 
   return (
