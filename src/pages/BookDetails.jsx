@@ -9,6 +9,7 @@ import { getBook, getFavoriteIds, toggleFavorite, downloadBookPdf, isPdfDownload
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { toast } from "sonner";
 import SmartImage from "@/components/SmartImage";
+import MobileHeader from "@/components/MobileHeader";
 
 export default function BookDetails() {
   const { id } = useParams();
@@ -92,6 +93,7 @@ export default function BookDetails() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <MobileHeader title={book?.title} />
       {!isOnline && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -102,7 +104,7 @@ export default function BookDetails() {
           تعمل بدون اتصال
         </motion.div>
       )}
-      <Link to="/books" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors">
+      <Link to="/books" className="hidden md:inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors">
         <ArrowRight className="w-4 h-4" />
         {t.backToLib}
       </Link>

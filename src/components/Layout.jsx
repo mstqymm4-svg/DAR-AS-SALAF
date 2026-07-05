@@ -55,7 +55,7 @@ export default function Layout() {
   return (
     <div dir={t.dir} lang={t.langCode} className="min-h-screen bg-background" style={{ fontFamily: t.fontFamily }}>
       {/* Top Header */}
-      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border">
+      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border safe-area-top">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center gap-3 group">

@@ -11,6 +11,8 @@ import { useT } from "@/lib/i18n";
 import { getBooks, getFavoriteIds, toggleFavorite } from "@/lib/offlineSync";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { useContentRefresh } from "@/hooks/useContentSync";
+import PullToRefresh from "@/components/PullToRefresh";
+import { forceSyncNow } from "@/lib/contentSyncEngine";
 
 export default function Books() {
   const t = useT();
@@ -79,6 +81,7 @@ export default function Books() {
   }
 
   return (
+    <PullToRefresh onRefresh={async () => { await forceSyncNow(); loadData(); }}>
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {!isOnline && (
         <motion.div
@@ -149,5 +152,6 @@ export default function Books() {
         </div>
       )}
     </div>
+    </PullToRefresh>
   );
 }

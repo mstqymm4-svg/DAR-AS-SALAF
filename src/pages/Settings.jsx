@@ -5,7 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MobileSelect } from "@/components/ui/mobile-select";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Trash2 } from "lucide-react";
+import MobileHeader from "@/components/MobileHeader";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { useT, TRANSLATIONS } from "@/lib/i18n";
@@ -74,6 +77,7 @@ export default function Settings() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <MobileHeader title={t.settings} />
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-foreground">{t.settings}</h1>
         <p className="text-sm text-muted-foreground mt-1">{t.settingsSub}</p>
@@ -146,20 +150,21 @@ export default function Settings() {
             <div>
               <Label>{t.preferredLang}</Label>
               <p className="text-xs text-muted-foreground mt-0.5 mb-1.5">{t.preferredLangSub}</p>
-              <Select value={language} onValueChange={setLanguage}>
-                <SelectTrigger className="mt-1.5">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="الكل">الكل</SelectItem>
-                  <SelectItem value="العربية">العربية</SelectItem>
-                  <SelectItem value="الإنجليزية">الإنجليزية</SelectItem>
-                  <SelectItem value="الفرنسية">الفرنسية</SelectItem>
-                  <SelectItem value="الأوردو">الأوردو</SelectItem>
-                  <SelectItem value="الهندية">الهندية</SelectItem>
-                  <SelectItem value="التركية">التركية</SelectItem>
-                </SelectContent>
-              </Select>
+              <MobileSelect
+                value={language}
+                onValueChange={setLanguage}
+                placeholder="اللغة المفضلة"
+                triggerClassName="mt-1.5"
+                options={[
+                  { value: "الكل", label: "الكل" },
+                  { value: "العربية", label: "العربية" },
+                  { value: "الإنجليزية", label: "الإنجليزية" },
+                  { value: "الفرنسية", label: "الفرنسية" },
+                  { value: "الأوردو", label: "الأوردو" },
+                  { value: "الهندية", label: "الهندية" },
+                  { value: "التركية", label: "التركية" },
+                ]}
+              />
             </div>
             <Button onClick={handleSavePreferences} disabled={saving} className="gap-2 rounded-xl">
               <Save className="w-4 h-4" /> {t.savePreferences}
@@ -211,6 +216,34 @@ export default function Settings() {
           <Button variant="destructive" onClick={() => base44.auth.logout()} className="gap-2 rounded-xl">
             <LogOut className="w-4 h-4" /> {t.logout}
           </Button>
+        </motion.div>
+
+        {/* Account Deletion — Play Store policy compliance */}
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.35 }} className="bg-card border border-destructive/20 rounded-2xl p-6">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-9 h-9 rounded-xl bg-destructive/10 flex items-center justify-center">
+              <Trash2 className="w-4 h-4 text-destructive" />
+            </div>
+            <h2 className="text-base font-bold">حذف الحساب</h2>
+          </div>
+          <p className="text-sm text-muted-foreground mb-4">سيتم حذف حسابك وجميع بياناتك نهائياً. لا يمكن التراجع عن هذا الإجراء.</p>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" className="gap-2 rounded-xl">
+                <Trash2 className="w-4 h-4" /> حذف الحساب
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>تأكيد حذف الحساب</AlertDialogTitle>
+                <AlertDialogDescription>هل أنت متأكد؟ سيتم حذف جميع بياناتك نهائياً ولا يمكن التراجع عن هذا الإجراء.</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                <AlertDialogAction onClick={() => base44.auth.logout()}>حذف نهائي</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </motion.div>
       </div>
     </div>);

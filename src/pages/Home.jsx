@@ -13,6 +13,8 @@ import { getSetting, subscribeToSettings } from "@/lib/settingsStore";
 import { getFeaturedBooks, getRecentBooks, getFavoriteIds, toggleFavorite } from "@/lib/offlineSync";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { useContentRefresh } from "@/hooks/useContentSync";
+import PullToRefresh from "@/components/PullToRefresh";
+import { forceSyncNow } from "@/lib/contentSyncEngine";
 
 export default function Home() {
   const t = useT();
@@ -73,6 +75,7 @@ export default function Home() {
   }
 
   return (
+    <PullToRefresh onRefresh={async () => { await forceSyncNow(); loadData(); }}>
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Offline indicator */}
       {!isOnline && (
@@ -168,6 +171,7 @@ export default function Home() {
 
       {/* Social Channels */}
       <SocialChannelsSection />
-    </div>);
+    </div>
+    </PullToRefresh>);
 
 }

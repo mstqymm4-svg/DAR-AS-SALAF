@@ -96,6 +96,9 @@
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
 }
 
 @layer base {
@@ -151,6 +154,7 @@
     @apply bg-background text-foreground font-tajawal;
     font-family: var(--font-app, var(--font-tajawal));
     unicode-bidi: plaintext;
+    overscroll-behavior: none;
   }
 
   /* Urdu Nastaliq needs extra line-height to prevent letter overlap */
@@ -172,9 +176,18 @@
 
   button {
     font-family: var(--font-button);
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
   }
 
   a[class*="nav"], nav a, nav button {
     font-family: var(--font-nav);
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  a {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
   }
 }
