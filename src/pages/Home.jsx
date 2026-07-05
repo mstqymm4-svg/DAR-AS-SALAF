@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { BookOpen, ArrowLeft, Sparkles, Youtube, ExternalLink, WifiOff } from "lucide-react";
 import BookCard from "../components/BookCard";
-import CategoryChip, { categories } from "../components/CategoryChip";
 import HeroBanner from "../components/HeroBanner";
 import SocialChannelsSection from "../components/SocialChannelsSection";
 import HomeChannels from "../components/HomeChannels";
@@ -111,18 +110,6 @@ export default function Home() {
           </a>
         </motion.section>
       }
-
-      {/* Categories */}
-      <section className="mb-12">
-        
-        <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide">
-          {categories.filter((c) => c.name !== "الكل").map((cat) =>
-          <Link key={cat.name} to={`/books?category=${encodeURIComponent(cat.name)}`}>
-              <CategoryChip category={cat} isActive={false} onClick={() => {}} />
-            </Link>
-          )}
-        </div>
-      </section>
 
       {/* Featured Books */}
       {featuredBooks.length > 0 &&
