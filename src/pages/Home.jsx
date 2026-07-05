@@ -27,19 +27,6 @@ export default function Home() {
   const [youtubeSubText, setYoutubeSubText] = useState(() => getSetting("youtube_sub") || "");
   const { isOnline } = useOnlineStatus();
 
-  useEffect(() => {
-    loadData();
-    const unsub = subscribeToSettings((s) => {
-      setYoutubeUrl(s.youtube_url || "");
-      setYoutubeLabel(s.youtube_label || "قناتنا على يوتيوب");
-      setYoutubeSubText(s.youtube_sub || "");
-    });
-    return unsub;
-  }, []);
-
-  // Auto-refresh when content changes in background
-  useContentRefresh(["books", "videos", "channels", "social"], loadData);
-
   const loadData = async () => {
     const u = await base44.auth.me().catch(() => null);
     setUser(u);
@@ -55,6 +42,19 @@ export default function Home() {
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    loadData();
+    const unsub = subscribeToSettings((s) => {
+      setYoutubeUrl(s.youtube_url || "");
+      setYoutubeLabel(s.youtube_label || "قناتنا على يوتيوب");
+      setYoutubeSubText(s.youtube_sub || "");
+    });
+    return unsub;
+  }, []);
+
+  // Auto-refresh when content changes in background
+  useContentRefresh(["books", "videos", "channels", "social"], loadData);
 
   const handleToggleFavorite = async (bookId) => {
     if (!user) return;
