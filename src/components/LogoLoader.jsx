@@ -2,86 +2,133 @@ import { motion } from "framer-motion";
 import { getSetting } from "@/lib/settingsStore";
 
 /**
- * Dar Al-Uloom — 3D Motion Logo Loader
- * The inner book stays static; the D-shaped outer frame detaches
- * and orbits around it in 3D (passing front → side → behind → side),
- * then returns to merge. Loop = world-class app loading feel.
+ * Dar Al-Uloom — Premium 3D Motion Logo Loader
+ * Inner book stays fixed; D-frame detaches and orbits in 3D with
+ * realistic depth (scale + blur + opacity), then merges back. Loop.
  */
-export default function LogoLoader({ size = 90, showName = true }) {
+export default function LogoLoader({ size = 100, showName = true }) {
   const appName = getSetting("app_name") || "دار العلوم";
 
-  const dur = 3;
-  const times = [0, 0.12, 0.88, 1];
-  const ease = [0.45, 0, 0.55, 1];
+  const dur = 3.6;
+  const times = [0, 0.08, 0.5, 0.92, 1];
+  const ease = [0.22, 1, 0.36, 1]; // expo-out for luxury feel
   const tr = { duration: dur, repeat: Infinity, times, ease };
 
   return (
-    <div className="flex flex-col items-center justify-center gap-6" style={{ perspective: "1000px" }}>
+    <div className="flex flex-col items-center justify-center gap-7" style={{ perspective: "1400px" }}>
       <div style={{ width: size, height: size, position: "relative", transformStyle: "preserve-3d" }}>
 
-        {/* ── Static inner: open book ── */}
+        {/* ── Static inner: open book with refined pages ── */}
         <svg viewBox="0 0 120 120" className="absolute inset-0 w-full h-full" style={{ transformStyle: "preserve-3d" }}>
           <defs>
-            <linearGradient id="dal-book-grad" x1="0" y1="0" x2="1" y2="1">
+            <linearGradient id="dal-page-left" x1="0" y1="0" x2="1" y2="0.5">
               <stop offset="0%" stopColor="hsl(var(--primary))" />
-              <stop offset="100%" stopColor="hsl(var(--primary) / 0.65)" />
+              <stop offset="100%" stopColor="hsl(var(--primary) / 0.55)" />
+            </linearGradient>
+            <linearGradient id="dal-page-right" x1="1" y1="0" x2="0" y2="0.5">
+              <stop offset="0%" stopColor="hsl(var(--primary))" />
+              <stop offset="100%" stopColor="hsl(var(--primary) / 0.55)" />
+            </linearGradient>
+            <linearGradient id="dal-spine" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="hsl(var(--primary))" />
+              <stop offset="100%" stopColor="hsl(var(--primary) / 0.7)" />
             </linearGradient>
           </defs>
+
           {/* left page */}
-          <path d="M 60 40 L 26 47 L 26 83 L 60 76 Z" fill="url(#dal-book-grad)" />
+          <path d="M 60 38 L 24 46 L 24 84 L 60 76 Z" fill="url(#dal-page-left)" />
           {/* right page */}
-          <path d="M 60 40 L 94 47 L 94 83 L 60 76 Z" fill="url(#dal-book-grad)" opacity="0.75" />
-          {/* text lines */}
-          {[54, 61, 68].map((y) => (
-            <g key={y}>
-              <line x1="34" y1={y - 4} x2="54" y2={y - 8} stroke="hsl(var(--primary-foreground))" strokeWidth="1.2" opacity="0.35" />
-              <line x1="66" y1={y - 8} x2="86" y2={y - 4} stroke="hsl(var(--primary-foreground))" strokeWidth="1.2" opacity="0.35" />
+          <path d="M 60 38 L 96 46 L 96 84 L 60 76 Z" fill="url(#dal-page-right)" />
+          {/* spine */}
+          <line x1="60" y1="38" x2="60" y2="76" stroke="hsl(var(--primary-foreground))" strokeWidth="1.2" opacity="0.5" />
+
+          {/* refined text lines on pages */}
+          {[48, 55, 62, 69].map((y, i) => (
+            <g key={i}>
+              <line x1="31" y1={y - 3} x2="54" y2={y - 6} stroke="hsl(var(--primary-foreground))" strokeWidth="0.9" opacity={0.28 - i * 0.03} strokeLinecap="round" />
+              <line x1="66" y1={y - 6} x2="89" y2={y - 3} stroke="hsl(var(--primary-foreground))" strokeWidth="0.9" opacity={0.28 - i * 0.03} strokeLinecap="round" />
             </g>
           ))}
         </svg>
 
-        {/* ── Orbiting D-frame (3 layers: orbit → translate+scale → counter-rotate) ── */}
+        {/* ── Orbiting D-frame: 4-layer 3D rig ── */}
+        {/* Layer 1: orbital path (rotateY around vertical axis) */}
         <motion.div
           style={{ position: "absolute", inset: 0, transformStyle: "preserve-3d" }}
-          animate={{ rotateY: [0, 0, 360, 360] }}
+          animate={{ rotateY: [0, 15, 180, 345, 360] }}
           transition={tr}
         >
+          {/* Layer 2: depth (z-translate + scale + opacity + blur) */}
           <motion.div
             style={{ position: "absolute", inset: 0, transformStyle: "preserve-3d" }}
-            animate={{ z: [0, 28, 28, 0], scale: [1, 0.7, 0.7, 1] }}
+            animate={{
+              z: [0, 22, -22, 22, 0],
+              scale: [1, 0.82, 0.55, 0.82, 1],
+              opacity: [1, 0.92, 0.35, 0.92, 1],
+              filter: ["blur(0px)", "blur(0.5px)", "blur(2px)", "blur(0.5px)", "blur(0px)"],
+            }}
             transition={tr}
           >
+            {/* Layer 3: counter-rotate so D-frame keeps its orientation facing viewer */}
             <motion.div
               style={{ position: "absolute", inset: 0, transformStyle: "preserve-3d" }}
-              animate={{ rotateY: [0, 0, -360, -360] }}
+              animate={{ rotateY: [0, -15, -180, -345, -360] }}
               transition={tr}
             >
-              <svg viewBox="0 0 120 120" className="absolute inset-0 w-full h-full">
-                <path
-                  d="M 20 12 L 20 108 L 66 108 C 98 108 108 87 108 60 C 108 33 98 12 66 12 Z"
-                  fill="none"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth="7"
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                />
-              </svg>
+              {/* Layer 4: subtle tilt for 3D richness */}
+              <motion.div
+                style={{ position: "absolute", inset: 0, transformStyle: "preserve-3d" }}
+                animate={{ rotateX: [0, 6, 0, -6, 0] }}
+                transition={tr}
+              >
+                <svg viewBox="0 0 120 120" className="absolute inset-0 w-full h-full">
+                  <defs>
+                    <linearGradient id="dal-frame-grad" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--primary))" />
+                      <stop offset="50%" stopColor="hsl(var(--primary) / 0.85)" />
+                      <stop offset="100%" stopColor="hsl(var(--primary) / 0.6)" />
+                    </linearGradient>
+                  </defs>
+                  <path
+                    d="M 18 10 L 18 110 L 66 110 C 100 110 110 88 110 60 C 110 32 100 10 66 10 Z"
+                    fill="none"
+                    stroke="url(#dal-frame-grad)"
+                    strokeWidth="6.5"
+                    strokeLinejoin="round"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </motion.div>
             </motion.div>
           </motion.div>
         </motion.div>
 
+        {/* ── Subtle ground shadow that pulses with orbit ── */}
+        <motion.div
+          className="absolute left-1/2 -translate-x-1/2 rounded-full bg-primary/10 blur-md"
+          style={{ bottom: -8, width: size * 0.7, height: 8 }}
+          animate={{ scale: [1, 0.7, 0.4, 0.7, 1], opacity: [0.3, 0.2, 0.08, 0.2, 0.3] }}
+          transition={tr}
+        />
       </div>
 
-      {/* App name pulse */}
+      {/* App name with refined letter-spacing */}
       {showName && (
-        <motion.p
-          className="font-bold text-primary text-lg tracking-wide"
-          style={{ fontFamily: "var(--font-heading)" }}
-          animate={{ opacity: [0.35, 1, 0.35] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        >
-          {appName}
-        </motion.p>
+        <div className="flex flex-col items-center gap-1.5">
+          <motion.p
+            className="font-bold text-primary text-xl tracking-[0.15em]"
+            style={{ fontFamily: "var(--font-heading)" }}
+            animate={{ opacity: [0.4, 1, 0.4] }}
+            transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+          >
+            {appName}
+          </motion.p>
+          <motion.div
+            className="h-[2px] rounded-full bg-primary/40"
+            animate={{ width: ["20%", "60%", "20%"], opacity: [0.3, 0.8, 0.3] }}
+            transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </div>
       )}
     </div>
   );
