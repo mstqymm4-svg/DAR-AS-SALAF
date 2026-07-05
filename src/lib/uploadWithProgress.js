@@ -14,7 +14,7 @@ export function uploadFileWithProgress(file, onProgress) {
     const formData = new FormData();
     formData.append("file", file, file.name);
 
-    const endpoint = `/apps/${appParams.appId}/integration-endpoints/Core/UploadFile`;
+    const endpoint = `/api/apps/${appParams.appId}/integration-endpoints/Core/UploadFile`;
 
     const startTime = Date.now();
 
