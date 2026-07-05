@@ -50,16 +50,6 @@ export default function BookCard({ book, isFavorite, onToggleFavorite, index = 0
               ⭐ مميز
             </div>
           }
-
-          {/* Read Button — always visible at bottom of cover */}
-          <Link
-            to={`/read/${book.id}`}
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-            className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-1.5 py-2.5 bg-primary/90 hover:bg-primary backdrop-blur-sm text-primary-foreground text-xs font-bold transition-all duration-300">
-            
-            <BookMarked className="w-3.5 h-3.5" />
-            {t.readBook}
-          </Link>
         </div>
 
         {/* Content */}
@@ -82,6 +72,14 @@ export default function BookCard({ book, isFavorite, onToggleFavorite, index = 0
               <span className="text-[10px] text-muted-foreground mr-1">{book.rating}</span>
             </div>
           }
+
+          <Link
+            to={`/read/${book.id}`}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+            className="mt-3 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold transition-all">
+            <BookMarked className="w-3.5 h-3.5" />
+            {t.readBook}
+          </Link>
         </div>
       </Link>
     </motion.div>);
