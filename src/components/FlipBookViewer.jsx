@@ -86,25 +86,21 @@ export default function FlipBookViewer({ pdfUrl, title, language = "ar" }) {
     if (currentPage > 1) pdf.getPage(currentPage - 1).catch(() => {});
   }, [pdf, currentPage, totalPages]);
 
-  // Navigation — change page immediately with smooth transition
+  // Navigation — change page immediately with smooth slide transition
   const goNext = useCallback(() => {
-    setCurrentPage((p) => {
-      if (p >= totalPages) return p;
-      setDirection(isRTL ? -1 : 1);
-      return p + 1;
-    });
-  }, [totalPages, isRTL]);
+    if (currentPage >= totalPages) return;
+    setDirection(isRTL ? -1 : 1);
+    setCurrentPage((p) => Math.min(p + 1, totalPages));
+  }, [currentPage, totalPages, isRTL]);
 
   const goPrev = useCallback(() => {
-    setCurrentPage((p) => {
-      if (p <= 1) return p;
-      setDirection(isRTL ? 1 : -1);
-      return p - 1;
-    });
-  }, [isRTL]);
+    if (currentPage <= 1) return;
+    setDirection(isRTL ? 1 : -1);
+    setCurrentPage((p) => Math.max(p - 1, 1));
+  }, [currentPage, isRTL]);
 
   const navigateToPage = useCallback((num) => {
-    if (num < 1 || num > totalPages) return;
+    if (num < 1 || num > totalPages || num === currentPage) return;
     setDirection(num > currentPage ? 1 : -1);
     setCurrentPage(num);
   }, [totalPages, currentPage]);

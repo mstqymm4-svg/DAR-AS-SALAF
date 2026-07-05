@@ -51,11 +51,11 @@ export default function BookCard({ book, isFavorite, onToggleFavorite, index = 0
             </div>
           }
 
-          {/* Read Button — overlaid at bottom of cover */}
+          {/* Read Button — always visible at bottom of cover */}
           <Link
             to={`/read/${book.id}`}
-            onClick={(e) => e.stopPropagation()}
-            className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-1.5 py-2.5 bg-primary/80 hover:bg-primary backdrop-blur-sm text-primary-foreground text-xs font-bold transition-all duration-300 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 opacity-0">
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+            className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-1.5 py-2.5 bg-primary/90 hover:bg-primary backdrop-blur-sm text-primary-foreground text-xs font-bold transition-all duration-300">
             
             <BookMarked className="w-3.5 h-3.5" />
             {t.readBook}

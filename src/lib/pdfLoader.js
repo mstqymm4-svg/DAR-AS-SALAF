@@ -44,6 +44,16 @@ export async function getPdfPageCount(url) {
 }
 
 /**
+ * Extract text from a single PDF page using the text layer.
+ * Fast — no API calls, runs entirely client-side.
+ */
+export async function extractPageText(pdf, pageNumber) {
+  const page = await pdf.getPage(pageNumber);
+  const content = await page.getTextContent();
+  return content.items.map((item) => item.str).join(" ");
+}
+
+/**
  * Render a PDF page to a canvas with devicePixelRatio for crisp text.
  * Returns the canvas element. Uses cache for re-renders.
  */

@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Heart, Star, BookOpen, ArrowRight, FileText, User, BookMarked } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useT } from "@/lib/i18n";
+import BookTranslate from "@/components/BookTranslate";
 
 export default function BookDetails() {
   const { id } = useParams();
@@ -142,13 +143,15 @@ export default function BookDetails() {
           }
 
           {book.pdf_url &&
-          <a href={`/read/${book.id}`} className="block">
+          <Link to={`/read/${book.id}`} className="block">
             <Button className="w-full gap-2 h-12 rounded-xl text-sm font-bold">
               <BookMarked className="w-4 h-4" />
               {t.readBook}
             </Button>
-          </a>
+          </Link>
           }
+
+          {book.pdf_url && <BookTranslate book={book} />}
         </div>
       </motion.div>
     </div>);

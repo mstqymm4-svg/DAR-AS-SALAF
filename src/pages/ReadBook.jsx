@@ -1,22 +1,34 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ArrowRight, BookOpen } from "lucide-react";
+import { ArrowRight, BookOpen, Languages } from "lucide-react";
 import FlipBookViewer from "@/components/FlipBookViewer";
 import { useT } from "@/lib/i18n";
 
 export default function ReadBook() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const isTranslated = searchParams.get("translated") === "1";
   const t = useT();
   const [book, setBook] = useState(null);
+  const [translation, setTranslation] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.entities.Book.filter({ id }).then((books) => {
+    const loadData = async () => {
+      const books = await base44.entities.Book.filter({ id });
       if (books.length > 0) setBook(books[0]);
+
+      if (isTranslated) {
+        try {
+          const translations = await base44.entities.BookTranslation.filter({ book_id: id, status: "completed" });
+          if (translations.length > 0) setTranslation(translations[0]);
+        } catch (e) {}
+      }
       setLoading(false);
-    });
-  }, [id]);
+    };
+    loadData();
+  }, [id, isTranslated]);
 
   if (loading) {
     return (
@@ -26,11 +38,13 @@ export default function ReadBook() {
     );
   }
 
-  if (!book || !book.pdf_url) {
+  const pdfUrl = isTranslated && translation?.translated_pdf_url ? translation.translated_pdf_url : book?.pdf_url;
+
+  if (!book || !pdfUrl) {
     return (
       <div className="text-center py-20 px-4">
         <BookOpen className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-        <h3 className="text-lg font-bold mb-2">لا يوجد ملف PDF لهذا الكتاب</h3>
+        <h3 className="text-lg font-bold mb-2">{isTranslated ? "لا توجد ترجمة متاحة لهذا الكتاب" : "لا يوجد ملف PDF لهذا الكتاب"}</h3>
         <Link to="/books" className="text-primary text-sm hover:underline">العودة للمكتبة</Link>
       </div>
     );
@@ -45,11 +59,17 @@ export default function ReadBook() {
           <span className="hidden sm:inline">{book.title}</span>
           <span className="sm:hidden">رجوع</span>
         </Link>
+        {isTranslated && translation && (
+          <div className="flex items-center gap-2 text-xs">
+            <Languages className="w-4 h-4 text-primary" />
+            <span className="text-muted-foreground">نسخة مترجمة</span>
+          </div>
+        )}
       </div>
 
       {/* FlipBook Viewer */}
       <div className="flex-1 overflow-hidden relative">
-        <FlipBookViewer pdfUrl={book.pdf_url} title={book.title} language={t.langCode || "ar"} />
+        <FlipBookViewer pdfUrl={pdfUrl} title={isTranslated ? `${book.title}_translated` : book.title} language={isTranslated ? "ar" : (t.langCode || "ar")} />
       </div>
     </div>
   );
