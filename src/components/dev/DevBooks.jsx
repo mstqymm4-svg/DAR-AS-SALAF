@@ -232,8 +232,8 @@ export default function DevBooks() {
                       ? <img src={form.cover_image} alt="غلاف" className="w-full h-full object-cover" />
                       : <BookOpen className="w-4 h-4 text-muted-foreground" />}
                   </div>
-                  <label className="cursor-pointer flex-1">
-                    <input type="file" accept="image/*" onChange={e=>uploadFile(e,"cover_image",setCoverUploading)} className="hidden" />
+                  <label htmlFor="cover-upload-input" className="cursor-pointer flex-1">
+                    <input id="cover-upload-input" type="file" accept="image/*" onChange={e=>uploadFile(e,"cover_image",setCoverUploading)} className="sr-only" />
                     <div className={`flex items-center justify-center gap-1 h-9 rounded-xl border-2 border-dashed transition-colors ${form.cover_image?"border-primary bg-primary/5":"border-border hover:border-primary/40"}`}>
                       {coverUploading ? <><div className="w-3 h-3 border-2 border-primary/20 border-t-primary rounded-full animate-spin" /><span className="text-xs text-primary">جاري الرفع...</span></> : form.cover_image ? <><Check className="w-3.5 h-3.5 text-primary"/><span className="text-xs text-primary">تم الرفع</span></> : <><Upload className="w-3.5 h-3.5 text-muted-foreground"/><span className="text-xs text-muted-foreground">رفع غلاف</span></>}
                     </div>
@@ -242,8 +242,8 @@ export default function DevBooks() {
               </div>
               <div>
                 <Label className="text-xs">ملف PDF</Label>
-                <label className="cursor-pointer block mt-1">
-                  <input type="file" accept=".pdf" onChange={e=>uploadFile(e,"pdf_url",setPdfUploading)} className="hidden" />
+                <label htmlFor="pdf-upload-input" className="cursor-pointer block mt-1">
+                  <input id="pdf-upload-input" type="file" accept=".pdf" onChange={e=>uploadFile(e,"pdf_url",setPdfUploading)} className="sr-only" />
                   <div className={`flex items-center justify-center gap-1 h-9 rounded-xl border-2 border-dashed transition-colors ${form.pdf_url?"border-primary bg-primary/5":"border-border hover:border-primary/40"}`}>
                     {pdfUploading
                       ? <><div className="w-3 h-3 border-2 border-primary/20 border-t-primary rounded-full animate-spin" /><span className="text-xs text-primary tabular-nums">{pdfProgress}% · {pdfProgressInfo} · {pdfSpeed}</span></>
