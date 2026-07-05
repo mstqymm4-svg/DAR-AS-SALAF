@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { ArrowRight, BookOpen } from "lucide-react";
 import FlipBookViewer from "@/components/FlipBookViewer";
 import { useT } from "@/lib/i18n";
+import { getBook } from "@/lib/offlineSync";
 
 export default function ReadBook() {
   const { id } = useParams();
@@ -12,11 +13,16 @@ export default function ReadBook() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.entities.Book.filter({ id }).then((books) => {
-      if (books.length > 0) setBook(books[0]);
-      setLoading(false);
-    });
+    loadBook();
   }, [id]);
+
+  const loadBook = async () => {
+    try {
+      const b = await getBook(id);
+      if (b) setBook(b);
+    } catch(e) {}
+    setLoading(false);
+  };
 
   if (loading) {
     return (

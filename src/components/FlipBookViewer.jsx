@@ -178,8 +178,8 @@ export default function FlipBookViewer({ pdfUrl, title, language = "ar" }) {
       {/* Page Area */}
       <div className="flex-1 relative flex items-center justify-center overflow-hidden px-2 py-2">
         {/* Click zones for page navigation */}
-        <button className="absolute left-0 top-0 bottom-0 w-1/4 z-10" onClick={() => isRTL ? goNext() : goPrev()} aria-label="السابق" />
-        <button className="absolute right-0 top-0 bottom-0 w-1/4 z-10" onClick={() => isRTL ? goPrev() : goNext()} aria-label="التالي" />
+        <button className="absolute left-0 top-0 bottom-0 w-1/5 z-10" onClick={() => isRTL ? goNext() : goPrev()} aria-label="السابق" />
+        <button className="absolute right-0 top-0 bottom-0 w-1/5 z-10" onClick={() => isRTL ? goPrev() : goNext()} aria-label="التالي" />
 
         <AnimatePresence initial={false} custom={direction}>
           <motion.div
@@ -251,9 +251,14 @@ export default function FlipBookViewer({ pdfUrl, title, language = "ar" }) {
           <motion.div initial={{ y: 60 }} animate={{ y: 0 }} exit={{ y: 60 }}
             className={`shrink-0 border-t ${darkMode ? "border-gray-700 bg-gray-800" : "border-border bg-card"}`}>
             <div className="flex items-center justify-between px-4 py-2 gap-2">
-              <div className="flex items-center gap-2 text-xs">
+              <div className="flex items-center gap-2 text-xs min-w-[80px]">
                 <span className={`font-mono font-bold ${darkMode ? "text-gray-200" : "text-foreground"}`}>{currentPage}</span>
                 <span className={darkMode ? "text-gray-400" : "text-muted-foreground"}>/ {totalPages}</span>
+              </div>
+
+              {/* Page progress bar */}
+              <div className={`flex-1 h-1.5 rounded-full overflow-hidden ${darkMode ? "bg-gray-700" : "bg-muted"} mx-2`}>
+                <div className="h-full bg-primary rounded-full transition-all duration-300" style={{ width: `${totalPages ? (currentPage / totalPages) * 100 : 0}%` }} />
               </div>
 
               <div className="flex items-center gap-1">

@@ -25,8 +25,16 @@ export default function VideoPlayer({ video, onClose }) {
   const [fullscreen, setFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [ready, setReady] = useState(false);
+  const [restoreTime, setRestoreTime] = useState(0);
 
   const videoId = extractYoutubeId(video?.youtube_url);
+
+  // Restore last position
+  useEffect(() => {
+    if (!videoId) return;
+    const saved = localStorage.getItem(`video_pos_${videoId}`);
+    if (saved) setRestoreTime(Number(saved));
+  }, [videoId]);
 
   // Initialize YouTube IFrame API player
   useEffect(() => {
@@ -40,6 +48,7 @@ export default function VideoPlayer({ video, onClose }) {
         playerVars: {
           autoplay: 1, controls: 0, modestbranding: 1, rel: 0,
           playsinline: 1, iv_load_policy: 3, fs: 0, disablekb: 1,
+          start: restoreTime || 0,
         },
         events: {
           onReady: (e) => {
@@ -82,18 +91,23 @@ export default function VideoPlayer({ video, onClose }) {
     };
   }, [videoId]);
 
-  // Time update polling
+  // Time update polling + save position
   useEffect(() => {
     if (!player) return;
     const interval = setInterval(() => {
       try {
-        setCurrentTime(player.getCurrentTime() || 0);
+        const t = player.getCurrentTime() || 0;
+        setCurrentTime(t);
         const d = player.getDuration();
         if (d) setDuration(d);
+        // Save position every 5 seconds
+        if (videoId && t > 0) {
+          localStorage.setItem(`video_pos_${videoId}`, String(Math.floor(t)));
+        }
       } catch(e) {}
     }, 300);
     return () => clearInterval(interval);
-  }, [player]);
+  }, [player, videoId]);
 
   // Fullscreen handling
   useEffect(() => {
