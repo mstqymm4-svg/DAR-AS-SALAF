@@ -99,6 +99,25 @@
   .safe-area-top {
     padding-top: env(safe-area-inset-top, 0px);
   }
+
+  /* PDF.js text layer — selectable text overlay on canvas */
+  .text-layer-container {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    opacity: 1;
+    line-height: 1;
+  }
+  .text-layer-container span {
+    color: transparent;
+    position: absolute;
+    white-space: pre;
+    cursor: text;
+    transform-origin: 0% 0%;
+  }
+  .text-layer-container ::selection {
+    background: hsl(var(--primary) / 0.3);
+  }
 }
 
 @layer base {

@@ -5,6 +5,7 @@ import { ArrowRight, BookOpen, Eye } from "lucide-react";
 import FlipBookViewer from "@/components/FlipBookViewer";
 import NativePdfViewer from "@/components/NativePdfViewer";
 import PdfJsViewer from "@/components/PdfJsViewer";
+import UniversalPdfViewer from "@/components/UniversalPdfViewer";
 import { useT } from "@/lib/i18n";
 import { getBook } from "@/lib/offlineSync";
 
@@ -15,6 +16,7 @@ export default function ReadBook() {
   const [loading, setLoading] = useState(true);
   const [useNativeViewer, setUseNativeViewer] = useState(false);
   const [usePdfJsViewer, setUsePdfJsViewer] = useState(false);
+  const [useUniversalViewer, setUseUniversalViewer] = useState(true);
 
   useEffect(() => {
     loadBook();
@@ -25,10 +27,8 @@ export default function ReadBook() {
       const b = await getBook(id);
       if (b) {
         setBook(b);
-        // Auto-select PDF.js text-layer viewer for Urdu books to fix letter shaping
-        if (b.language === "الأوردو" || b.language === "Urdu") {
-          setUsePdfJsViewer(true);
-        }
+        // Universal viewer handles Urdu shaping via text layer + canvas
+        // No special auto-selection needed — it's the default
       }
     } catch(e) {}
     setLoading(false);
@@ -63,9 +63,10 @@ export default function ReadBook() {
         </Link>
         <div className="flex items-center gap-1.5">
           {[
-            { key: "flipbook", label: "فليب بوك", active: !useNativeViewer && !usePdfJsViewer, on: () => { setUseNativeViewer(false); setUsePdfJsViewer(false); } },
-            { key: "pdfjs", label: "PDF.js", active: usePdfJsViewer, on: () => { setUsePdfJsViewer(true); setUseNativeViewer(false); } },
-            { key: "native", label: "أصلي", active: useNativeViewer, on: () => { setUseNativeViewer(true); setUsePdfJsViewer(false); } },
+            { key: "universal", label: "شامل", active: useUniversalViewer, on: () => { setUseUniversalViewer(true); setUseNativeViewer(false); setUsePdfJsViewer(false); } },
+            { key: "flipbook", label: "فليب بوك", active: !useUniversalViewer && !useNativeViewer && !usePdfJsViewer, on: () => { setUseUniversalViewer(false); setUseNativeViewer(false); setUsePdfJsViewer(false); } },
+            { key: "pdfjs", label: "PDF.js", active: usePdfJsViewer, on: () => { setUseUniversalViewer(false); setUsePdfJsViewer(true); setUseNativeViewer(false); } },
+            { key: "native", label: "أصلي", active: useNativeViewer, on: () => { setUseUniversalViewer(false); setUseNativeViewer(true); setUsePdfJsViewer(false); } },
           ].map((opt) => (
             <button
               key={opt.key}
@@ -82,12 +83,14 @@ export default function ReadBook() {
         </div>
       </div>
 
-      {/* PDF Viewer — three modes: FlipBook (canvas), PDF.js (text layer), Native (iframe) */}
+      {/* PDF Viewer — four modes: Universal (default), FlipBook, PDF.js, Native */}
       <div className="flex-1 overflow-hidden relative">
         {useNativeViewer ? (
           <NativePdfViewer pdfUrl={book.pdf_url} title={book.title} />
         ) : usePdfJsViewer ? (
           <PdfJsViewer pdfUrl={book.pdf_url} title={book.title} />
+        ) : useUniversalViewer ? (
+          <UniversalPdfViewer pdfUrl={book.pdf_url} title={book.title} language={t.langCode || "ar"} />
         ) : (
           <FlipBookViewer pdfUrl={book.pdf_url} title={book.title} language={t.langCode || "ar"} />
         )}
