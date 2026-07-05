@@ -85,6 +85,7 @@ export const DEFAULT_SETTINGS = {
   theme_mode:        "light",  // light | dark | auto
   show_dev_nav:      "true",
   categories:        "",
+  offline_mode:      "true",
 };
 
 // ─── localStorage helpers ─────────────────────────────────────────────────────

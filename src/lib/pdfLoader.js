@@ -19,15 +19,28 @@ const MAX_PAGE_CACHE = 12;
 
 /**
  * Load a PDF document. Cached per URL.
- * Uses larger range chunks for faster streaming of large files.
+ * Offline-aware: checks IndexedDB for cached PDF first, falls back to URL.
  */
 export async function loadPdfDocument(url) {
   if (_docCache.has(url)) return _docCache.get(url);
+
+  // Try offline cache first
+  let pdfData = null;
+  let cachedPdf = null;
+  try {
+    const { getCachedPdf } = await import("@/lib/offlineDB");
+    cachedPdf = await getCachedPdf(url);
+    if (cachedPdf && cachedPdf.buffer) {
+      pdfData = new Uint8Array(cachedPdf.buffer);
+    }
+  } catch(e) { /* offlineDB not available — fall through to URL */ }
+
   const loadingTask = pdfjsLib.getDocument({
-    url,
-    rangeChunkSize: 262144, // 256KB chunks — faster for large PDFs
-    disableAutoFetch: false,
-    disableStream: false,
+    url: pdfData ? undefined : url,
+    data: pdfData || undefined,
+    rangeChunkSize: 262144,
+    disableAutoFetch: pdfData ? true : false,
+    disableStream: pdfData ? true : false,
     cMapUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/cmaps/",
     cMapPacked: true,
     standardFontDataUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/standard_fonts/",

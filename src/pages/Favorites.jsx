@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Heart } from "lucide-react";
+import { Heart, WifiOff } from "lucide-react";
+import { motion } from "framer-motion";
 import BookCard from "../components/BookCard";
 import { useT } from "@/lib/i18n";
+import { getBooks, getFavoriteIds, toggleFavorite } from "@/lib/offlineSync";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
 export default function Favorites() {
   const t = useT();
@@ -10,6 +13,7 @@ export default function Favorites() {
   const [favoriteIds, setFavoriteIds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const { isOnline } = useOnlineStatus();
 
   useEffect(() => { loadFavorites(); }, []);
 
@@ -17,24 +21,20 @@ export default function Favorites() {
     const u = await base44.auth.me().catch(() => null);
     setUser(u);
     if (!u) { setLoading(false); return; }
-    const favs = await base44.entities.Favorite.filter({ user_email: u.email });
-    const ids = favs.map((f) => f.book_id);
+    const ids = await getFavoriteIds(u.email);
     setFavoriteIds(ids);
     if (ids.length > 0) {
-      const allBooks = await base44.entities.Book.list('-created_date', 1000);
+      const allBooks = await getBooks();
       setBooks(allBooks.filter((b) => ids.includes(b.id)));
     }
     setLoading(false);
   };
 
-  const toggleFavorite = async (bookId) => {
+  const handleToggleFavorite = async (bookId) => {
     if (!user) return;
-    const existing = await base44.entities.Favorite.filter({ book_id: bookId, user_email: user.email });
-    if (existing.length > 0) {
-      await base44.entities.Favorite.delete(existing[0].id);
-      setFavoriteIds((prev) => prev.filter((id) => id !== bookId));
-      setBooks((prev) => prev.filter((b) => b.id !== bookId));
-    }
+    await toggleFavorite(bookId, user.email);
+    setFavoriteIds((prev) => prev.filter((id) => id !== bookId));
+    setBooks((prev) => prev.filter((b) => b.id !== bookId));
   };
 
   if (loading) {
@@ -47,6 +47,16 @@ export default function Favorites() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {!isOnline && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-700 dark:text-orange-400 text-xs font-medium mb-4"
+        >
+          <WifiOff className="w-4 h-4" />
+          تعمل بدون اتصال — المفضلة محفوظة محلياً
+        </motion.div>
+      )}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-foreground mb-2 flex items-center gap-2">
           <Heart className="w-6 h-6 text-red-500" />
@@ -58,7 +68,7 @@ export default function Favorites() {
       {books.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {books.map((book, i) => (
-            <BookCard key={book.id} book={book} index={i} isFavorite={true} onToggleFavorite={toggleFavorite} />
+            <BookCard key={book.id} book={book} index={i} isFavorite={true} onToggleFavorite={handleToggleFavorite} />
           ))}
         </div>
       ) : (

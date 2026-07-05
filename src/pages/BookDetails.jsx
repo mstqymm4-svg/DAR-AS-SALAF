@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Heart, Star, BookOpen, ArrowRight, FileText, User, BookMarked } from "lucide-react";
+import { Heart, Star, BookOpen, ArrowRight, FileText, User, BookMarked, Download, CheckCircle, WifiOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useT } from "@/lib/i18n";
+import { getBook, getFavoriteIds, toggleFavorite, downloadBookPdf, isPdfDownloaded } from "@/lib/offlineSync";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { toast } from "sonner";
 
 export default function BookDetails() {
   const { id } = useParams();
@@ -13,31 +16,48 @@ export default function BookDetails() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [pdfDownloaded, setPdfDownloaded] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
+  const { isOnline } = useOnlineStatus();
 
   useEffect(() => {loadBook();}, [id]);
 
   const loadBook = async () => {
     const u = await base44.auth.me().catch(() => null);
     setUser(u);
-    const books = await base44.entities.Book.filter({ id });
-    if (books.length > 0) setBook(books[0]);
+    const b = await getBook(id);
+    if (b) setBook(b);
     if (u) {
-      const favs = await base44.entities.Favorite.filter({ book_id: id, user_email: u.email });
-      setIsFavorite(favs.length > 0);
+      const favIds = await getFavoriteIds(u.email);
+      setIsFavorite(favIds.includes(id));
+    }
+    if (b?.pdf_url) {
+      setPdfDownloaded(await isPdfDownloaded(b.pdf_url));
     }
     setLoading(false);
   };
 
-  const toggleFavorite = async () => {
+  const handleToggleFavorite = async () => {
     if (!user) return;
-    const existing = await base44.entities.Favorite.filter({ book_id: id, user_email: user.email });
-    if (existing.length > 0) {
-      await base44.entities.Favorite.delete(existing[0].id);
-      setIsFavorite(false);
-    } else {
-      await base44.entities.Favorite.create({ book_id: id, user_email: user.email });
-      setIsFavorite(true);
+    const added = await toggleFavorite(id, user.email);
+    setIsFavorite(added);
+  };
+
+  const handleDownload = async () => {
+    if (!book?.pdf_url) return;
+    setDownloading(true);
+    setDownloadProgress(0);
+    try {
+      await downloadBookPdf(book, (p) => {
+        if (p.percent !== undefined) setDownloadProgress(p.percent);
+      });
+      setPdfDownloaded(true);
+      toast.success("تم تنزيل الكتاب للقراءة بدون إنترنت");
+    } catch(e) {
+      toast.error("فشل التنزيل: " + (e.message || ""));
     }
+    setDownloading(false);
   };
 
   if (loading) {
@@ -60,6 +80,16 @@ export default function BookDetails() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {!isOnline && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-700 dark:text-orange-400 text-xs font-medium mb-4"
+        >
+          <WifiOff className="w-4 h-4" />
+          تعمل بدون اتصال
+        </motion.div>
+      )}
       <Link to="/books" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors">
         <ArrowRight className="w-4 h-4" />
         {t.backToLib}
@@ -93,11 +123,11 @@ export default function BookDetails() {
             </div>
             {user &&
             <button
-              onClick={toggleFavorite}
-              className="shrink-0 w-11 h-11 rounded-xl border border-border flex items-center justify-center hover:bg-muted transition-colors">
-              
-                <Heart className={`w-5 h-5 ${isFavorite ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
-              </button>
+            onClick={handleToggleFavorite}
+            className="shrink-0 w-11 h-11 rounded-xl border border-border flex items-center justify-center hover:bg-muted transition-colors">
+
+              <Heart className={`w-5 h-5 ${isFavorite ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
+            </button>
             }
           </div>
 
@@ -142,12 +172,37 @@ export default function BookDetails() {
           }
 
           {book.pdf_url &&
-          <Link to={`/read/${book.id}`} className="block">
-            <Button className="w-full gap-2 h-12 rounded-xl text-sm font-bold">
-              <BookMarked className="w-4 h-4" />
-              {t.readBook}
-            </Button>
-          </Link>
+          <div className="space-y-2">
+            <Link to={`/read/${book.id}`} className="block">
+              <Button className="w-full gap-2 h-12 rounded-xl text-sm font-bold">
+                <BookMarked className="w-4 h-4" />
+                {t.readBook}
+              </Button>
+            </Link>
+            {isOnline && !pdfDownloaded && !downloading && (
+              <Button variant="outline" onClick={handleDownload} className="w-full gap-2 h-10 rounded-xl text-sm">
+                <Download className="w-4 h-4" />
+                تنزيل للقراءة بدون إنترنت
+              </Button>
+            )}
+            {downloading && (
+              <div className="w-full px-4 py-2 rounded-xl border border-primary/20 bg-primary/5">
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span className="text-muted-foreground">جاري التنزيل...</span>
+                  <span className="font-bold text-primary">{downloadProgress}%</span>
+                </div>
+                <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                  <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${downloadProgress}%` }} />
+                </div>
+              </div>
+            )}
+            {pdfDownloaded && (
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-500/5 border border-green-500/20 text-green-700 dark:text-green-400 text-xs font-medium">
+                <CheckCircle className="w-4 h-4" />
+                متوفر للقراءة بدون إنترنت
+              </div>
+            )}
+          </div>
           }
 
         </div>

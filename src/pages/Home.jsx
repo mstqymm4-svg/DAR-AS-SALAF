@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { BookOpen, ArrowLeft, Sparkles, Youtube, ExternalLink } from "lucide-react";
+import { BookOpen, ArrowLeft, Sparkles, Youtube, ExternalLink, WifiOff } from "lucide-react";
 import BookCard from "../components/BookCard";
 import CategoryChip, { categories } from "../components/CategoryChip";
 import HeroBanner from "../components/HeroBanner";
@@ -10,6 +10,8 @@ import HomeChannels from "../components/HomeChannels";
 import { motion } from "framer-motion";
 import { useT } from "@/lib/i18n";
 import { getSetting, subscribeToSettings } from "@/lib/settingsStore";
+import { getFeaturedBooks, getRecentBooks, getFavoriteIds, toggleFavorite } from "@/lib/offlineSync";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
 export default function Home() {
   const t = useT();
@@ -22,6 +24,7 @@ export default function Home() {
   const [youtubeUrl, setYoutubeUrl] = useState(() => getSetting("youtube_url") || "");
   const [youtubeLabel, setYoutubeLabel] = useState(() => getSetting("youtube_label") || "قناتنا على يوتيوب");
   const [youtubeSubText, setYoutubeSubText] = useState(() => getSetting("youtube_sub") || "");
+  const { isOnline } = useOnlineStatus();
 
   useEffect(() => {
     loadData();
@@ -37,28 +40,24 @@ export default function Home() {
     const u = await base44.auth.me().catch(() => null);
     setUser(u);
     const [featured, recent] = await Promise.all([
-    base44.entities.Book.filter({ is_featured: true }, '-created_date', 6),
-    base44.entities.Book.list('-created_date', 8)]
-    );
+      getFeaturedBooks(),
+      getRecentBooks(),
+    ]);
     setFeaturedBooks(featured);
     setRecentBooks(recent);
     if (u) {
-      const favs = await base44.entities.Favorite.filter({ user_email: u.email });
-      setFavorites(favs.map((f) => f.book_id));
+      const favIds = await getFavoriteIds(u.email);
+      setFavorites(favIds);
     }
     setLoading(false);
   };
 
-  const toggleFavorite = async (bookId) => {
+  const handleToggleFavorite = async (bookId) => {
     if (!user) return;
-    const existing = await base44.entities.Favorite.filter({ book_id: bookId, user_email: user.email });
-    if (existing.length > 0) {
-      await base44.entities.Favorite.delete(existing[0].id);
-      setFavorites((prev) => prev.filter((id) => id !== bookId));
-    } else {
-      await base44.entities.Favorite.create({ book_id: bookId, user_email: user.email });
-      setFavorites((prev) => [...prev, bookId]);
-    }
+    const added = await toggleFavorite(bookId, user.email);
+    setFavorites((prev) =>
+      added ? [...prev, bookId] : prev.filter((id) => id !== bookId)
+    );
   };
 
   if (loading) {
@@ -71,6 +70,18 @@ export default function Home() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Offline indicator */}
+      {!isOnline && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-700 dark:text-orange-400 text-xs font-medium mb-4 mt-2"
+        >
+          <WifiOff className="w-4 h-4" />
+          تعمل بدون اتصال — البيانات محفوظة محلياً
+        </motion.div>
+      )}
+
       {/* Hero */}
       <HeroBanner />
 
@@ -127,7 +138,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
             {featuredBooks.map((book, i) =>
-          <BookCard key={book.id} book={book} index={i} isFavorite={favorites.includes(book.id)} onToggleFavorite={user ? toggleFavorite : null} />
+          <BookCard key={book.id} book={book} index={i} isFavorite={favorites.includes(book.id)} onToggleFavorite={user ? handleToggleFavorite : null} />
           )}
           </div>
         </section>
@@ -147,7 +158,7 @@ export default function Home() {
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {recentBooks.map((book, i) =>
-          <BookCard key={book.id} book={book} index={i} isFavorite={favorites.includes(book.id)} onToggleFavorite={user ? toggleFavorite : null} />
+          <BookCard key={book.id} book={book} index={i} isFavorite={favorites.includes(book.id)} onToggleFavorite={user ? handleToggleFavorite : null} />
           )}
         </div>
       </section>

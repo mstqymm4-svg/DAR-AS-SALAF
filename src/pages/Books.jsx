@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Search } from "lucide-react";
+import { Search, WifiOff } from "lucide-react";
+import { motion } from "framer-motion";
 import AISearch from "../components/AISearch";
 import BookCard from "../components/BookCard";
 import CategoryChip, { categories } from "../components/CategoryChip";
 import { Input } from "@/components/ui/input";
 import { useT } from "@/lib/i18n";
+import { getBooks, getFavoriteIds, toggleFavorite } from "@/lib/offlineSync";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
 export default function Books() {
   const t = useT();
@@ -18,6 +21,7 @@ export default function Books() {
   const [preferredLanguage, setPreferredLanguage] = useState("الكل");
   const [aiResults, setAiResults] = useState(null);
   const [aiLabel, setAiLabel] = useState("");
+  const { isOnline } = useOnlineStatus();
 
   const urlParams = new URLSearchParams(window.location.search);
   const categoryParam = urlParams.get("category");
@@ -31,28 +35,24 @@ export default function Books() {
   const loadData = async () => {
     const u = await base44.auth.me().catch(() => null);
     setUser(u);
-    const allBooks = await base44.entities.Book.list('-created_date', 1000);
+    const allBooks = await getBooks();
     setBooks(allBooks);
     if (u?.preferred_language && u.preferred_language !== 'الكل') {
       setPreferredLanguage(u.preferred_language);
     }
     if (u) {
-      const favs = await base44.entities.Favorite.filter({ user_email: u.email });
-      setFavorites(favs.map((f) => f.book_id));
+      const favIds = await getFavoriteIds(u.email);
+      setFavorites(favIds);
     }
     setLoading(false);
   };
 
-  const toggleFavorite = async (bookId) => {
+  const handleToggleFavorite = async (bookId) => {
     if (!user) return;
-    const existing = await base44.entities.Favorite.filter({ book_id: bookId, user_email: user.email });
-    if (existing.length > 0) {
-      await base44.entities.Favorite.delete(existing[0].id);
-      setFavorites((prev) => prev.filter((id) => id !== bookId));
-    } else {
-      await base44.entities.Favorite.create({ book_id: bookId, user_email: user.email });
-      setFavorites((prev) => [...prev, bookId]);
-    }
+    const added = await toggleFavorite(bookId, user.email);
+    setFavorites((prev) =>
+      added ? [...prev, bookId] : prev.filter((id) => id !== bookId)
+    );
   };
 
   const filteredBooks = aiResults ?? books.filter((book) => {
@@ -75,6 +75,16 @@ export default function Books() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {!isOnline && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-700 dark:text-orange-400 text-xs font-medium mb-4"
+        >
+          <WifiOff className="w-4 h-4" />
+          تعمل بدون اتصال — البيانات محفوظة محلياً
+        </motion.div>
+      )}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-foreground mb-2">{t.library}</h1>
         <p className="text-sm text-muted-foreground">{t.librarySub}</p>
@@ -122,7 +132,7 @@ export default function Books() {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {filteredBooks.map((book, i) => (
-          <BookCard key={book.id} book={book} index={i} isFavorite={favorites.includes(book.id)} onToggleFavorite={user ? toggleFavorite : null} />
+          <BookCard key={book.id} book={book} index={i} isFavorite={favorites.includes(book.id)} onToggleFavorite={user ? handleToggleFavorite : null} />
         ))}
       </div>
 
