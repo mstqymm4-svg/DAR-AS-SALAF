@@ -5,7 +5,7 @@ import {
   LayoutDashboard, BookOpen, Type, Palette, Layers, Sliders,
   Navigation, Image, Users, HardDrive, Archive, Activity,
   KeyRound, Zap, Settings, ChevronRight, Moon, Sun, Check, Menu, X,
-  ImagePlay, GalleryHorizontal, Paintbrush, Share2, Video, Languages
+  ImagePlay, GalleryHorizontal, Paintbrush, Share2, Video
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,7 +35,6 @@ import DevBackgroundManager from "@/components/dev/DevBackgroundManager";
 import DevTheme from "@/components/dev/DevTheme";
 import DevSocialChannels from "@/components/dev/DevSocialChannels";
 import DevVideos from "@/components/dev/DevVideos";
-import DevTranslations from "@/components/dev/DevTranslations";
 
 // ─── Font / Color exports (used by settingsStore) ─────────────────────────────
 export { FONT_PRESETS, FONT_ROLES } from "@/lib/fontConstants";
@@ -69,7 +68,6 @@ const TABS = [
   { id: "bg_library",   label: "مكتبة الخلفيات",     icon: GalleryHorizontal },
   { id: "social",        label: "قنوات التواصل",        icon: Share2 },
   { id: "videos",        label: "إدارة الفيديوهات",      icon: Video },
-  { id: "translations",  label: "إدارة ترجمة الكتب",     icon: Languages },
 ];
 
 export default function DevPanel() {
@@ -149,7 +147,6 @@ export default function DevPanel() {
     bg_library:   DevBackgroundLibrary,
     social:        DevSocialChannels,
     videos:        DevVideos,
-    translations:  DevTranslations,
   }[activeTab] || DevDashboard;
 
   return (

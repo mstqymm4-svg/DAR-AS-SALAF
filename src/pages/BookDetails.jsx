@@ -5,7 +5,6 @@ import { Heart, Star, BookOpen, ArrowRight, FileText, User, BookMarked } from "l
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useT } from "@/lib/i18n";
-import BookTranslate from "@/components/BookTranslate";
 
 export default function BookDetails() {
   const { id } = useParams();
@@ -151,7 +150,6 @@ export default function BookDetails() {
           </Link>
           }
 
-          {book.pdf_url && <BookTranslate book={book} />}
         </div>
       </motion.div>
     </div>);
