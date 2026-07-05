@@ -5,7 +5,7 @@ import { appParams } from "@/lib/app-params";
  * Uses XMLHttpRequest to get real-time upload progress (axios doesn't expose it by default).
  *
  * @param {File} file - The file to upload
- * @param {(percent: number, loadedMB: number, totalMB: number) => void} onProgress - progress callback
+ * @param {(percent: number, loadedMB: number, totalMB: number, speedMBs: number, etaSec: number) => void} onProgress - progress callback
  * @returns {Promise<string>} file_url
  */
 export function uploadFileWithProgress(file, onProgress) {
@@ -16,12 +16,18 @@ export function uploadFileWithProgress(file, onProgress) {
 
     const endpoint = `/apps/${appParams.appId}/integration-endpoints/Core/UploadFile`;
 
+    const startTime = Date.now();
+
     xhr.upload.addEventListener("progress", (e) => {
       if (e.lengthComputable && onProgress) {
         const percent = Math.round((e.loaded / e.total) * 100);
         const loadedMB = (e.loaded / (1024 * 1024)).toFixed(1);
         const totalMB = (e.total / (1024 * 1024)).toFixed(1);
-        onProgress(percent, loadedMB, totalMB);
+        const elapsedSec = (Date.now() - startTime) / 1000;
+        const speedMBs = elapsedSec > 0 ? (e.loaded / (1024 * 1024)) / elapsedSec : 0;
+        const remainingBytes = e.total - e.loaded;
+        const etaSec = speedMBs > 0 ? remainingBytes / (1024 * 1024) / speedMBs : 0;
+        onProgress(percent, loadedMB, totalMB, speedMBs, etaSec);
       }
     });
 

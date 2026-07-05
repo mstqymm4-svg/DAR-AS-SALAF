@@ -29,6 +29,7 @@ export default function DevBooks() {
   const [coverUploading, setCoverUploading] = useState(false);
   const [pdfProgress, setPdfProgress]       = useState(0);
   const [pdfProgressInfo, setPdfProgressInfo] = useState("");
+  const [pdfSpeed, setPdfSpeed]             = useState("");
 
   const categories = (() => { try { return JSON.parse(getSetting("categories") || "[]"); } catch(e) { return []; } })().length > 0
     ? (() => { try { return JSON.parse(getSetting("categories")); } catch(e) { return DEFAULT_CATS; } })()
@@ -96,10 +97,13 @@ export default function DevBooks() {
       setPdfUploading(true);
       setPdfProgress(0);
       setPdfProgressInfo(`${(file.size / (1024 * 1024)).toFixed(1)} MB`);
+      setPdfSpeed("");
       try {
-        const file_url = await uploadFileWithProgress(file, (percent, loadedMB, totalMB) => {
+        const file_url = await uploadFileWithProgress(file, (percent, loadedMB, totalMB, speedMBs, etaSec) => {
           setPdfProgress(percent);
           setPdfProgressInfo(`${loadedMB}/${totalMB} MB`);
+          const etaStr = etaSec > 1 ? `${Math.ceil(etaSec)}ث` : "≈ثانية";
+          setPdfSpeed(`${speedMBs.toFixed(1)} MB/ث · ${etaStr}`);
         });
         setForm(p => ({...p, pdf_url: file_url}));
         toast.success("تم رفع الملف ✓");
@@ -109,6 +113,7 @@ export default function DevBooks() {
         setPdfUploading(false);
         setPdfProgress(0);
         setPdfProgressInfo("");
+        setPdfSpeed("");
       }
       return;
     }
@@ -229,7 +234,7 @@ export default function DevBooks() {
                   <input type="file" accept=".pdf" onChange={e=>uploadFile(e,"pdf_url",setPdfUploading)} className="hidden" />
                   <div className={`flex items-center justify-center gap-1 h-9 rounded-xl border-2 border-dashed transition-colors ${form.pdf_url?"border-primary bg-primary/5":"border-border hover:border-primary/40"}`}>
                     {pdfUploading
-                      ? <><div className="w-3 h-3 border-2 border-primary/20 border-t-primary rounded-full animate-spin" /><span className="text-xs text-primary tabular-nums">{pdfProgress}% · {pdfProgressInfo}</span></>
+                      ? <><div className="w-3 h-3 border-2 border-primary/20 border-t-primary rounded-full animate-spin" /><span className="text-xs text-primary tabular-nums">{pdfProgress}% · {pdfProgressInfo} · {pdfSpeed}</span></>
                       : form.pdf_url
                         ? <><Check className="w-3.5 h-3.5 text-primary"/><span className="text-xs text-primary">PDF ✓</span></>
                         : <><Upload className="w-3.5 h-3.5 text-muted-foreground"/><span className="text-xs text-muted-foreground">رفع PDF</span></>}
