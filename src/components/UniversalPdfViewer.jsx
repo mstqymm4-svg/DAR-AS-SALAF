@@ -552,10 +552,23 @@ const PdfPage = ({ pdf, pageNumber, scale, darkFilter, refCallback }) => {
   const canvasRef = useRef(null);
   const textLayerRef = useRef(null);
   const renderTaskRef = useRef(null);
+  const containerRef = useRef(null);
   const [rendering, setRendering] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
+
+  // Track visibility — only render pages near the viewport
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { rootMargin: "800px 0px" }
+    );
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
-    if (!pdf || !canvasRef.current) return;
+    if (!pdf || !isVisible || !canvasRef.current) return;
     let cancelled = false;
     setRendering(true);
 
@@ -599,7 +612,8 @@ const PdfPage = ({ pdf, pageNumber, scale, darkFilter, refCallback }) => {
               container: textLayerRef.current,
               viewport: cssViewport,
             });
-            await tl.render();
+            const result = tl.render();
+            await (result?.promise || result);
           } catch(e) {}
         }
 
@@ -619,10 +633,10 @@ const PdfPage = ({ pdf, pageNumber, scale, darkFilter, refCallback }) => {
       clearTimeout(timer);
       if (renderTaskRef.current) { try { renderTaskRef.current.cancel(); } catch(e) {} }
     };
-  }, [pdf, pageNumber, scale]);
+  }, [pdf, pageNumber, scale, isVisible]);
 
   return (
-    <div ref={refCallback} className="relative shadow-xl bg-white" style={{ filter: darkFilter }}>
+    <div ref={(el) => { containerRef.current = el; refCallback?.(el); }} className="relative shadow-xl bg-white" style={{ filter: darkFilter, minHeight: rendering ? "60vh" : undefined }}>
       <canvas ref={canvasRef} className="block bg-white" style={{ maxWidth: "100%", height: "auto" }} />
       <div
         ref={textLayerRef}
