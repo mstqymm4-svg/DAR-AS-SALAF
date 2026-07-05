@@ -19,28 +19,37 @@ const MAX_PAGE_CACHE = 12;
 
 /**
  * Load a PDF document. Cached per URL.
- * Offline-aware: checks IndexedDB for cached PDF first, falls back to URL.
+ * Offline-aware: uses IndexedDB cache when offline, URL when online.
  */
 export async function loadPdfDocument(url) {
   if (_docCache.has(url)) return _docCache.get(url);
 
-  // Try offline cache first
-  let pdfData = null;
-  let cachedPdf = null;
-  try {
-    const { getCachedPdf } = await import("@/lib/offlineDB");
-    cachedPdf = await getCachedPdf(url);
-    if (cachedPdf && cachedPdf.buffer) {
-      pdfData = new Uint8Array(cachedPdf.buffer);
-    }
-  } catch(e) { /* offlineDB not available — fall through to URL */ }
+  // Only check offline cache when navigator is offline
+  if (!navigator.onLine) {
+    try {
+      const { getCachedPdf } = await import("@/lib/offlineDB");
+      const cachedPdf = await getCachedPdf(url);
+      if (cachedPdf && cachedPdf.buffer) {
+        const pdfData = new Uint8Array(cachedPdf.buffer);
+        const loadingTask = pdfjsLib.getDocument({
+          data: pdfData,
+          cMapUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/cmaps/",
+          cMapPacked: true,
+          standardFontDataUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/standard_fonts/",
+        });
+        const pdf = await loadingTask.promise;
+        _docCache.set(url, pdf);
+        return pdf;
+      }
+    } catch(e) { /* fall through to URL */ }
+  }
 
+  // Normal online loading from URL
   const loadingTask = pdfjsLib.getDocument({
-    url: pdfData ? undefined : url,
-    data: pdfData || undefined,
+    url,
     rangeChunkSize: 262144,
-    disableAutoFetch: pdfData ? true : false,
-    disableStream: pdfData ? true : false,
+    disableAutoFetch: false,
+    disableStream: false,
     cMapUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/cmaps/",
     cMapPacked: true,
     standardFontDataUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/standard_fonts/",
