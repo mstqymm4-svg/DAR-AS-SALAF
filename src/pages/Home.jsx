@@ -6,6 +6,7 @@ import BookCard from "../components/BookCard";
 import CategoryChip, { categories } from "../components/CategoryChip";
 import HeroBanner from "../components/HeroBanner";
 import SocialChannelsSection from "../components/SocialChannelsSection";
+import HomeChannels from "../components/HomeChannels";
 import { motion } from "framer-motion";
 import { useT } from "@/lib/i18n";
 import { getSetting, subscribeToSettings } from "@/lib/settingsStore";
@@ -158,6 +159,9 @@ export default function Home() {
           <p className="text-sm text-muted-foreground">{t.emptyLibSub}</p>
         </div>
       }
+
+      {/* Video Channels */}
+      <HomeChannels />
 
       {/* Social Channels */}
       <SocialChannelsSection />

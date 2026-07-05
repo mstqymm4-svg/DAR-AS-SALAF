@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Heart, Star, BookOpen, ArrowRight, FileText, User, BookMarked, Globe } from "lucide-react";
+import { Heart, Star, BookOpen, ArrowRight, FileText, User, BookMarked } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useT } from "@/lib/i18n";
@@ -142,20 +142,12 @@ export default function BookDetails() {
           }
 
           {book.pdf_url &&
-          <div className="flex gap-3">
-            <a href={`/read/${book.id}`} className="flex-1">
-              <Button className="w-full gap-2 h-12 rounded-xl text-sm font-bold">
-                <BookMarked className="w-4 h-4" />
-                {t.readBook}
-              </Button>
-            </a>
-            <a href={`/read/${book.id}?translate=true`} className="flex-1">
-              <Button variant="outline" className="w-full gap-2 h-12 rounded-xl text-sm font-bold">
-                <Globe className="w-4 h-4" />
-                {t.translateBook}
-              </Button>
-            </a>
-          </div>
+          <a href={`/read/${book.id}`} className="block">
+            <Button className="w-full gap-2 h-12 rounded-xl text-sm font-bold">
+              <BookMarked className="w-4 h-4" />
+              {t.readBook}
+            </Button>
+          </a>
           }
         </div>
       </motion.div>

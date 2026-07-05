@@ -85,9 +85,6 @@ export const DEFAULT_SETTINGS = {
   theme_mode:        "light",  // light | dark | auto
   show_dev_nav:      "true",
   categories:        "",
-  // Translation
-  translation_model:          "claude_sonnet_4_6",
-  translation_preserve_terms: "true",
 };
 
 // ─── localStorage helpers ─────────────────────────────────────────────────────
