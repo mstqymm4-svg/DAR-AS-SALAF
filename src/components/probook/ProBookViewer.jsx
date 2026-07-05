@@ -1,30 +1,19 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { ChevronLeft, ChevronRight, Menu, Loader2 } from "lucide-react";
-import { loadPdfDocument } from "@/lib/pdfLoader";
-import PdfPageRenderer from "./PdfPageRenderer";
-import ViewerToolbar from "./ViewerToolbar";
-import { TocPanel, SearchPanel, GoToPanel } from "./ViewerPanels";
+import {
+  ChevronLeft, ChevronRight, Menu, Loader2, ZoomIn, ZoomOut,
+  Moon, Sun, List, Search, Bookmark, Maximize2, X
+} from "lucide-react";
+import { loadPdfDocument, extractPageText } from "@/lib/pdfLoader";
 
 const ZOOM_MIN = 0.5;
 const ZOOM_MAX = 4;
 const ZOOM_STEP = 0.25;
 
 /**
- * ProBookViewer — professional PDF reader with book-like page flipping.
- *
- * Features:
- *  - Canvas rendering: preserves exact PDF layout (embedded fonts, images, tables)
- *  - Page-flip by drag/swipe with smooth spring animation
- *  - Pre-calculated fit scale for perfect screen fitting
- *  - High DPR rendering for crisp text
- *  - Next/prev, go-to-page, page indicator
- *  - TOC (outline), full-text search, bookmarks
- *  - Dark/light reading mode, zoom, fullscreen
- *  - Save/restore last reading position
- *  - RTL support (Arabic/Urdu) and LTR (English)
- *  - Memory-efficient: only one page rendered at a time
+ * ProBookViewer — simple self-contained PDF reader.
+ * Canvas rendering preserves exact PDF layout.
  */
 export default function ProBookViewer({ pdfUrl, title, language = "ar" }) {
   const isRTL = language === "ar" || language === "ur" || language === "fa";
@@ -61,7 +50,11 @@ export default function ProBookViewer({ pdfUrl, title, language = "ar" }) {
   // ── Refs ──
   const containerRef = useRef(null);
   const pageAreaRef = useRef(null);
+  const canvasRef = useRef(null);
+  const renderTaskRef = useRef(null);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+  const [rendering, setRendering] = useState(true);
+  const [pageError, setPageError] = useState(false);
   const pinchRef = useRef({ dist: 0, zoom: 1 });
 
   // ═══════════════════════════════════════════════════════
@@ -78,11 +71,9 @@ export default function ProBookViewer({ pdfUrl, title, language = "ar" }) {
       setPdf(doc);
       setTotalPages(doc.numPages);
 
-      // Restore last reading position
       const saved = Number(localStorage.getItem(`lastpage_${title}`));
       if (saved && saved > 0 && saved <= doc.numPages) setCurrentPage(saved);
 
-      // Load outline (TOC)
       try {
         const outlineData = await doc.getOutline();
         if (outlineData && !cancelled) {
@@ -110,7 +101,7 @@ export default function ProBookViewer({ pdfUrl, title, language = "ar" }) {
   }, [currentPage, title, totalPages]);
 
   // ═══════════════════════════════════════════════════════
-  //  Track container size for page fitting
+  //  Track container size
   // ═══════════════════════════════════════════════════════
   useEffect(() => {
     if (!pageAreaRef.current) return;
@@ -127,6 +118,73 @@ export default function ProBookViewer({ pdfUrl, title, language = "ar" }) {
     observer.observe(pageAreaRef.current);
     return () => observer.disconnect();
   }, []);
+
+  // ═══════════════════════════════════════════════════════
+  //  Page rendering — directly on canvas
+  // ═══════════════════════════════════════════════════════
+  useEffect(() => {
+    if (!pdf || !currentPage) return;
+    let cancelled = false;
+    setRendering(true);
+    setPageError(false);
+
+    const render = async () => {
+      try {
+        if (renderTaskRef.current) {
+          try { renderTaskRef.current.cancel(); } catch (e) {}
+        }
+
+        const page = await pdf.getPage(currentPage);
+        if (cancelled) return;
+
+        const baseVp = page.getViewport({ scale: 1 });
+
+        let fitScale = 1.2;
+        if (containerSize.width > 0 && containerSize.height > 0) {
+          fitScale = Math.min(
+            containerSize.width / baseVp.width,
+            containerSize.height / baseVp.height
+          ) * 0.95;
+        }
+
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const renderScale = fitScale * zoom * dpr;
+        const cssScale = fitScale * zoom;
+
+        const viewport = page.getViewport({ scale: renderScale });
+        const cssViewport = page.getViewport({ scale: cssScale });
+
+        const canvas = canvasRef.current;
+        if (!canvas || cancelled) return;
+
+        const ctx = canvas.getContext("2d", { alpha: false });
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        canvas.style.width = `${cssViewport.width}px`;
+        canvas.style.height = `${cssViewport.height}px`;
+
+        const task = page.render({ canvasContext: ctx, viewport });
+        renderTaskRef.current = task;
+        await task.promise;
+
+        if (!cancelled) setRendering(false);
+      } catch (e) {
+        if (e?.name !== "RenderingCancelledException" && !cancelled) {
+          setPageError(true);
+          setRendering(false);
+        }
+      }
+    };
+
+    const timer = setTimeout(render, 30);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      if (renderTaskRef.current) {
+        try { renderTaskRef.current.cancel(); } catch (e) {}
+      }
+    };
+  }, [pdf, currentPage, zoom, containerSize.width, containerSize.height]);
 
   // ═══════════════════════════════════════════════════════
   //  Navigation
@@ -233,9 +291,7 @@ export default function ProBookViewer({ pdfUrl, title, language = "ar" }) {
     const results = [];
     for (let i = 1; i <= totalPages; i++) {
       try {
-        const page = await pdf.getPage(i);
-        const content = await page.getTextContent();
-        const text = content.items.map(it => it.str).join(" ").toLowerCase();
+        const text = (await extractPageText(pdf, i)).toLowerCase();
         if (text.includes(q)) results.push(i);
       } catch (e) {}
     }
@@ -258,7 +314,7 @@ export default function ProBookViewer({ pdfUrl, title, language = "ar" }) {
   }, [searchResults, searchIdx, navigateToPage]);
 
   // ═══════════════════════════════════════════════════════
-  //  Drag-to-flip handler
+  //  Drag-to-flip
   // ═══════════════════════════════════════════════════════
   const handleDragEnd = useCallback((e, info) => {
     const threshold = (containerSize.width || 300) * 0.2;
@@ -293,8 +349,8 @@ export default function ProBookViewer({ pdfUrl, title, language = "ar" }) {
 
   const darkFilter = darkMode ? "invert(0.88) hue-rotate(180deg) brightness(0.95)" : "none";
   const canDrag = zoom <= 1;
+  const loadingH = containerSize.height > 0 ? containerSize.height * 0.85 : 500;
 
-  // Page flip animation variants
   const pageVariants = {
     enter: (dir) => ({ x: dir > 0 ? "100%" : "-100%", opacity: 0 }),
     center: { x: 0, opacity: 1 },
@@ -309,7 +365,7 @@ export default function ProBookViewer({ pdfUrl, title, language = "ar" }) {
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
     >
-      {/* ── Page flip area ── */}
+      {/* ── Page area ── */}
       <div
         ref={pageAreaRef}
         className="flex-1 relative"
@@ -338,14 +394,27 @@ export default function ProBookViewer({ pdfUrl, title, language = "ar" }) {
               className="cursor-grab active:cursor-grabbing"
               style={{ touchAction: canDrag ? "none" : "auto" }}
             >
-              <PdfPageRenderer
-                pdf={pdf}
-                pageNumber={currentPage}
-                zoom={zoom}
-                darkFilter={darkFilter}
-                containerWidth={containerSize.width}
-                containerHeight={containerSize.height}
-              />
+              <div
+                className="relative flex items-center justify-center bg-white shadow-2xl"
+                style={{ minHeight: loadingH }}
+              >
+                <canvas
+                  ref={canvasRef}
+                  className="block bg-white"
+                  style={{ filter: darkFilter }}
+                />
+                {rendering && !pageError && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/80">
+                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                    <span className="text-xs text-muted-foreground">صفحة {currentPage}</span>
+                  </div>
+                )}
+                {pageError && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-white/80">
+                    <span className="text-sm text-destructive">فشل عرض الصفحة {currentPage}</span>
+                  </div>
+                )}
+              </div>
             </motion.div>
           </AnimatePresence>
         </div>
@@ -370,55 +439,167 @@ export default function ProBookViewer({ pdfUrl, title, language = "ar" }) {
         )}
       </div>
 
-      {/* ── Panels ── */}
-      <TocPanel
-        show={showToc}
-        isRTL={isRTL}
-        darkMode={darkMode}
-        outline={outline}
-        onClose={() => setShowToc(false)}
-        onPageClick={navigateToPage}
-      />
-      <SearchPanel
-        show={showSearch}
-        query={searchQuery}
-        setQuery={setSearchQuery}
-        onSearch={handleSearch}
-        searching={searching}
-        results={searchResults}
-        resultIdx={searchIdx}
-        onNextResult={nextSearchResult}
-        onClose={() => setShowSearch(false)}
-      />
-      <GoToPanel
-        show={showGoTo}
-        value={goToValue}
-        setValue={setGoToValue}
-        totalPages={totalPages}
-        onGo={handleGoTo}
-        onClose={() => setShowGoTo(false)}
-      />
+      {/* ── TOC Panel ── */}
+      <AnimatePresence>
+        {showToc && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className={`absolute top-0 ${isRTL ? "left-0" : "right-0"} bottom-0 w-72 max-w-[80%] bg-card border-l border-border z-30 flex flex-col`}
+          >
+            <div className="flex items-center justify-between p-3 border-b border-border">
+              <h3 className="text-sm font-bold">الفهرس</h3>
+              <button onClick={() => setShowToc(false)} className="text-muted-foreground hover:text-foreground">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-2">
+              {outline.length === 0 ? (
+                <p className="text-xs text-muted-foreground text-center py-4">لا يوجد فهرس</p>
+              ) : (
+                outline.map((item, i) => (
+                  <button
+                    key={i}
+                    onClick={() => { if (item.pageNumber) { navigateToPage(item.pageNumber); setShowToc(false); } }}
+                    className="w-full text-right px-3 py-2 text-sm hover:bg-muted rounded-lg transition-colors truncate"
+                  >
+                    {item.title}
+                    {item.pageNumber && <span className="text-xs text-muted-foreground mr-2">— {item.pageNumber}</span>}
+                  </button>
+                ))
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Search Panel ── */}
+      <AnimatePresence>
+        {showSearch && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className={`absolute top-0 ${isRTL ? "left-0" : "right-0"} bottom-0 w-72 max-w-[80%] bg-card border-l border-border z-30 flex flex-col`}
+          >
+            <div className="flex items-center justify-between p-3 border-b border-border">
+              <h3 className="text-sm font-bold">بحث</h3>
+              <button onClick={() => setShowSearch(false)} className="text-muted-foreground hover:text-foreground">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-3 border-b border-border flex gap-2">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                placeholder="ابحث..."
+                className="flex-1 px-3 py-1.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                autoFocus
+              />
+              <button onClick={handleSearch} disabled={searching} className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-lg disabled:opacity-50">
+                {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : "بحث"}
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-2">
+              {searchResults.length > 0 && (
+                <>
+                  <div className="flex items-center justify-between px-2 py-1">
+                    <span className="text-xs text-muted-foreground">{searchResults.length} نتيجة</span>
+                    <button onClick={nextSearchResult} className="text-xs text-primary font-medium">التالي</button>
+                  </div>
+                  {searchResults.map((pg, i) => (
+                    <button
+                      key={i}
+                      onClick={() => navigateToPage(pg)}
+                      className={`w-full text-right px-3 py-2 text-sm hover:bg-muted rounded-lg transition-colors ${i === searchIdx ? "bg-primary/10 font-bold" : ""}`}
+                    >
+                      صفحة {pg}
+                    </button>
+                  ))}
+                </>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Go to page ── */}
+      <AnimatePresence>
+        {showGoTo && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-black/40 z-30 flex items-center justify-center"
+            onClick={() => setShowGoTo(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="bg-card border border-border rounded-2xl p-4 w-64"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-sm font-bold mb-3">الذهاب لصفحة</h3>
+              <input
+                type="number"
+                value={goToValue}
+                onChange={(e) => setGoToValue(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleGoTo()}
+                placeholder={`1 - ${totalPages}`}
+                className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-1 focus:ring-ring mb-3"
+                autoFocus
+              />
+              <button onClick={handleGoTo} className="w-full py-2 text-sm bg-primary text-primary-foreground rounded-lg font-medium">
+                ذهاب
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── Toolbar ── */}
       {showToolbar && (
-        <ViewerToolbar
-          currentPage={currentPage}
-          totalPages={totalPages}
-          zoom={zoom}
-          darkMode={darkMode}
-          bookmarks={bookmarks}
-          hasOutline={outline.length > 0}
-          onNext={goNext}
-          onPrev={goPrev}
-          onZoomIn={() => setZoom(z => Math.min(ZOOM_MAX, z + ZOOM_STEP))}
-          onZoomOut={() => setZoom(z => Math.max(ZOOM_MIN, z - ZOOM_STEP))}
-          onToggleDark={() => setDarkMode(d => !d)}
-          onToggleBookmark={toggleBookmark}
-          onToggleToc={() => setShowToc(true)}
-          onToggleSearch={() => setShowSearch(s => !s)}
-          onToggleGoTo={() => setShowGoTo(true)}
-          onToggleFullscreen={toggleFullscreen}
-        />
+        <div className="bg-card border-t border-border px-3 py-2 flex items-center justify-center gap-1 flex-wrap shrink-0">
+          <button onClick={goPrev} disabled={currentPage <= 1} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-muted disabled:opacity-30 transition-colors" title="السابق">
+            <ChevronRight className="w-4 h-4" />
+          </button>
+          <button onClick={goNext} disabled={currentPage >= totalPages} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-muted disabled:opacity-30 transition-colors" title="التالي">
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <div className="w-px h-5 bg-border mx-1" />
+          <button onClick={() => setZoom(z => Math.max(ZOOM_MIN, z - ZOOM_STEP))} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-muted transition-colors" title="تصغير">
+            <ZoomOut className="w-4 h-4" />
+          </button>
+          <span className="text-xs font-mono w-10 text-center">{Math.round(zoom * 100)}%</span>
+          <button onClick={() => setZoom(z => Math.min(ZOOM_MAX, z + ZOOM_STEP))} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-muted transition-colors" title="تكبير">
+            <ZoomIn className="w-4 h-4" />
+          </button>
+          <div className="w-px h-5 bg-border mx-1" />
+          <button onClick={() => setDarkMode(d => !d)} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-muted transition-colors" title={darkMode ? "الوضع الفاتح" : "الوضع الليلي"}>
+            {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
+          <button onClick={toggleBookmark} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-muted transition-colors" title="علامة">
+            <Bookmark className={`w-4 h-4 ${bookmarks.includes(currentPage) ? "fill-primary text-primary" : ""}`} />
+          </button>
+          {outline.length > 0 && (
+            <button onClick={() => setShowToc(true)} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-muted transition-colors" title="الفهرس">
+              <List className="w-4 h-4" />
+            </button>
+          )}
+          <button onClick={() => setShowSearch(s => !s)} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-muted transition-colors" title="بحث">
+            <Search className="w-4 h-4" />
+          </button>
+          <button onClick={() => setShowGoTo(true)} className="px-2 h-8 rounded-lg flex items-center justify-center hover:bg-muted transition-colors text-xs font-mono font-bold" title="ذهاب لصفحة">
+            {currentPage}/{totalPages}
+          </button>
+          <button onClick={toggleFullscreen} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-muted transition-colors" title="ملء الشاشة">
+            <Maximize2 className="w-4 h-4" />
+          </button>
+        </div>
       )}
 
       {/* Toggle toolbar */}
