@@ -32,11 +32,6 @@ export default function Books() {
     if (categoryParam) setActiveCategory(categoryParam);
   }, [categoryParam]);
 
-  useEffect(() => { loadData(); }, []);
-
-  // Auto-refresh when books change in background
-  useContentRefresh(["books"], loadData);
-
   const loadData = async () => {
     const u = await base44.auth.me().catch(() => null);
     setUser(u);
@@ -51,6 +46,11 @@ export default function Books() {
     }
     setLoading(false);
   };
+
+  useEffect(() => { loadData(); }, []);
+
+  // Auto-refresh when books change in background
+  useContentRefresh(["books"], loadData);
 
   const handleToggleFavorite = async (bookId) => {
     if (!user) return;

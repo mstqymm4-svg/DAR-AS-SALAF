@@ -17,11 +17,6 @@ export default function Favorites() {
   const [user, setUser] = useState(null);
   const { isOnline } = useOnlineStatus();
 
-  useEffect(() => { loadFavorites(); }, []);
-
-  // Auto-refresh when books change (e.g., a favorited book gets updated or deleted)
-  useContentRefresh(["books"], loadFavorites);
-
   const loadFavorites = async () => {
     const u = await base44.auth.me().catch(() => null);
     setUser(u);
@@ -34,6 +29,11 @@ export default function Favorites() {
     }
     setLoading(false);
   };
+
+  useEffect(() => { loadFavorites(); }, []);
+
+  // Auto-refresh when books change (e.g., a favorited book gets updated or deleted)
+  useContentRefresh(["books"], loadFavorites);
 
   const handleToggleFavorite = async (bookId) => {
     if (!user) return;
