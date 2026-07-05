@@ -4,6 +4,7 @@
  * Canvas rendering preserves the original layout exactly.
  */
 import * as pdfjsLib from "pdfjs-dist";
+import { getCachedPdf, cachePdf } from "@/lib/offlineDB";
 
 pdfjsLib.GlobalWorkerOptions.workerPort = new Worker(
   new URL("pdfjs-dist/build/pdf.worker.min.mjs", import.meta.url),
@@ -21,31 +22,28 @@ const MAX_PAGE_CACHE = 12;
  * Load a PDF document. Cached per URL.
  * Offline-aware: uses IndexedDB cache when offline, URL when online.
  */
-export async function loadPdfDocument(url) {
+export async function loadPdfDocument(url, metadata = {}) {
   if (_docCache.has(url)) return _docCache.get(url);
 
-  // Only check offline cache when navigator is offline
-  if (!navigator.onLine) {
-    try {
-      const { getCachedPdf } = await import("@/lib/offlineDB");
-      const cachedPdf = await getCachedPdf(url);
-      if (cachedPdf && cachedPdf.buffer) {
-        const pdfData = new Uint8Array(cachedPdf.buffer);
-        const loadingTask = pdfjsLib.getDocument({
-          data: pdfData,
-          cMapUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/cmaps/",
-          cMapPacked: true,
-          useSystemFonts: true,
-          standardFontDataUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/standard_fonts/",
-        });
-        const pdf = await loadingTask.promise;
-        _docCache.set(url, pdf);
-        return pdf;
-      }
-    } catch(e) { /* fall through to URL */ }
-  }
+  // Check cache first (works both online and offline)
+  try {
+    const cachedPdf = await getCachedPdf(url);
+    if (cachedPdf && cachedPdf.buffer) {
+      const pdfData = new Uint8Array(cachedPdf.buffer);
+      const loadingTask = pdfjsLib.getDocument({
+        data: pdfData,
+        cMapUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/cmaps/",
+        cMapPacked: true,
+        useSystemFonts: true,
+        standardFontDataUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/standard_fonts/",
+      });
+      const pdf = await loadingTask.promise;
+      _docCache.set(url, pdf);
+      return pdf;
+    }
+  } catch(e) { /* fall through to URL */ }
 
-  // Normal online loading from URL
+  // Load from URL (online)
   const loadingTask = pdfjsLib.getDocument({
     url,
     rangeChunkSize: 262144,
@@ -58,6 +56,14 @@ export async function loadPdfDocument(url) {
   });
   const pdf = await loadingTask.promise;
   _docCache.set(url, pdf);
+
+  // Auto-cache PDF in background for offline reading (no duplicate download — uses pdfjs internal data)
+  if (metadata.bookId) {
+    pdf.getData().then(data => {
+      cachePdf(url, data.buffer, metadata.bookId, metadata.title || "").catch(() => {});
+    }).catch(() => {});
+  }
+
   return pdf;
 }
 

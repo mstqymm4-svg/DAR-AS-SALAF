@@ -15,7 +15,7 @@ const ZOOM_STEP = 0.25;
  * ProBookViewer — simple self-contained PDF reader.
  * Canvas rendering preserves exact PDF layout.
  */
-export default function ProBookViewer({ pdfUrl, title, language = "ar" }) {
+export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }) {
   const isRTL = language === "ar" || language === "ur" || language === "fa";
 
   // ── Document state ──
@@ -66,7 +66,7 @@ export default function ProBookViewer({ pdfUrl, title, language = "ar" }) {
     setLoading(true);
     setError("");
 
-    loadPdfDocument(pdfUrl).then(async (doc) => {
+    loadPdfDocument(pdfUrl, { bookId, title }).then(async (doc) => {
       if (cancelled) return;
       setPdf(doc);
       setTotalPages(doc.numPages);

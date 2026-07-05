@@ -57,6 +57,7 @@ export default function ReadBook() {
         <ProBookViewer
           pdfUrl={book.pdf_url}
           title={book.title}
+          bookId={book.id}
           language={t.langCode || "ar"}
         />
       </div>
