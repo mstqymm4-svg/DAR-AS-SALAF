@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ArrowRight, BookOpen } from "lucide-react";
+import { ArrowRight, BookOpen, Eye } from "lucide-react";
 import FlipBookViewer from "@/components/FlipBookViewer";
+import NativePdfViewer from "@/components/NativePdfViewer";
 import { useT } from "@/lib/i18n";
 import { getBook } from "@/lib/offlineSync";
 
@@ -11,6 +12,7 @@ export default function ReadBook() {
   const t = useT();
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [useNativeViewer, setUseNativeViewer] = useState(false);
 
   useEffect(() => {
     loadBook();
@@ -19,7 +21,13 @@ export default function ReadBook() {
   const loadBook = async () => {
     try {
       const b = await getBook(id);
-      if (b) setBook(b);
+      if (b) {
+        setBook(b);
+        // Auto-select native viewer for Urdu books to fix letter shaping
+        if (b.language === "الأوردو" || b.language === "Urdu") {
+          setUseNativeViewer(true);
+        }
+      }
     } catch(e) {}
     setLoading(false);
   };
@@ -51,11 +59,23 @@ export default function ReadBook() {
           <span className="hidden sm:inline">{book.title}</span>
           <span className="sm:hidden">رجوع</span>
         </Link>
+        <button
+          onClick={() => setUseNativeViewer((v) => !v)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+          title="تبديل العارض"
+        >
+          <Eye className="w-3.5 h-3.5" />
+          {useNativeViewer ? "عارض متواصل" : "عارض أصلي"}
+        </button>
       </div>
 
-      {/* FlipBook Viewer */}
+      {/* PDF Viewer — toggle between canvas (FlipBook) and native iframe (correct Urdu shaping) */}
       <div className="flex-1 overflow-hidden relative">
-        <FlipBookViewer pdfUrl={book.pdf_url} title={book.title} language={t.langCode || "ar"} />
+        {useNativeViewer ? (
+          <NativePdfViewer pdfUrl={book.pdf_url} title={book.title} />
+        ) : (
+          <FlipBookViewer pdfUrl={book.pdf_url} title={book.title} language={t.langCode || "ar"} />
+        )}
       </div>
     </div>
   );
