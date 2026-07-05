@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { getSetting } from "@/lib/settingsStore";
+import { uploadFileWithProgress } from "@/lib/uploadWithProgress";
 
 const DEFAULT_CATS = ["القرآن وعلومه","الحديث الشريف","الفقه الإسلامي","السيرة النبوية","العقيدة","التزكية والرقائق","التاريخ الإسلامي","أخرى"];
 const emptyForm = { title:"", author:"", category:"القرآن وعلومه", description:"", cover_image:"", pages_count:"", language:"العربية", pdf_url:"", is_featured:false, rating:0, status:"published" };
@@ -26,6 +27,8 @@ export default function DevBooks() {
   const [saving, setSaving]         = useState(false);
   const [pdfUploading, setPdfUploading]     = useState(false);
   const [coverUploading, setCoverUploading] = useState(false);
+  const [pdfProgress, setPdfProgress]       = useState(0);
+  const [pdfProgressInfo, setPdfProgressInfo] = useState("");
 
   const categories = (() => { try { return JSON.parse(getSetting("categories") || "[]"); } catch(e) { return []; } })().length > 0
     ? (() => { try { return JSON.parse(getSetting("categories")); } catch(e) { return DEFAULT_CATS; } })()
@@ -87,6 +90,29 @@ export default function DevBooks() {
 
   const uploadFile = async (e, field, setUploading) => {
     const file = e.target.files[0]; if (!file) return;
+
+    // PDF uploads use progress-tracked upload for better UX
+    if (field === "pdf_url") {
+      setPdfUploading(true);
+      setPdfProgress(0);
+      setPdfProgressInfo(`${(file.size / (1024 * 1024)).toFixed(1)} MB`);
+      try {
+        const file_url = await uploadFileWithProgress(file, (percent, loadedMB, totalMB) => {
+          setPdfProgress(percent);
+          setPdfProgressInfo(`${loadedMB}/${totalMB} MB`);
+        });
+        setForm(p => ({...p, pdf_url: file_url}));
+        toast.success("تم رفع الملف ✓");
+      } catch (err) {
+        toast.error("فشل رفع الملف: " + err.message);
+      } finally {
+        setPdfUploading(false);
+        setPdfProgress(0);
+        setPdfProgressInfo("");
+      }
+      return;
+    }
+
     setUploading(true);
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
     setForm(p => ({...p, [field]: file_url}));
@@ -202,8 +228,17 @@ export default function DevBooks() {
                 <label className="cursor-pointer block mt-1">
                   <input type="file" accept=".pdf" onChange={e=>uploadFile(e,"pdf_url",setPdfUploading)} className="hidden" />
                   <div className={`flex items-center justify-center gap-1 h-9 rounded-xl border-2 border-dashed transition-colors ${form.pdf_url?"border-primary bg-primary/5":"border-border hover:border-primary/40"}`}>
-                    {pdfUploading ? <div className="w-3 h-3 border-2 border-primary/20 border-t-primary rounded-full animate-spin" /> : form.pdf_url ? <><Check className="w-3.5 h-3.5 text-primary"/><span className="text-xs text-primary">PDF ✓</span></> : <><Upload className="w-3.5 h-3.5 text-muted-foreground"/><span className="text-xs text-muted-foreground">رفع PDF</span></>}
+                    {pdfUploading
+                      ? <><div className="w-3 h-3 border-2 border-primary/20 border-t-primary rounded-full animate-spin" /><span className="text-xs text-primary tabular-nums">{pdfProgress}% · {pdfProgressInfo}</span></>
+                      : form.pdf_url
+                        ? <><Check className="w-3.5 h-3.5 text-primary"/><span className="text-xs text-primary">PDF ✓</span></>
+                        : <><Upload className="w-3.5 h-3.5 text-muted-foreground"/><span className="text-xs text-muted-foreground">رفع PDF</span></>}
                   </div>
+                  {pdfUploading && (
+                    <div className="mt-1 h-1 rounded-full bg-muted overflow-hidden">
+                      <div className="h-full bg-primary transition-all duration-300" style={{ width: `${pdfProgress}%` }} />
+                    </div>
+                  )}
                 </label>
               </div>
             </div>
