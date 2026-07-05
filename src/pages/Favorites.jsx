@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Heart, WifiOff } from "lucide-react";
 import { motion } from "framer-motion";
 import BookCard from "../components/BookCard";
+import { SkeletonGrid } from "../components/Skeleton";
 import { useT } from "@/lib/i18n";
 import { getBooks, getFavoriteIds, toggleFavorite } from "@/lib/offlineSync";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
@@ -39,8 +40,8 @@ export default function Favorites() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <SkeletonGrid count={6} />
       </div>
     );
   }

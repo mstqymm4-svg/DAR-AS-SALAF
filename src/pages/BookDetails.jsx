@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Heart, Star, BookOpen, ArrowRight, FileText, User, BookMarked, Download, CheckCircle, WifiOff } from "lucide-react";
+import { Heart, Star, BookOpen, ArrowRight, FileText, User, BookMarked, Download, CheckCircle, WifiOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useT } from "@/lib/i18n";
@@ -62,10 +62,21 @@ export default function BookDetails() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-      </div>);
-
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid md:grid-cols-3 gap-8">
+          <div className="md:col-span-1">
+            <div className="aspect-[3/4] rounded-2xl bg-muted animate-pulse" />
+          </div>
+          <div className="md:col-span-2 space-y-4">
+            <div className="h-6 w-24 bg-muted rounded-full animate-pulse" />
+            <div className="h-8 w-3/4 bg-muted rounded animate-pulse" />
+            <div className="h-4 w-1/3 bg-muted rounded animate-pulse" />
+            <div className="h-24 w-full bg-muted rounded-xl animate-pulse" />
+            <div className="h-12 w-full bg-muted rounded-xl animate-pulse" />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!book) {

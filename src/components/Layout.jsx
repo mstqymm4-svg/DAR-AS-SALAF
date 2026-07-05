@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { BookOpen, Home, Heart, Settings, Code, Video } from "lucide-react";
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { useT } from "@/lib/i18n";
 import { getSetting, subscribeToSettings } from "@/lib/settingsStore";
@@ -17,14 +17,12 @@ export default function Layout() {
   const [appSubtitleOverride, setAppSubtitleOverride] = useState(() => getSetting("app_subtitle"));
 
   useEffect(() => {
-    // Sync from settingsStore events (real-time)
     const unsub = subscribeToSettings((s) => {
       setShowDevNav(s.show_dev_nav !== "false");
       setLogoUrl(s.logo_url || "");
       setAppNameOverride(s.app_name || "");
       setAppSubtitleOverride(s.app_subtitle || "");
     });
-    // Also legacy storage event
     const handler = () => setShowDevNav(getSetting("show_dev_nav") !== "false");
     window.addEventListener("storage", handler);
     return () => { unsub(); window.removeEventListener("storage", handler); };
@@ -43,7 +41,6 @@ export default function Layout() {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
-  // Apply dir, lang, font globally whenever language changes
   useEffect(() => {
     const html = document.documentElement;
     html.setAttribute("dir", t.dir || "rtl");
@@ -52,11 +49,8 @@ export default function Layout() {
       html.style.setProperty("--font-app", t.fontFamily);
       document.body.style.fontFamily = t.fontFamily;
     }
-    // Nastaliq Urdu needs extra line-height to prevent letter overlap
     document.body.style.lineHeight = t.langCode === "ur" ? "2.8" : "";
   }, [t.dir, t.langCode, t.fontFamily]);
-
-  // logoUrl and appName now reactive via settingsStore state above
 
   return (
     <div dir={t.dir} lang={t.langCode} className="min-h-screen bg-background" style={{ fontFamily: t.fontFamily }}>
@@ -64,8 +58,8 @@ export default function Layout() {
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center overflow-hidden shrink-0">
+            <Link to="/" className="flex items-center gap-3 group">
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center overflow-hidden shrink-0 group-hover:scale-105 transition-transform">
                 {logoUrl
                   ? <img src={logoUrl} alt="logo" className="w-full h-full object-cover" />
                   : <BookOpen className="w-5 h-5 text-primary-foreground" />}
@@ -84,7 +78,7 @@ export default function Layout() {
                     to={item.path}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                       isActive
-                        ? "bg-primary text-primary-foreground"
+                        ? "bg-primary text-primary-foreground shadow-sm"
                         : "text-muted-foreground hover:text-foreground hover:bg-muted"
                     }`}
                   >
@@ -102,29 +96,38 @@ export default function Layout() {
       </header>
 
       {/* Main Content */}
-      <motion.main
-        key={location.pathname}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.2 }}
-        className="pb-24"
-      >
-        <Outlet />
-      </motion.main>
+      <AnimatePresence mode="wait">
+        <motion.main
+          key={location.pathname}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.2 }}
+          className="pb-24 md:pb-8"
+        >
+          <Outlet />
+        </motion.main>
+      </AnimatePresence>
 
-      {/* Bottom Nav */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-xl border-t border-border">
-        <div className="flex items-center justify-around py-2 px-4">
+      {/* Bottom Nav — Mobile Only */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-t border-border">
+        <div className="flex items-center justify-around py-2 px-2 safe-area-bottom">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 ${
+                className={`relative flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all duration-200 ${
                   isActive ? "text-primary" : "text-muted-foreground"
                 }`}
               >
+                {isActive && (
+                  <motion.div
+                    layoutId="bottomNavIndicator"
+                    className="absolute -top-2 left-1/2 -translate-x-1/2 w-8 h-1 rounded-full bg-primary"
+                  />
+                )}
                 <item.icon className={`w-5 h-5 ${isActive ? "fill-primary/20" : ""}`} />
                 <span className="text-[10px] font-medium">{item.label}</span>
               </Link>

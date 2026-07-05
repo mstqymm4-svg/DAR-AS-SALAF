@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Play, Heart, Share2, Star, Search, Video, Tv, Clock } from "lucide-react";
+import { Play, Star, Search, Video, Tv, Clock } from "lucide-react";
 import { toast } from "sonner";
 import VideoPlayer from "@/components/VideoPlayer";
+import VideoCard from "@/components/VideoCard";
+import { PageSpinner } from "@/components/Skeleton";
 import { getThumbnail } from "@/components/dev/DevVideos";
 import { useT } from "@/lib/i18n";
 
@@ -45,8 +46,8 @@ export default function Videos() {
     });
   }, [videos, search, category]);
 
-  const featured = videos.filter((v) => v.is_featured);
-  const recent = [...filtered].sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+  const featured = useMemo(() => videos.filter((v) => v.is_featured), [videos]);
+  const recent = useMemo(() => [...filtered].sort((a, b) => new Date(b.created_date) - new Date(a.created_date)), [filtered]);
 
   const toggleFavorite = (videoId) => {
     const next = favorites.includes(videoId)
@@ -61,63 +62,11 @@ export default function Videos() {
     if (navigator.share) {
       try { await navigator.share({ title: video.title, url: video.youtube_url }); } catch(e) {}
     } else {
-      try { await navigator.clipboard.writeText(video.youtube_url); toast.success("✓"); } catch(e) {}
+      try { await navigator.clipboard.writeText(video.youtube_url); toast.success("تم نسخ الرابط"); } catch(e) {}
     }
   };
 
-  const VideoCard = ({ video }) => (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-card border border-border rounded-2xl overflow-hidden group hover:shadow-lg transition-shadow"
-    >
-      {/* Thumbnail */}
-      <div className="relative aspect-video bg-muted cursor-pointer" onClick={() => setPlayingVideo(video)}>
-        {video.thumbnail && <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />}
-        <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="w-12 h-12 rounded-full bg-primary/90 flex items-center justify-center">
-            <Play className="w-5 h-5 text-primary-foreground fill-primary-foreground mr-0.5" />
-          </div>
-        </div>
-        {video.duration && (
-          <span className="absolute bottom-2 left-2 px-1.5 py-0.5 rounded bg-black/80 text-white text-[10px] font-mono flex items-center gap-1">
-            <Clock className="w-2.5 h-2.5" /> {video.duration}
-          </span>
-        )}
-        {video.is_featured && (
-         <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-amber-500 text-white text-[10px] font-bold flex items-center gap-1">
-          <Star className="w-2.5 h-2.5 fill-white" /> {t.featured}
-          </span>
-        )}
-      </div>
-
-      {/* Info */}
-      <div className="p-3" dir="rtl">
-        <h3 className="text-sm font-bold line-clamp-2 mb-1">{video.title}</h3>
-        {video.channel_name && <p className="text-xs text-muted-foreground mb-1">{video.channel_name}</p>}
-        {video.description && <p className="text-[10px] text-muted-foreground line-clamp-2 mb-2">{video.description}</p>}
-        <div className="flex items-center gap-1">
-          <Button size="sm" className="flex-1 h-8 text-xs gap-1" onClick={() => setPlayingVideo(video)}>
-            <Play className="w-3.5 h-3.5" /> {t.play}
-          </Button>
-          <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => toggleFavorite(video.id)}>
-            <Heart className={`w-3.5 h-3.5 ${favorites.includes(video.id) ? "fill-red-500 text-red-500" : ""}`} />
-          </Button>
-          <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => handleShare(video)}>
-            <Share2 className="w-3.5 h-3.5" />
-          </Button>
-        </div>
-      </div>
-    </motion.div>
-  );
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return <PageSpinner />;
 
   return (
     <div className="pb-8" dir="rtl">
@@ -139,7 +88,7 @@ export default function Videos() {
             <Input placeholder={t.searchVideo} value={search} onChange={(e) => setSearch(e.target.value)}
               className="pr-9" />
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-1">
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
             {categories.map((cat) => (
               <button key={cat} onClick={() => setCategory(cat)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap border-2 transition-all shrink-0 ${
@@ -158,7 +107,14 @@ export default function Videos() {
               <Star className="w-5 h-5 text-amber-500 fill-amber-500" /> {t.featuredVideos}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {featured.slice(0, 3).map((v) => <VideoCard key={v.id} video={v} />)}
+              {featured.slice(0, 3).map((v, i) => (
+                <VideoCard key={v.id} video={v} index={i}
+                  isFavorite={favorites.includes(v.id)}
+                  onToggleFavorite={toggleFavorite}
+                  onPlay={setPlayingVideo}
+                  onShare={handleShare}
+                />
+              ))}
             </div>
           </section>
         )}
@@ -175,7 +131,14 @@ export default function Videos() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {recent.map((v) => <VideoCard key={v.id} video={v} />)}
+              {recent.map((v, i) => (
+                <VideoCard key={v.id} video={v} index={i}
+                  isFavorite={favorites.includes(v.id)}
+                  onToggleFavorite={toggleFavorite}
+                  onPlay={setPlayingVideo}
+                  onShare={handleShare}
+                />
+              ))}
             </div>
           )}
         </section>
@@ -188,15 +151,16 @@ export default function Videos() {
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {channels.map((ch) => (
-                <div key={ch.id} className="bg-card border border-border rounded-xl p-4 flex flex-col items-center text-center">
-                  <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center mb-2">
+                <a key={ch.id} href={ch.youtube_url} target="_blank" rel="noopener noreferrer"
+                  className="bg-card border border-border rounded-xl p-4 flex flex-col items-center text-center hover:shadow-md transition-shadow">
+                  <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center mb-2 overflow-hidden">
                     {ch.channel_logo
                       ? <img src={ch.channel_logo} alt={ch.name} className="w-full h-full rounded-xl object-cover" />
                       : <Tv className="w-6 h-6 text-red-500" />}
                   </div>
                   <p className="text-sm font-bold truncate w-full">{ch.name}</p>
                   {ch.description && <p className="text-[10px] text-muted-foreground line-clamp-2 mt-1">{ch.description}</p>}
-                </div>
+                </a>
               ))}
             </div>
           </section>

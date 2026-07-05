@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { useT, TRANSLATIONS } from "@/lib/i18n";
 import { setThemeMode, getThemeState, subscribeToTheme } from "@/lib/themeEngine";
+import { PageSpinner } from "@/components/Skeleton";
 
 const ls = {
   get: (k, fb = "") => {try {return localStorage.getItem(k) || fb;} catch (e) {return fb;}},
@@ -69,13 +70,7 @@ export default function Settings() {
     toast.success(t.applyLang + " ✓");
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-      </div>);
-
-  }
+  if (loading) return <PageSpinner />;
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
