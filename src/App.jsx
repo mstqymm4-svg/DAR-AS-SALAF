@@ -11,6 +11,7 @@ import { useEffect, lazy, Suspense } from 'react';
 import { loadSettings } from '@/lib/settingsStore';
 import { initThemeEngine } from '@/lib/themeEngine';
 import { base44 } from '@/api/base44Client';
+import LogoLoader from './components/LogoLoader';
 
 // Apply theme immediately from localStorage before any renders
 try {
@@ -32,7 +33,7 @@ const Videos = lazy(() => import('./pages/Videos'));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
-    <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+    <LogoLoader size={72} />
   </div>
 );
 
@@ -48,8 +49,8 @@ const AuthenticatedApp = () => {
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+      <div className="fixed inset-0 flex items-center justify-center bg-background">
+        <LogoLoader size={100} />
       </div>
     );
   }
