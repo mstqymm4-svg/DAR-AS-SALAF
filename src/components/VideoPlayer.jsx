@@ -174,9 +174,6 @@ export default function VideoPlayer({ video, onClose }) {
 
   const showControlsTemp = () => {
     setShowControls(true);
-    // Also show bottom nav temporarily
-    const nav = document.getElementById("bottom-nav");
-    if (nav) nav.style.transform = "translateY(0)";
     clearTimeout(hideTimerRef.current);
     hideTimerRef.current = setTimeout(() => {
       if (playing) {
@@ -185,15 +182,7 @@ export default function VideoPlayer({ video, onClose }) {
     }, 3500);
   };
 
-  // Hide bottom nav while video player is open; restore on close
-  useEffect(() => {
-    const nav = document.getElementById("bottom-nav");
-    if (nav) nav.style.transform = "translateY(100%)";
-    return () => {
-      if (nav) nav.style.transform = "translateY(0)";
-      clearTimeout(hideTimerRef.current);
-    };
-  }, []);
+
 
   if (!videoId) {
     return (
