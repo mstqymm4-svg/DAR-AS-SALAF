@@ -12,33 +12,33 @@ export default function VideoCard({ video, isFavorite, onToggleFavorite, onPlay,
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.3) }}
-      className="bg-card border border-border rounded-2xl overflow-hidden group hover:shadow-lg transition-shadow"
-    >
+      className="bg-card border border-border rounded-2xl overflow-hidden group hover:shadow-lg transition-shadow">
+      
       {/* Thumbnail */}
       <div className="relative aspect-video bg-muted cursor-pointer" onClick={() => onPlay(video)}>
-        {video.thumbnail && (
-          <SmartImage
-            src={video.thumbnail}
-            alt={video.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            fallback={() => <Video className="w-8 h-8 text-muted-foreground/30" />}
-          />
-        )}
-        <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+        {video.thumbnail &&
+        <SmartImage
+          src={video.thumbnail}
+          alt={video.title}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          fallback={() => <Video className="w-8 h-8 text-muted-foreground/30" />} />
+
+        }
+        <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:opacity-100 transition-opacity opacity-0 rounded-[4px_4px_4px_10px]">
           <div className="w-12 h-12 rounded-full bg-primary/90 flex items-center justify-center">
             <Play className="w-5 h-5 text-primary-foreground fill-primary-foreground mr-0.5" />
           </div>
         </div>
-        {video.duration && (
-          <span className="absolute bottom-2 left-2 px-1.5 py-0.5 rounded bg-black/80 text-white text-[10px] font-mono flex items-center gap-1">
+        {video.duration &&
+        <span className="absolute bottom-2 left-2 px-1.5 py-0.5 rounded bg-black/80 text-white text-[10px] font-mono flex items-center gap-1">
             <Clock className="w-2.5 h-2.5" /> {video.duration}
           </span>
-        )}
-        {video.is_featured && (
-          <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-amber-500 text-white text-[10px] font-bold flex items-center gap-1">
+        }
+        {video.is_featured &&
+        <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-amber-500 text-white text-[10px] font-bold flex items-center gap-1">
             <Star className="w-2.5 h-2.5 fill-white" /> {t.featured}
           </span>
-        )}
+        }
       </div>
 
       {/* Info */}
@@ -58,6 +58,6 @@ export default function VideoCard({ video, isFavorite, onToggleFavorite, onPlay,
           </Button>
         </div>
       </div>
-    </motion.div>
-  );
+    </motion.div>);
+
 }
