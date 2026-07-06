@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Mail, ArrowLeft, MessageCircle, Send, Phone } from "lucide-react";
+import { Mail, ArrowLeft, MessageCircle, Send } from "lucide-react";
+import { WhatsAppIcon } from "@/components/BrandIcons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -85,7 +86,7 @@ export default function Contact() {
               className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border hover:border-primary/40 transition-colors"
             >
               <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
-                <Phone className="w-5 h-5 text-green-600" />
+                <WhatsAppIcon className="w-5 h-5 text-green-600" />
               </div>
               <div className="min-w-0">
                 <p className="text-xs text-muted-foreground">واتساب</p>

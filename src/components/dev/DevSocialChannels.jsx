@@ -9,16 +9,17 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import {
   Plus, Pencil, Trash2, Eye, EyeOff, GripVertical, Upload, Save,
-  MessageCircle, Instagram, Facebook, Send, Youtube, Twitter, Globe, Mail, Link as LinkIcon,
+  Instagram, Facebook, Youtube, Globe, Mail, Link as LinkIcon,
 } from "lucide-react";
+import { WhatsAppIcon, TelegramIcon, XIcon } from "@/components/BrandIcons";
 
 const CHANNEL_TYPES = [
-  { value: "whatsapp",   label: "واتساب",   icon: MessageCircle, color: "text-green-500", bg: "bg-green-500/10" },
+  { value: "whatsapp",   label: "واتساب",   icon: WhatsAppIcon,  color: "text-green-500", bg: "bg-green-500/10" },
   { value: "instagram",  label: "إنستغرام",  icon: Instagram,     color: "text-pink-500", bg: "bg-pink-500/10" },
   { value: "facebook",   label: "فيسبوك",   icon: Facebook,      color: "text-blue-500", bg: "bg-blue-500/10" },
-  { value: "telegram",   label: "تيليجرام",  icon: Send,          color: "text-sky-500",  bg: "bg-sky-500/10" },
+  { value: "telegram",   label: "تيليجرام",  icon: TelegramIcon,  color: "text-sky-500",  bg: "bg-sky-500/10" },
   { value: "youtube",    label: "يوتيوب",   icon: Youtube,       color: "text-red-500",  bg: "bg-red-500/10" },
-  { value: "twitter",    label: "X",        icon: Twitter,       color: "text-gray-700 dark:text-gray-300", bg: "bg-gray-500/10" },
+  { value: "twitter",    label: "X",        icon: XIcon,          color: "text-gray-700 dark:text-gray-300", bg: "bg-gray-500/10" },
   { value: "website",    label: "موقع",      icon: Globe,         color: "text-indigo-500", bg: "bg-indigo-500/10" },
   { value: "email",      label: "بريد",      icon: Mail,          color: "text-amber-500", bg: "bg-amber-500/10" },
   { value: "custom",     label: "مخصص",      icon: LinkIcon,      color: "text-purple-500", bg: "bg-purple-500/10" },
