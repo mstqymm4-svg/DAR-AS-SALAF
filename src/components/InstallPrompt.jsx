@@ -1,75 +1,104 @@
-import { useState, useEffect } from "react";
-import { Download, X } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Share, Plus } from "lucide-react";
 
 export default function InstallPrompt() {
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [visible, setVisible] = useState(false);
+  const deferredRef = useRef(null);
+  const [showIOSGuide, setShowIOSGuide] = useState(false);
 
   useEffect(() => {
-    // Already installed?
+    // Already installed as PWA? → do nothing
     if (window.matchMedia("(display-mode: standalone)").matches) return;
-    if (localStorage.getItem("pwa_install_dismissed") === "true") return;
+    if (localStorage.getItem("pwa_auto_attempted") === "true") return;
 
-    const handler = (e) => {
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isStandaloneIOS = window.navigator.standalone === true;
+
+    if (isIOS && !isStandaloneIOS) {
+      // iOS doesn't support auto-prompt — show instructions after a brief moment
+      const t = setTimeout(() => setShowIOSGuide(true), 1500);
+      return () => clearTimeout(t);
+    }
+
+    // Android/Chrome: capture beforeinstallprompt, then fire on first interaction
+    const capturePrompt = (e) => {
       e.preventDefault();
-      setDeferredPrompt(e);
-      setVisible(true);
+      deferredRef.current = e;
     };
 
-    window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
+    const triggerOnFirstInteraction = () => {
+      if (!deferredRef.current) return;
+      // Must be called from a user gesture
+      deferredRef.current.prompt();
+      localStorage.setItem("pwa_auto_attempted", "true");
+      cleanup();
+    };
+
+    function cleanup() {
+      window.removeEventListener("beforeinstallprompt", capturePrompt);
+      document.removeEventListener("click", triggerOnFirstInteraction);
+      document.removeEventListener("touchend", triggerOnFirstInteraction);
+    }
+
+    window.addEventListener("beforeinstallprompt", capturePrompt);
+    // Fire automatically on the very first tap/click anywhere
+    document.addEventListener("click", triggerOnFirstInteraction, { once: true });
+    document.addEventListener("touchend", triggerOnFirstInteraction, { once: true });
+
+    return cleanup;
   }, []);
 
-  const handleInstall = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    setDeferredPrompt(null);
-    setVisible(false);
-    if (outcome === "dismissed") {
-      localStorage.setItem("pwa_install_dismissed", "true");
-    }
-  };
-
-  const handleDismiss = () => {
-    setVisible(false);
-    localStorage.setItem("pwa_install_dismissed", "true");
+  const dismissIOS = () => {
+    setShowIOSGuide(false);
+    localStorage.setItem("pwa_auto_attempted", "true");
   };
 
   return (
     <AnimatePresence>
-      {visible && (
+      {showIOSGuide && (
         <motion.div
-          initial={{ y: 100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 100, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4"
+          onClick={dismissIOS}
         >
-          <div className="bg-card border border-border rounded-2xl shadow-2xl p-4 flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-              <Download className="w-6 h-6 text-primary" />
+          <motion.div
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 80, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="bg-card rounded-2xl shadow-2xl p-6 w-full max-w-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-center mb-4">
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                <Plus className="w-7 h-7 text-primary" />
+              </div>
+              <h3 className="text-base font-bold mb-1">ثبّت التطبيق على آيفون</h3>
+              <p className="text-xs text-muted-foreground">للتثبيت، اتبع الخطوات التالية</p>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold">ثبّت التطبيق على جوالك</p>
-              <p className="text-xs text-muted-foreground">للوصول السريع والاستخدام دون اتصال</p>
+
+            <div className="space-y-3 mb-4">
+              <div className="flex items-center gap-3 bg-muted/50 rounded-xl p-3">
+                <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center shrink-0">1</span>
+                <p className="text-xs">اضغط على زر المشاركة في سفاري</p>
+                <Share className="w-4 h-4 text-primary mr-auto" />
+              </div>
+              <div className="flex items-center gap-3 bg-muted/50 rounded-xl p-3">
+                <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center shrink-0">2</span>
+                <p className="text-xs">اختر «إضافة إلى الشاشة الرئيسية»</p>
+                <Plus className="w-4 h-4 text-primary mr-auto" />
+              </div>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                onClick={handleInstall}
-                className="bg-primary text-primary-foreground text-xs font-bold px-4 py-2 rounded-xl hover:bg-primary/90 active:scale-95 transition-all"
-              >
-                تثبيت
-              </button>
-              <button
-                onClick={handleDismiss}
-                className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-muted transition-colors"
-              >
-                <X className="w-4 h-4 text-muted-foreground" />
-              </button>
-            </div>
-          </div>
+
+            <button
+              onClick={dismissIOS}
+              className="w-full bg-primary text-primary-foreground text-sm font-bold py-2.5 rounded-xl hover:bg-primary/90 active:scale-95 transition-all"
+            >
+              حسناً
+            </button>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
