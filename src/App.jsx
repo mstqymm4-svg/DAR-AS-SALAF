@@ -15,6 +15,7 @@ import { syncPendingFavorites } from '@/lib/offlineSync';
 import { startContentSyncEngine } from '@/lib/contentSyncEngine';
 import LogoLoader from './components/LogoLoader';
 import SyncStatusBadge from './components/SyncStatusBadge';
+import InstallPrompt from './components/InstallPrompt';
 
 // Apply theme immediately from localStorage before any renders
 try {
@@ -85,6 +86,7 @@ const AuthenticatedApp = () => {
     <>
     <SaveStatusIndicator />
     <SyncStatusBadge />
+    <InstallPrompt />
     <Suspense fallback={<PageLoader />}>
       <Routes>
         <Route element={<Layout />}>
