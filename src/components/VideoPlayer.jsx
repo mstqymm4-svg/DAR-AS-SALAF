@@ -182,11 +182,21 @@ export default function VideoPlayer({ video, onClose }) {
     }, 3500);
   };
 
+  // Hide bottom nav while video player is open; restore on close
+  useEffect(() => {
+    const nav = document.getElementById("bottom-nav");
+    if (nav) nav.style.transform = "translateY(100%)";
+    return () => {
+      if (nav) nav.style.transform = "translateY(0)";
+      clearTimeout(hideTimerRef.current);
+    };
+  }, []);
+
 
 
   if (!videoId) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95" dir="rtl">
+      <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/95" dir="rtl">
         <div className="text-center text-white p-8">
           <p className="text-lg font-bold mb-2">{t.invalidVideoUrl}</p>
           <button onClick={onClose} className="text-primary hover:underline">{t.close}</button>
@@ -200,7 +210,7 @@ export default function VideoPlayer({ video, onClose }) {
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 z-50 bg-black flex flex-col"
+      className="fixed inset-0 z-[60] bg-black flex flex-col"
       dir="rtl"
       onMouseMove={showControlsTemp}
       onClick={showControlsTemp}

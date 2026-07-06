@@ -110,7 +110,7 @@ export default function Layout() {
       </AnimatePresence>
 
       {/* Bottom Nav — Mobile Only */}
-      <nav id="bottom-nav" className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-2xl border-t border-border shadow-lg shadow-black/5">
+      <nav id="bottom-nav" className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-2xl border-t border-border shadow-lg shadow-black/5 transition-transform duration-300">
         <div className="flex items-center justify-around py-1.5 px-2 safe-area-bottom">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
