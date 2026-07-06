@@ -30,6 +30,7 @@ export default function InstallPrompt() {
       if (!deferredRef.current) return;
       // Must be called from a user gesture
       deferredRef.current.prompt();
+      deferredRef.current = null;
       localStorage.setItem("pwa_auto_attempted", "true");
       cleanup();
     };
@@ -41,9 +42,9 @@ export default function InstallPrompt() {
     }
 
     window.addEventListener("beforeinstallprompt", capturePrompt);
-    // Fire automatically on the very first tap/click anywhere
-    document.addEventListener("click", triggerOnFirstInteraction, { once: true });
-    document.addEventListener("touchend", triggerOnFirstInteraction, { once: true });
+    // Fire automatically on every tap/click until the prompt is shown
+    document.addEventListener("click", triggerOnFirstInteraction);
+    document.addEventListener("touchend", triggerOnFirstInteraction);
 
     return cleanup;
   }, []);
