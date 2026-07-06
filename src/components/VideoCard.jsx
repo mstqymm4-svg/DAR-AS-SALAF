@@ -43,7 +43,7 @@ export default function VideoCard({ video, isFavorite, onToggleFavorite, onPlay,
 
       {/* Info */}
       <div className="p-3" dir="rtl">
-        <h3 className="text-sm font-bold line-clamp-2 mb-1">{video.title}</h3>
+        <h3 className="font-bold line-clamp-2 mb-1 text-base">{video.title}</h3>
         {video.channel_name && <p className="text-xs text-muted-foreground mb-1">{video.channel_name}</p>}
         {video.description && <p className="text-[10px] text-muted-foreground line-clamp-2 mb-2">{video.description}</p>}
         <div className="flex items-center gap-1">
