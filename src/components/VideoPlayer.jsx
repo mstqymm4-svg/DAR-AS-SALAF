@@ -181,26 +181,19 @@ export default function VideoPlayer({ video, onClose }) {
     hideTimerRef.current = setTimeout(() => {
       if (playing) {
         setShowControls(false);
-        if (nav) nav.style.transform = "translateY(100%)";
       }
     }, 3500);
   };
 
-  // Toggle body class + hide/show bottom nav based on playing state
+  // Hide bottom nav while video player is open; restore on close
   useEffect(() => {
     const nav = document.getElementById("bottom-nav");
-    if (playing) {
-      document.body.classList.add("video-playing");
-      if (nav) nav.style.transform = "translateY(100%)";
-    } else {
-      document.body.classList.remove("video-playing");
-      if (nav) nav.style.transform = "translateY(0)";
-    }
+    if (nav) nav.style.transform = "translateY(100%)";
     return () => {
-      document.body.classList.remove("video-playing");
       if (nav) nav.style.transform = "translateY(0)";
+      clearTimeout(hideTimerRef.current);
     };
-  }, [playing]);
+  }, []);
 
   if (!videoId) {
     return (
