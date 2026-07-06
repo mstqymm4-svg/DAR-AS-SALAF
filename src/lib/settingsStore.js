@@ -149,28 +149,33 @@ function applyColorVar(cssVar, hslValue) {
 }
 
 export function applySettingsToDom(settings) {
-  // Colors
-  applyColorVar("--background",      settings.color_bg);
-  applyColorVar("--foreground",      settings.color_fg);
-  applyColorVar("--card",            settings.color_card);
-  applyColorVar("--popover",         settings.color_card);
-  applyColorVar("--accent",          settings.color_accent);
-  applyColorVar("--secondary",       settings.color_secondary);
-  applyColorVar("--border",          settings.color_border);
-  applyColorVar("--input",           settings.color_border);
-  if (settings.color_primary) {
-    applyColorVar("--primary",         settings.color_primary);
-    applyColorVar("--ring",            settings.color_primary);
-    applyColorVar("--sidebar-primary", settings.color_primary);
-  } else {
-    ["--primary","--ring","--sidebar-primary"].forEach(v => document.documentElement.style.removeProperty(v));
-  }
-
-  // Dark mode — support theme_mode (light|dark|auto) with backward compat
+  // Dark mode — resolve first so custom colors can be skipped in dark mode
   const themeMode = settings.theme_mode || (settings.dark_mode === "true" ? "dark" : "light");
   const systemDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
   const resolvedDark = themeMode === "dark" ? true : themeMode === "light" ? false : systemDark;
   document.documentElement.classList.toggle("dark", resolvedDark);
+
+  // Colors — only apply custom overrides in light mode; in dark mode let CSS dark vars take effect
+  const colorVars = ["--background","--foreground","--card","--popover","--accent","--secondary","--border","--input","--primary","--ring","--sidebar-primary"];
+  if (!resolvedDark) {
+    applyColorVar("--background",      settings.color_bg);
+    applyColorVar("--foreground",      settings.color_fg);
+    applyColorVar("--card",            settings.color_card);
+    applyColorVar("--popover",         settings.color_card);
+    applyColorVar("--accent",          settings.color_accent);
+    applyColorVar("--secondary",       settings.color_secondary);
+    applyColorVar("--border",          settings.color_border);
+    applyColorVar("--input",           settings.color_border);
+    if (settings.color_primary) {
+      applyColorVar("--primary",         settings.color_primary);
+      applyColorVar("--ring",            settings.color_primary);
+      applyColorVar("--sidebar-primary", settings.color_primary);
+    } else {
+      colorVars.forEach(v => document.documentElement.style.removeProperty(v));
+    }
+  } else {
+    colorVars.forEach(v => document.documentElement.style.removeProperty(v));
+  }
 
   // Fonts
   FONT_ROLES.forEach(role => {

@@ -153,7 +153,7 @@ export default function Settings() {
               <MobileSelect
                 value={language}
                 onValueChange={setLanguage}
-                placeholder="اللغة المفضلة"
+                placeholder={t.preferredLangPlaceholder}
                 triggerClassName="mt-1.5"
                 options={[
                   { value: "الكل", label: "الكل" },
@@ -224,23 +224,23 @@ export default function Settings() {
             <div className="w-9 h-9 rounded-xl bg-destructive/10 flex items-center justify-center">
               <Trash2 className="w-4 h-4 text-destructive" />
             </div>
-            <h2 className="text-base font-bold">حذف الحساب</h2>
+            <h2 className="text-base font-bold">{t.deleteAccount}</h2>
           </div>
-          <p className="text-sm text-muted-foreground mb-4">سيتم حذف حسابك وجميع بياناتك نهائياً. لا يمكن التراجع عن هذا الإجراء.</p>
+          <p className="text-sm text-muted-foreground mb-4">{t.deleteAccountSub}</p>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive" className="gap-2 rounded-xl">
-                <Trash2 className="w-4 h-4" /> حذف الحساب
+                <Trash2 className="w-4 h-4" /> {t.deleteAccount}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>تأكيد حذف الحساب</AlertDialogTitle>
-                <AlertDialogDescription>هل أنت متأكد؟ سيتم حذف جميع بياناتك نهائياً ولا يمكن التراجع عن هذا الإجراء.</AlertDialogDescription>
+                <AlertDialogTitle>{t.deleteAccountConfirm}</AlertDialogTitle>
+                <AlertDialogDescription>{t.deleteAccountWarning}</AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>إلغاء</AlertDialogCancel>
-                <AlertDialogAction onClick={() => base44.auth.logout()}>حذف نهائي</AlertDialogAction>
+                <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
+                <AlertDialogAction onClick={() => base44.auth.logout()}>{t.deletePermanently}</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
