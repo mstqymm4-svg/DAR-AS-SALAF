@@ -34,7 +34,8 @@ export async function loadPdfDocument(url, metadata = {}) {
         data: pdfData,
         cMapUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/cmaps/",
         cMapPacked: true,
-        useSystemFonts: true,
+        useSystemFonts: false,
+        disableFontFace: false,
         standardFontDataUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/standard_fonts/",
       });
       const pdf = await loadingTask.promise;
@@ -49,7 +50,8 @@ export async function loadPdfDocument(url, metadata = {}) {
     rangeChunkSize: 262144,
     disableAutoFetch: false,
     disableStream: false,
-    useSystemFonts: true,
+    useSystemFonts: false,
+    disableFontFace: false,
     cMapUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/cmaps/",
     cMapPacked: true,
     standardFontDataUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/standard_fonts/",
