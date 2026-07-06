@@ -24,7 +24,7 @@ export default function VideoCard({ video, isFavorite, onToggleFavorite, onPlay,
           fallback={() => <Video className="w-8 h-8 text-muted-foreground/30" />} />
 
         }
-        <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:opacity-100 transition-opacity opacity-0 rounded-none mx-4">
+        <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:opacity-100 transition-opacity opacity-0 rounded-none my-1">
           <div className="w-12 h-12 rounded-full bg-primary/90 flex items-center justify-center">
             <Play className="w-5 h-5 text-primary-foreground fill-primary-foreground mr-0.5" />
           </div>
