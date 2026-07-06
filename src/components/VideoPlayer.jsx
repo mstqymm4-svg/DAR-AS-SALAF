@@ -174,11 +174,33 @@ export default function VideoPlayer({ video, onClose }) {
 
   const showControlsTemp = () => {
     setShowControls(true);
+    // Also show bottom nav temporarily
+    const nav = document.getElementById("bottom-nav");
+    if (nav) nav.style.transform = "translateY(0)";
     clearTimeout(hideTimerRef.current);
     hideTimerRef.current = setTimeout(() => {
-      if (playing) setShowControls(false);
+      if (playing) {
+        setShowControls(false);
+        if (nav) nav.style.transform = "translateY(100%)";
+      }
     }, 3500);
   };
+
+  // Toggle body class + hide/show bottom nav based on playing state
+  useEffect(() => {
+    const nav = document.getElementById("bottom-nav");
+    if (playing) {
+      document.body.classList.add("video-playing");
+      if (nav) nav.style.transform = "translateY(100%)";
+    } else {
+      document.body.classList.remove("video-playing");
+      if (nav) nav.style.transform = "translateY(0)";
+    }
+    return () => {
+      document.body.classList.remove("video-playing");
+      if (nav) nav.style.transform = "translateY(0)";
+    };
+  }, [playing]);
 
   if (!videoId) {
     return (
