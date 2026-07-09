@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { getSetting } from "@/lib/settingsStore";
-import { uploadFileWithProgress } from "@/lib/uploadWithProgress";
+
 
 const DEFAULT_CATS = ["القرآن وعلومه","الحديث الشريف","الفقه الإسلامي","السيرة النبوية","العقيدة","التزكية والرقائق","التاريخ الإسلامي","أخرى"];
 const emptyForm = { title:"", author:"", category:"القرآن وعلومه", description:"", cover_image:"", pages_count:"", language:"العربية", pdf_url:"", is_featured:false, rating:0, status:"published" };
@@ -91,43 +91,32 @@ export default function DevBooks() {
 
   const uploadFile = async (e, field, setUploading) => {
     const file = e.target.files[0]; if (!file) return;
-    e.target.value = "";
 
-    // PDF uploads use progress-tracked upload for better UX
-    if (field === "pdf_url") {
+    const isPdf = field === "pdf_url";
+    if (isPdf) {
       setPdfUploading(true);
       setPdfProgress(0);
       setPdfProgressInfo(`${(file.size / (1024 * 1024)).toFixed(1)} MB`);
-      setPdfSpeed("");
-      try {
-        const file_url = await uploadFileWithProgress(file, (percent, loadedMB, totalMB, speedMBs, etaSec) => {
-          setPdfProgress(percent);
-          setPdfProgressInfo(`${loadedMB}/${totalMB} MB`);
-          const etaStr = etaSec > 1 ? `${Math.ceil(etaSec)}ث` : "≈ثانية";
-          setPdfSpeed(`${speedMBs.toFixed(1)} MB/ث · ${etaStr}`);
-        });
-        setForm(p => ({...p, pdf_url: file_url}));
-        toast.success("تم رفع الملف ✓");
-      } catch (err) {
-        toast.error("فشل رفع الملف: " + err.message);
-      } finally {
+    } else {
+      setUploading(true);
+    }
+
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setForm(p => ({...p, [field]: file_url}));
+      toast.success("تم رفع " + (isPdf ? "الملف" : "الغلاف") + " ✓");
+    } catch (err) {
+      toast.error("فشل الرفع: " + (err?.message || "خطأ غير معروف"));
+    } finally {
+      if (isPdf) {
         setPdfUploading(false);
         setPdfProgress(0);
         setPdfProgressInfo("");
         setPdfSpeed("");
+      } else {
+        setUploading(false);
       }
-      return;
-    }
-
-    setUploading(true);
-    try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      setForm(p => ({...p, [field]: file_url}));
-      toast.success("تم الرفع ✓");
-    } catch (err) {
-      toast.error("فشل رفع الغلاف: " + (err?.message || "خطأ غير معروف"));
-    } finally {
-      setUploading(false);
+      e.target.value = "";
     }
   };
 
