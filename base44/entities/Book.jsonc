@@ -63,6 +63,16 @@
       "minimum": 0,
       "maximum": 5,
       "default": 0
+    },
+    "status": {
+      "type": "string",
+      "title": "\u0627\u0644\u062d\u0627\u0644\u0629",
+      "enum": [
+        "published",
+        "draft",
+        "hidden"
+      ],
+      "default": "published"
     }
   },
   "required": [
