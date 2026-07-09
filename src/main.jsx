@@ -21,8 +21,15 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 )
 
 // Register Service Worker for PWA (installable app + offline support)
+// Skip in dev to prevent stale Vite cache issues; unregister stale dev workers
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch(() => {});
-  });
+  if (import.meta.env.DEV) {
+    navigator.serviceWorker.getRegistrations()
+      .then((regs) => regs.forEach((r) => r.unregister()))
+      .catch(() => {});
+  } else {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    });
+  }
 }
