@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { getSetting } from "@/lib/settingsStore";
+import { deleteCachedBook } from "@/lib/offlineDB";
 
 
 const DEFAULT_CATS = ["القرآن وعلومه","الحديث الشريف","الفقه الإسلامي","السيرة النبوية","العقيدة","التزكية والرقائق","التاريخ الإسلامي","أخرى"];
@@ -76,17 +77,28 @@ export default function DevBooks() {
 
   const handleDelete = async (book) => {
     if (!confirm(`حذف "${book.title}"؟`)) return;
-    await base44.entities.Book.delete(book.id);
-    toast.success("تم الحذف");
-    loadBooks();
+    try {
+      await base44.entities.Book.delete(book.id);
+      await deleteCachedBook(book.id).catch(() => {});
+      setBooks(prev => prev.filter(b => b.id !== book.id));
+      toast.success("تم الحذف");
+    } catch (err) {
+      toast.error("فشل الحذف: " + (err?.message || "خطأ غير معروف"));
+    }
   };
 
   const handleBulkDelete = async () => {
-    if (!confirm(`حذف ${selected.length} كتاب؟`)) return;
-    await Promise.all(selected.map(id => base44.entities.Book.delete(id)));
+    const count = selected.length;
+    if (!confirm(`حذف ${count} كتاب؟`)) return;
+    const ids = [...selected];
+    const results = await Promise.allSettled(ids.map(id => base44.entities.Book.delete(id)));
+    const failed = results.filter(r => r.status === "rejected").length;
+    const succeeded = count - failed;
+    await Promise.all(ids.map(id => deleteCachedBook(id).catch(() => {})));
     setSelected([]);
-    toast.success(`تم حذف ${selected.length} كتاب`);
-    loadBooks();
+    setBooks(prev => prev.filter(b => !ids.includes(b.id)));
+    if (failed > 0) toast.error(`تم حذف ${succeeded}، فشل ${failed}`);
+    else toast.success(`تم حذف ${count} كتاب`);
   };
 
   const uploadFile = async (e, field, setUploading) => {
@@ -200,13 +212,13 @@ export default function DevBooks() {
             <div className="grid grid-cols-3 gap-3">
               <div>
                 <Label className="text-xs">التصنيف</Label>
-                <select value={form.category} onChange={e=>setForm(p=>({...p,category:e.target.value}))} className="mt-1 w-full h-9 rounded-md border border-input bg-transparent px-3 text-sm">
+                <select value={form.category} onChange={e=>setForm(p=>({...p,category:e.target.value}))} className="mt-1 w-full h-9 rounded-md border border-input bg-background text-foreground px-3 text-sm">
                   {categories.map(c=><option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div>
                 <Label className="text-xs">الحالة</Label>
-                <select value={form.status} onChange={e=>setForm(p=>({...p,status:e.target.value}))} className="mt-1 w-full h-9 rounded-md border border-input bg-transparent px-3 text-sm">
+                <select value={form.status} onChange={e=>setForm(p=>({...p,status:e.target.value}))} className="mt-1 w-full h-9 rounded-md border border-input bg-background text-foreground px-3 text-sm">
                   {STATUS_OPTIONS.map(s=><option key={s.value} value={s.value}>{s.label}</option>)}
                 </select>
               </div>
