@@ -12,13 +12,13 @@ export default function About() {
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-      >
+        transition={{ duration: 0.4 }}>
+        
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
             <Info className="w-6 h-6 text-primary" />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">عن التطبيق</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground line-through normal-case">عن التطبيق</h1>
         </div>
 
         <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none">
@@ -73,6 +73,6 @@ export default function About() {
           </Link>
         </div>
       </motion.div>
-    </div>
-  );
+    </div>);
+
 }
