@@ -43,19 +43,19 @@ export const categories = [
 export default function CategoryChip({ category, isActive, onClick }) {
   const colorClass = COLOR_MAP[category.color] || COLOR_MAP.gray;
 
-  return (
-    <motion.button
-      whileTap={{ scale: 0.92 }}
-      whileHover={{ y: -2 }}
-      onClick={() => onClick?.(category.name)}
-      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap border transition-all duration-200 shrink-0 hidden ${
-      isActive ?
-      "border-primary bg-primary text-primary-foreground shadow-lg shadow-primary/25" :
-      `border-border bg-card text-muted-foreground hover:shadow-md ${colorClass}`}`
-      }>
-      
-      <span className="text-base">{category.emoji}</span>
-      <span>{category.name}</span>
-    </motion.button>);
+  return null;
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
