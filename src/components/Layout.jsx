@@ -138,7 +138,7 @@ export default function Layout() {
 
       {/* Footer — Desktop Only */}
       <footer className="hidden md:block border-t border-border bg-card/50 mt-auto">
-       <div className="max-w-7xl sm:px-6 lg:px-8 px-4 py-3">
+       <div className="max-w-7xl sm:px-6 lg:px-8 py-6 px-6">
          <div className="flex items-center justify-between">
            <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} {appNameOverride || t.appName}</p>
            <nav className="flex items-center gap-5">
