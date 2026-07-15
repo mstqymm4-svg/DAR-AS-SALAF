@@ -142,10 +142,10 @@ export default function Layout() {
          <div className="flex items-center justify-between">
            <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} {appNameOverride || t.appName}</p>
            <nav className="flex items-center gap-5">
-             <Link to="/about" className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
-               <Info className="w-3.5 h-3.5" />
-               عن التطبيق
-             </Link>
+             <Link to="/about" className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">ع
+
+
+              </Link>
              <Link to="/contact" className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
                <MessageCircle className="w-3.5 h-3.5" />
                تواصل معنا
