@@ -63,9 +63,9 @@ export default function About() {
         </div>
 
         <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
-          <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-            <Heart className="w-3.5 h-3.5 text-primary" />
-            صُنع بعناية لخدمة العلم والمعرفة
+          <p className="text-xs text-muted-foreground flex items-center gap-1.5">صُنع بعناية 
+
+
           </p>
           <Link to="/" className="text-sm text-primary font-medium hover:underline flex items-center gap-1">
             العودة للرئيسية
