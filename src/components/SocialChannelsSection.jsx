@@ -70,10 +70,10 @@ export default function SocialChannelsSection() {
                 className="flex-1 flex items-center justify-center gap-1 bg-primary text-primary-foreground text-xs font-bold px-3 py-2 rounded-xl hover:bg-primary/90 transition-colors active:scale-95 shadow-sm">
                   فتح <ExternalLink className="w-3 h-3" />
                 </a>
-                <button onClick={() => handleShare(ch)}
-                className="flex items-center justify-center w-9 h-9 rounded-xl border border-border hover:bg-muted hover:border-primary/30 transition-colors active:scale-95 hidden">
-                  <Share2 className="w-3.5 h-3.5 text-muted-foreground" />
-                </button>
+                
+
+
+                
               </div>
             </motion.div>);
 
