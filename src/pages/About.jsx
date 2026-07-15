@@ -18,7 +18,7 @@ export default function About() {
           <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
             <Info className="w-6 h-6 text-primary" />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground line-through normal-case">عن التطبيق</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground not-italic no-underline text-left">عن التطبيق</h1>
         </div>
 
         <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none">
