@@ -25,17 +25,17 @@ export default function Layout() {
     });
     const handler = () => setShowDevNav(getSetting("show_dev_nav") !== "false");
     window.addEventListener("storage", handler);
-    return () => { unsub(); window.removeEventListener("storage", handler); };
+    return () => {unsub();window.removeEventListener("storage", handler);};
   }, []);
 
   const navItems = [
-    { path: "/",          icon: Home,     label: t.navHome },
-    { path: "/books",     icon: BookOpen, label: t.navBooks },
-    { path: "/videos",    icon: Video,    label: t.navVideos },
-    { path: "/favorites", icon: Heart,    label: t.navFav },
-    { path: "/settings",  icon: Settings, label: t.navSettings },
-    ...(showDevNav ? [{ path: "/dev", icon: Code, label: "Dev" }] : []),
-  ];
+  { path: "/", icon: Home, label: t.navHome },
+  { path: "/books", icon: BookOpen, label: t.navBooks },
+  { path: "/videos", icon: Video, label: t.navVideos },
+  { path: "/favorites", icon: Heart, label: t.navFav },
+  { path: "/settings", icon: Settings, label: t.navSettings },
+  ...(showDevNav ? [{ path: "/dev", icon: Code, label: "Dev" }] : [])];
+
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -60,9 +60,9 @@ export default function Layout() {
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center gap-3 group">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center overflow-hidden shrink-0 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-primary/30 transition-all">
-                {logoUrl
-                  ? <img src={logoUrl} alt="logo" className="w-full h-full object-cover" />
-                  : <BookOpen className="w-5 h-5 text-primary-foreground" />}
+                {logoUrl ?
+                <img src={logoUrl} alt="logo" className="w-full h-full object-cover" /> :
+                <BookOpen className="w-5 h-5 text-primary-foreground" />}
               </div>
               <div>
                 <h1 className="text-foreground text-xl font-bold leading-tight">{appNameOverride || t.appName}</h1>
@@ -77,15 +77,15 @@ export default function Layout() {
                     key={item.path}
                     to={item.path}
                     className={`relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                      isActive
-                        ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                    }`}
-                  >
+                    isActive ?
+                    "bg-primary text-primary-foreground shadow-md shadow-primary/20" :
+                    "text-muted-foreground hover:text-foreground hover:bg-muted"}`
+                    }>
+                    
                     <item.icon className="w-4 h-4" />
                     {item.label}
-                  </Link>
-                );
+                  </Link>);
+
               })}
             </nav>
             <Link to="/books" className="md:hidden p-2.5 rounded-xl hover:bg-muted transition-colors active:scale-95">
@@ -103,8 +103,8 @@ export default function Layout() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.2 }}
-          className="pb-24 md:pb-8"
-        >
+          className="pb-24 md:pb-8">
+          
           <Outlet />
         </motion.main>
       </AnimatePresence>
@@ -119,26 +119,26 @@ export default function Layout() {
                 key={item.path}
                 to={item.path}
                 className={`relative flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all duration-200 ${
-                  isActive ? "text-primary" : "text-muted-foreground"
-                }`}
-              >
-                {isActive && (
-                  <motion.div
-                    layoutId="bottomNavIndicator"
-                    className="absolute -top-2 left-1/2 -translate-x-1/2 w-8 h-1 rounded-full bg-primary"
-                  />
-                )}
+                isActive ? "text-primary" : "text-muted-foreground"}`
+                }>
+                
+                {isActive &&
+                <motion.div
+                  layoutId="bottomNavIndicator"
+                  className="absolute -top-2 left-1/2 -translate-x-1/2 w-8 h-1 rounded-full bg-primary" />
+
+                }
                 <item.icon className={`w-5 h-5 transition-transform ${isActive ? "fill-primary/20 scale-110" : ""}`} />
                 <span className="text-[10px] font-medium">{item.label}</span>
-              </Link>
-            );
+              </Link>);
+
           })}
         </div>
       </nav>
 
       {/* Footer — Desktop Only */}
       <footer className="hidden md:block border-t border-border bg-card/50 mt-auto">
-       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+       <div className="max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
          <div className="flex items-center justify-between">
            <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} {appNameOverride || t.appName}</p>
            <nav className="flex items-center gap-5">
@@ -154,6 +154,6 @@ export default function Layout() {
          </div>
        </div>
       </footer>
-      </div>
-      );
-      }
+      </div>);
+
+}
