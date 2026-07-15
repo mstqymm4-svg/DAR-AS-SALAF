@@ -12,13 +12,13 @@ export default function SocialChannelsSection() {
   const [loading, setLoading] = useState(true);
 
   const loadData = () => {
-    getSocialChannels()
-      .then((data) => setChannels((data || []).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))))
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    getSocialChannels().
+    then((data) => setChannels((data || []).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)))).
+    catch(() => {}).
+    finally(() => setLoading(false));
   };
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => {loadData();}, []);
 
   // Auto-refresh when social channels change in background
   useContentRefresh(["social"], loadData);
@@ -56,29 +56,29 @@ export default function SocialChannelsSection() {
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="bg-card border border-border rounded-2xl p-4 flex flex-col items-center text-center hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 hover:border-primary/30 transition-all group"
-            >
+              className="bg-card border border-border rounded-2xl p-4 flex flex-col items-center text-center hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 hover:border-primary/30 transition-all group">
+              
               <div className={`w-16 h-16 rounded-2xl ${typeInfo.bg} flex items-center justify-center mb-3 group-hover:scale-110 group-hover:rotate-3 transition-transform shadow-sm`}>
-                {ch.icon_url
-                  ? <SmartImage src={ch.icon_url} alt={ch.name} className="w-full h-full rounded-2xl object-cover" fallback={() => <Icon className={`w-8 h-8 ${typeInfo.color}`} />} />
-                  : <Icon className={`w-8 h-8 ${typeInfo.color}`} />}
+                {ch.icon_url ?
+                <SmartImage src={ch.icon_url} alt={ch.name} className="w-full h-full rounded-2xl object-cover" fallback={() => <Icon className={`w-8 h-8 ${typeInfo.color}`} />} /> :
+                <Icon className={`w-8 h-8 ${typeInfo.color}`} />}
               </div>
               <p className="text-sm font-bold mb-1 truncate w-full">{ch.name}</p>
               {ch.description && <p className="text-[10px] text-muted-foreground line-clamp-2 mb-3">{ch.description}</p>}
               <div className="flex gap-1.5 mt-auto w-full">
                 <a href={ch.url} target="_blank" rel="noopener noreferrer"
-                  className="flex-1 flex items-center justify-center gap-1 bg-primary text-primary-foreground text-xs font-bold px-3 py-2 rounded-xl hover:bg-primary/90 transition-colors active:scale-95 shadow-sm">
+                className="flex-1 flex items-center justify-center gap-1 bg-primary text-primary-foreground text-xs font-bold px-3 py-2 rounded-xl hover:bg-primary/90 transition-colors active:scale-95 shadow-sm">
                   فتح <ExternalLink className="w-3 h-3" />
                 </a>
                 <button onClick={() => handleShare(ch)}
-                  className="flex items-center justify-center w-9 h-9 rounded-xl border border-border hover:bg-muted hover:border-primary/30 transition-colors active:scale-95">
+                className="flex items-center justify-center w-9 h-9 rounded-xl border border-border hover:bg-muted hover:border-primary/30 transition-colors active:scale-95 hidden">
                   <Share2 className="w-3.5 h-3.5 text-muted-foreground" />
                 </button>
               </div>
-            </motion.div>
-          );
+            </motion.div>);
+
         })}
       </div>
-    </section>
-  );
+    </section>);
+
 }
