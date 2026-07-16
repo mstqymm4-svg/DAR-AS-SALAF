@@ -42,7 +42,7 @@ export default function SocialChannelsSection() {
   return (
     <section className="px-4 sm:px-6 lg:px-8 py-8 max-w-6xl mx-auto" dir="rtl">
       <div className="text-center mb-6">
-        <h2 className="text-xl font-bold mb-1">قنواتنا على التواصل الاجتماعي</h2>
+        <h2 className="text-xl font-bold mb-1"></h2>
         <p className="text-sm text-muted-foreground">تابعنا وتواصل معنا عبر منصاتنا</p>
       </div>
 
