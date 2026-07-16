@@ -40,29 +40,29 @@ export default function AISearch({ books, onResults, onClear }) {
 
   return (
     <div className="mb-4">
-      <div className="flex gap-2 hidden">
-        <div className="relative flex-1">
-          <Sparkles className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-accent" />
-          <Input
-            placeholder="اسألني عن أي موضوع ديني... (مثال: كتب عن الصلاة)"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            className="pr-10 h-12 rounded-xl bg-card border-accent/30 text-sm" />
-          
-        </div>
-        {active ?
-        <Button onClick={handleClear} variant="outline" className="h-12 px-4 rounded-xl shrink-0 gap-1">
-            <X className="w-4 h-4" />
-            مسح
-          </Button> :
+      
 
-        <Button onClick={handleSearch} disabled={loading || !query.trim()} className="h-12 px-4 rounded-xl shrink-0 gap-1 bg-accent text-accent-foreground hover:bg-accent/90">
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-            بحث ذكي
-          </Button>
-        }
-      </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
       {active && !loading &&
       <div className="flex items-center gap-1.5 mt-2">
           <Sparkles className="w-3 h-3 text-accent" />
