@@ -43,7 +43,7 @@ export default function SocialChannelsSection() {
     <section className="px-4 sm:px-6 lg:px-8 py-8 max-w-6xl mx-auto" dir="rtl">
       <div className="text-center mb-6">
         <h2 className="text-xl font-bold mb-1">Our social media channels</h2>
-        <p className="text-sm text-muted-foreground">تابعنا وتواصل معنا عبر منصاتنا</p>
+        <p className="text-sm text-muted-foreground">Follow and connect with us via our platforms.</p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
