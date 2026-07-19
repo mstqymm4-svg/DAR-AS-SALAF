@@ -228,7 +228,19 @@ function VideosTab() {
         toast.success("تمت إضافة الفيديو");
       }
       setShowForm(false); setEditing(null);
-      setForm({ title: "", youtube_url: "", description: "", channel_id: "", channel_name: "", category: "عام", duration: "", is_featured: false, visible: true, sort_order: 0 });
+      setForm({
+  title: "",
+  youtube_url: "",
+  description: "",
+  channel_id: "",
+  channel_name: "",
+  category: "عام",
+  duration: "",
+  video_type: "normal",
+  is_featured: false,
+  visible: true,
+  sort_order: 0,
+});
       load();
     } catch (e) { toast.error("فشل الحفظ"); }
   };
