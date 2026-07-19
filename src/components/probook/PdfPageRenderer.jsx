@@ -49,7 +49,7 @@ export default function PdfPageRenderer({
           ) * 0.95;
         }
 
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const dpr = 2;
         const renderScale = fitScale * zoom * dpr;
         const cssScale = fitScale * zoom;
 
@@ -60,6 +60,9 @@ export default function PdfPageRenderer({
         if (!canvas || cancelled) return;
 
         const ctx = canvas.getContext("2d", { alpha: false });
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        ctx.textBaseline = "alphabetic";
         canvas.width = viewport.width;
         canvas.height = viewport.height;
         canvas.style.width = `${cssViewport.width}px`;
