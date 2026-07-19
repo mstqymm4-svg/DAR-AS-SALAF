@@ -213,7 +213,12 @@ function VideosTab() {
     if (!form.title || !form.youtube_url) { toast.error("أدخل العنوان والرابط"); return; }
     const thumbnail = getThumbnail(form.youtube_url);
     const ch = channels.find((c) => c.id === form.channel_id);
-    const data = { ...form, thumbnail, channel_name: ch?.name || "" };
+    const data = {
+  ...form,
+  thumbnail,
+  channel_name: ch?.name || "",
+  video_type: form.video_type || "normal",
+};
     try {
       if (editing) {
         await base44.entities.Video.update(editing.id, data);
