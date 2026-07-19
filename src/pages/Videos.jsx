@@ -114,11 +114,11 @@ export default function Videos() {
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
             <button
   onClick={() => setCategory("live")}
-  className={`px-4 py-2 rounded-lg font-bold border-2 ${
-    category === "live"
-      ? "bg-red-600 text-white border-red-600"
-      : "bg-white text-red-600 border-red-600"
-  }`}
+  className={`h-11 px-6 rounded-full transition-all duration-300 shadow-lg ${
+  category === "live"
+    ? "bg-gradient-to-r from-red-500 to-red-700 text-white"
+    : "bg-gray-100 text-gray-700 hover:bg-red-100"
+}`}
 >
 🔴 البث المباشر
 </button>
