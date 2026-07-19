@@ -45,12 +45,23 @@ export default function Videos() {
   const categories = ["live", "short"];
 
   const filtered = useMemo(() => {
-    return videos.filter((v) => {
-      if (category !== "all" && v.category !== category) return false;
-      if (search && !v.title?.includes(search) && !v.channel_name?.includes(search)) return false;
-      return true;
-    });
-  }, [videos, search, category]);
+  return videos.filter((v) => {
+
+    if (category === "live" && !v.is_live) return false;
+
+    if (category === "short" && !v.is_short) return false;
+
+    if (
+      search &&
+      !v.title?.includes(search) &&
+      !v.channel_name?.includes(search)
+    ) {
+      return false;
+    }
+
+    return true;
+  });
+}, [videos, search, category]);
 
   const featured = useMemo(() => videos.filter((v) => v.is_featured), [videos]);
   const recent = useMemo(() => [...filtered].sort((a, b) => new Date(b.created_date) - new Date(a.created_date)), [filtered]);
