@@ -193,7 +193,7 @@ function VideosTab() {
   const [search, setSearch] = useState("");
   const [form, setForm] = useState({
     title: "", youtube_url: "", description: "", channel_id: "",
-    channel_name: "", category: "عام", duration: "", is_featured: false, visible: true, sort_order: 0,
+    channel_name: "", category: "عام", video_type: "normal", duration: "", is_featured: false, visible: true, sort_order: 0,
   });
 
   const load = useCallback(async () => {
