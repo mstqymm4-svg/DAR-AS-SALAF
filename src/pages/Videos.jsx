@@ -20,7 +20,7 @@ export default function Videos() {
   const [channels, setChannels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("live");
+  const [category, setCategory] = useState("all");
   const [playingVideo, setPlayingVideo] = useState(null);
   const [favorites, setFavorites] = useState(() => {
     try { return JSON.parse(localStorage.getItem("video_favorites") || "[]"); } catch(e) { return []; }
@@ -42,7 +42,7 @@ export default function Videos() {
   // Auto-refresh when videos or channels change in background
   useContentRefresh(["videos", "channels"], loadData);
 
-  const categories = ["live", "short"];
+  const categories = ["all", "live", "short"];
 
   const filtered = useMemo(() => {
   return videos.filter((v) => {
