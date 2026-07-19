@@ -280,6 +280,29 @@ function VideosTab() {
                 className="h-9 text-sm" />
             </div>
             <div>
+  <Label className="text-xs">نوع الفيديو</Label>
+
+  <Select
+    value={form.video_type || "normal"}
+    onValueChange={(value) =>
+      setForm({
+        ...form,
+        video_type: value,
+      })
+    }
+  >
+    <SelectTrigger className="h-9 text-sm">
+      <SelectValue />
+    </SelectTrigger>
+
+    <SelectContent>
+      <SelectItem value="normal">📺 فيديو عادي</SelectItem>
+      <SelectItem value="short">🟣 شورت</SelectItem>
+      <SelectItem value="live">🔴 بث مباشر</SelectItem>
+    </SelectContent>
+  </Select>
+</div>
+            <div>
               <Label className="text-xs">المدة (اختياري)</Label>
               <Input value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })}
                 placeholder="10:30" className="h-9 text-sm" />
