@@ -104,14 +104,27 @@ export default function Videos() {
               className="pr-9" />
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-            {categories.map((cat) => (
-              <button key={cat} onClick={() => setCategory(cat)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap border-2 transition-all shrink-0 ${
-                  category === cat ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground hover:border-primary/30"
-                }`}>
-                {cat === "all" ? t.all : cat}
-              </button>
-            ))}
+            <button
+  onClick={() => setCategory("live")}
+  className={`px-4 py-2 rounded-lg font-bold border-2 ${
+    category === "live"
+      ? "bg-red-600 text-white border-red-600"
+      : "bg-white text-red-600 border-red-600"
+  }`}
+>
+🔴 البث المباشر
+</button>
+
+<button
+  onClick={() => setCategory("short")}
+  className={`px-4 py-2 rounded-lg font-bold border-2 ${
+    category === "short"
+      ? "bg-purple-600 text-white border-purple-600"
+      : "bg-white text-purple-600 border-purple-600"
+  }`}
+>
+🟣 الشورت
+</button>
           </div>
         </div>
 
