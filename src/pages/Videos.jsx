@@ -42,10 +42,7 @@ export default function Videos() {
   // Auto-refresh when videos or channels change in background
   useContentRefresh(["videos", "channels"], loadData);
 
-  const categories = useMemo(() => {
-    const set = new Set(videos.map((v) => v.category).filter(Boolean));
-    return ["all", ...Array.from(set)];
-  }, [videos]);
+  const categories = ["live", "short"];
 
   const filtered = useMemo(() => {
     return videos.filter((v) => {
