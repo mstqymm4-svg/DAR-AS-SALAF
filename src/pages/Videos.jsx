@@ -47,9 +47,9 @@ export default function Videos() {
   const filtered = useMemo(() => {
   return videos.filter((v) => {
 
-    if (category === "live" && !v.is_live) return false;
+    if (category === "live" && v.video_type !== "live") return false;
 
-    if (category === "short" && !v.is_short) return false;
+    if (category === "short" && v.video_type !== "short") return false;
 
     if (
       search &&
