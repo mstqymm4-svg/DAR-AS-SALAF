@@ -20,7 +20,7 @@ export default function Videos() {
   const [channels, setChannels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
+  const [category, setCategory] = useState("live");
   const [playingVideo, setPlayingVideo] = useState(null);
   const [favorites, setFavorites] = useState(() => {
     try { return JSON.parse(localStorage.getItem("video_favorites") || "[]"); } catch(e) { return []; }
