@@ -28,7 +28,7 @@ const emptyBook = {
   description: "",
   cover_image: "",
   pages_count: "",
-  language: "العربية",
+  language: "اورد",
   pdf_url: "",
   is_featured: false,
   rating: 0,
