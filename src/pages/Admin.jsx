@@ -69,7 +69,7 @@ export default function Admin() {
       description: book.description || "",
       cover_image: book.cover_image || "",
       pages_count: book.pages_count || "",
-      language: book.language || "العربية",
+      language: book.language || "اورد",
       pdf_url: book.pdf_url || "",
       is_featured: book.is_featured || false,
       rating: book.rating || 0,
