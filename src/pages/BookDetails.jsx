@@ -56,7 +56,7 @@ export default function BookDetails() {
       });
       setPdfDownloaded(true);
       toast.success("تم تنزيل الكتاب للقراءة بدون إنترنت");
-    } catch(e) {
+    } catch (e) {
       toast.error("فشل التنزيل: " + (e.message || ""));
     }
     setDownloading(false);
@@ -77,8 +77,8 @@ export default function BookDetails() {
             <div className="h-12 w-full bg-muted rounded-xl animate-pulse" />
           </div>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   if (!book) {
@@ -94,16 +94,16 @@ export default function BookDetails() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <MobileHeader title={book?.title} />
-      {!isOnline && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-700 dark:text-orange-400 text-xs font-bold mb-4"
-        >
+      {!isOnline &&
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-700 dark:text-orange-400 text-xs font-bold mb-4">
+        
           <WifiOff className="w-4 h-4" />
           {t.offlineMode}
         </motion.div>
-      )}
+      }
       <Link to="/books" className="hidden md:inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors">
         <ArrowRight className="w-4 h-4" />
         {t.backToLib}
@@ -137,8 +137,8 @@ export default function BookDetails() {
             </div>
             {user &&
             <button
-            onClick={handleToggleFavorite}
-            className="shrink-0 w-11 h-11 rounded-xl border border-border flex items-center justify-center hover:bg-muted hover:border-primary/30 active:scale-95 transition-all">
+              onClick={handleToggleFavorite}
+              className="shrink-0 w-11 h-11 rounded-xl border border-border flex items-center justify-center hover:bg-muted hover:border-primary/30 active:scale-95 transition-all">
 
               <Heart className={`w-5 h-5 transition-all ${isFavorite ? "fill-red-500 text-red-500 scale-110" : "text-muted-foreground"}`} />
             </button>
@@ -170,10 +170,10 @@ export default function BookDetails() {
               </div>
             }
             {book.language &&
-            <div className="p-4 rounded-xl bg-muted/50 border border-border hover:border-primary/20 transition-colors">
+            <div className="p-4 rounded-xl bg-muted/50 border border-border hover:border-primary/20 transition-colors hidden">
                 <BookOpen className="w-4 h-4 text-muted-foreground mb-1" />
-                <p className="text-lg font-bold text-foreground">{book.language}</p>
-                <p className="text-xs text-muted-foreground">{t.language}</p>
+                <p className="text-lg font-bold text-foreground hidden">{book.language}</p>
+                <p className="text-xs text-muted-foreground hidden">{t.language}</p>
               </div>
             }
           </div>
@@ -193,14 +193,14 @@ export default function BookDetails() {
                 {t.readBook}
               </Button>
             </Link>
-            {isOnline && !pdfDownloaded && !downloading && (
-              <Button variant="outline" onClick={handleDownload} className="w-full gap-2 h-10 rounded-xl text-sm hover:border-primary/30">
+            {isOnline && !pdfDownloaded && !downloading &&
+            <Button variant="outline" onClick={handleDownload} className="w-full gap-2 h-10 rounded-xl text-sm hover:border-primary/30">
                 <Download className="w-4 h-4" />
                 تنزيل للقراءة بدون إنترنت
               </Button>
-            )}
-            {downloading && (
-              <div className="w-full px-4 py-3 rounded-xl border border-primary/20 bg-primary/5">
+            }
+            {downloading &&
+            <div className="w-full px-4 py-3 rounded-xl border border-primary/20 bg-primary/5">
                 <div className="flex items-center justify-between text-xs mb-2">
                   <span className="text-muted-foreground">جاري التنزيل...</span>
                   <span className="font-bold text-primary">{downloadProgress}%</span>
@@ -209,13 +209,13 @@ export default function BookDetails() {
                   <div className="h-full bg-gradient-to-l from-primary to-primary/80 rounded-full transition-all" style={{ width: `${downloadProgress}%` }} />
                 </div>
               </div>
-            )}
-            {pdfDownloaded && (
-              <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-green-500/5 border border-green-500/20 text-green-700 dark:text-green-400 text-xs font-bold">
+            }
+            {pdfDownloaded &&
+            <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-green-500/5 border border-green-500/20 text-green-700 dark:text-green-400 text-xs font-bold">
                 <CheckCircle className="w-4 h-4" />
                 متوفر للقراءة بدون إنترنت
               </div>
-            )}
+            }
           </div>
           }
 
