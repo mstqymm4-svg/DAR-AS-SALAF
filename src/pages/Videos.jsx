@@ -139,14 +139,14 @@ export default function Videos() {
         {/* Featured */}
         {featured.length > 0 && category === "all" && !search &&
         <section>
-            <h2 className="text-lg font-bold mb-3 flex items-center gap-2 hidden">
-            className={`h-11 px-6 rounded-full transition-all duration-300 shadow-lg ${
-            category === "short" ?
-            "bg-gradient-to-r from-violet-500 to-purple-700 text-white" :
-            "bg-gray-100 text-gray-700 hover:bg-purple-100"}`
-            }
-              <Star className="w-5 h-5 text-amber-500 fill-amber-500" /> {t.featuredVideos}
-            </h2>
+            
+
+
+
+
+
+
+          
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {featured.slice(0, 3).map((v, i) =>
             <VideoCard key={v.id} video={v} index={i}
