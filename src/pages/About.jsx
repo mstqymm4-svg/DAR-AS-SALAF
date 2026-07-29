@@ -23,8 +23,8 @@ export default function About() {
 
         <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none">
           <p className="text-foreground leading-relaxed text-base sm:text-lg">
-            تطبيق <strong>{appName}</strong> تطبيق دار العلوم صُنع لشيخ محمد هارون نور محمد المحمدي المدني 
-            صُنع من قِبل ولده مستقيم محمد هارون لنشر كتب الشيخ محمد هارون ومحتواه الإسلامي 
+          ق <strong>{appName}</strong> تطبيق دار العلوم المحمدية السلفية  صُنع لشيخ محمد هارون نور محمد المحمدي المدني 
+            صُنع من قِبل ولده مستقيم محمد هارون لنشر كتب الشيخ محمد هارون ومحتواه الإسلامي
             من خلال تطبيق يجميع بين الكتب وفيديوهات ومحاضرات الشيخ محمد هارون 
           </p>
 
