@@ -169,13 +169,13 @@ export default function BookDetails() {
                 <p className="text-xs text-muted-foreground">{t.pages}</p>
               </div>
             }
-            {book.language &&
-            <div className="p-4 rounded-xl bg-muted/50 border border-border hover:border-primary/20 transition-colors hidden">
-                <BookOpen className="w-4 h-4 text-muted-foreground mb-1" />
-                <p className="text-lg font-bold text-foreground hidden">{book.language}</p>
-                <p className="text-xs text-muted-foreground hidden">{t.language}</p>
-              </div>
-            }
+            
+
+
+
+
+
+            
           </div>
 
           {book.description &&
