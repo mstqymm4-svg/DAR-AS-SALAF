@@ -35,7 +35,7 @@ export default function VideoCard({ video, isFavorite, onToggleFavorite, onPlay,
           </span>
         }
         {video.is_featured &&
-        <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-amber-500 text-white text-[10px] font-bold flex items-center gap-1">
+        <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-amber-500 text-[10px] font-bold flex items-center gap-1 text-[hsl(var(--primary))]">
             <Star className="w-2.5 h-2.5 fill-white" /> {t.featured}
           </span>
         }
