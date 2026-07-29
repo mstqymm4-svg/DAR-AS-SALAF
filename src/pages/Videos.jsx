@@ -114,7 +114,7 @@ export default function Videos() {
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
             <button
               onClick={() => setCategory("live")}
-              className={`h-11 px-6 rounded-full transition-all duration-300 shadow-lg ${
+              className={`h-11 px-6 rounded-full transition-all duration-300 shadow-lg hidden ${
               category === "live" ?
               "bg-gradient-to-r from-red-500 to-red-700 text-white" :
               "bg-gray-100 text-gray-700 hover:bg-red-100"}`
@@ -125,7 +125,7 @@ export default function Videos() {
 
 <button
               onClick={() => setCategory("short")}
-              className={`px-4 py-2 rounded-lg font-bold border-2 ${
+              className={`px-4 py-2 rounded-lg font-bold border-2 hidden ${
               category === "short" ?
               "bg-purple-600 text-white border-purple-600" :
               "bg-white text-purple-600 border-purple-600"}`
