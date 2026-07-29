@@ -18,10 +18,20 @@ const DB_NAME = "dar_al_ulum_offline";
 const DB_VERSION = 2;
 
 let _db = null;
+let _dbReady = null; // in-flight open promise to avoid duplicate opens
+
+function _wireLifecycle(db) {
+  db.onclose = () => { _db = null; };
+  db.onversionchange = () => { db.close(); _db = null; };
+}
 
 function openDB() {
+  // Still valid connection
   if (_db) return Promise.resolve(_db);
-  return new Promise((resolve, reject) => {
+  // Open already in-flight
+  if (_dbReady) return _dbReady;
+
+  _dbReady = new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
     req.onupgradeneeded = (e) => {
       const db = e.target.result;
@@ -36,13 +46,31 @@ function openDB() {
       if (!db.objectStoreNames.contains("social"))    db.createObjectStore("social",    { keyPath: "id" });
       if (!db.objectStoreNames.contains("settings"))  db.createObjectStore("settings",  { keyPath: "setting_key" });
     };
-    req.onsuccess = (e) => { _db = e.target.result; resolve(_db); };
-    req.onerror   = (e) => reject(e.target.error);
+    req.onsuccess = (e) => {
+      _db = e.target.result;
+      _wireLifecycle(_db);
+      _dbReady = null;
+      resolve(_db);
+    };
+    req.onerror = (e) => { _dbReady = null; reject(e.target.error); };
+    req.onblocked = () => { _dbReady = null; reject(new Error("IndexedDB open blocked")); };
   });
+
+  return _dbReady;
 }
 
-function tx(store, mode = "readonly") {
-  return openDB().then(db => db.transaction(store, mode).objectStore(store));
+async function tx(store, mode = "readonly") {
+  // If cached connection is dead, drop it so openDB() re-opens
+  if (_db) {
+    try {
+      // A dead/closing connection throws on transaction() — detect & recover
+      return _db.transaction(store, mode).objectStore(store);
+    } catch (e) {
+      _db = null;
+    }
+  }
+  const db = await openDB();
+  return db.transaction(store, mode).objectStore(store);
 }
 
 function reqAsPromise(request) {
