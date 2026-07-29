@@ -319,12 +319,12 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
   const handleDragEnd = useCallback((e, info) => {
     const threshold = (containerSize.width || 300) * 0.2;
     if (isRTL) {
-      if (info.offset.x > threshold) goNext();
-      else if (info.offset.x < -threshold) goPrev();
+    if (info.offset.x > threshold) goPrev();
+    else if (info.offset.x < -threshold) goNext();
     } else {
-      if (info.offset.x < -threshold) goNext();
-      else if (info.offset.x > threshold) goPrev();
-    }
+    if (info.offset.x < -threshold) goPrev();
+    else if (info.offset.x > threshold) goNext();
+   }
   }, [containerSize.width, isRTL, goNext, goPrev]);
 
   // ═══════════════════════════════════════════════════════
