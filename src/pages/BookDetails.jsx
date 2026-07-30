@@ -194,7 +194,7 @@ export default function BookDetails() {
               </Button>
             </Link>
             {isOnline && !pdfDownloaded && !downloading &&
-            <Button variant="outline" onClick={handleDownload} className="w-full gap-2 h-10 rounded-xl text-sm hover:border-primary/30">
+            <Button variant="outline" onClick={handleDownload} className="w-full gap-2 h-10 rounded-xl text-sm hover:border-primary/30 bg-[hsl(var(--foreground))] text-[hsl(var(--background))]">
                 <Download className="w-4 h-4" />
                 تنزيل للقراءة بدون إنترنت
               </Button>
