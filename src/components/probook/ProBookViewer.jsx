@@ -351,9 +351,9 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
   const loadingH = containerSize.height > 0 ? containerSize.height * 0.85 : 500;
 
   const pageVariants = {
-    enter: (dir) => ({ x: dir > 0 ? "100%" : "-100%", opacity: 0 }),
-    center: { x: 0, opacity: 1 },
-    exit: (dir) => ({ x: dir > 0 ? "-30%" : "30%", opacity: 0 }),
+    enter: (dir) => ({ y: dir > 0 ? "100%" : "-100%", opacity: 0 }),
+    center: { y: 0, opacity: 1 },
+    exit: (dir) => ({ y: dir > 0 ? "-30%" : "30%", opacity: 0 }),
   };
 
   return (
