@@ -388,7 +388,7 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
                 opacity: { duration: 0.25 },
               }}
               drag={canDrag ? "y" : false}
-              dragConstraints={{ left: 0, right: 0 }}
+              dragConstraints={{ top: 0, bottom: 0 }}
               dragElastic={0.5}
               onDragEnd={handleDragEnd}
               className="cursor-grab active:cursor-grabbing"
