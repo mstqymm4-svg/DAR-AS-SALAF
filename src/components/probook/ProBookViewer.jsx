@@ -6,6 +6,8 @@ export default function PdfViewer({ url, title }) {
   const [loading, setLoading] = useState(true);
 
   // Disable download/print toolbar in PDF.js viewer
+  console.log("PDF URL =", url);
+
   const src = `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(url)}#toolbar=0`;
 
   const reload = () => { setKey(k => k + 1); setLoading(true); };
