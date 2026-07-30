@@ -164,8 +164,8 @@ export default function BookDetails() {
           <div className="grid grid-cols-2 gap-3 mb-6">
             {book.pages_count &&
             <div className="p-4 rounded-xl bg-muted/50 border border-border hover:border-primary/20 transition-colors">
-                <FileText className="w-4 h-4 mb-1 text-[hsl(var(--primary))]" />
-                <p className="text-lg font-bold text-foreground">{book.pages_count}</p>
+                <FileText className="w-4 h-4 mb-1" />
+                <p className="text-lg font-bold text-[hsl(var(--primary))]">{book.pages_count}</p>
                 <p className="text-xs text-muted-foreground">{t.pages}</p>
               </div>
             }
