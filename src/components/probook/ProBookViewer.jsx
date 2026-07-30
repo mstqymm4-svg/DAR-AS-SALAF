@@ -317,15 +317,14 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
   //  Drag-to-flip
   // ═══════════════════════════════════════════════════════
   const handleDragEnd = useCallback((e, info) => {
-    const threshold = (containerSize.width || 300) * 0.2;
-    if (isRTL) {
-    if (info.offset.x > threshold) goPrev();
-    else if (info.offset.x < -threshold) goNext();
-    } else {
-    if (info.offset.x < -threshold) goPrev();
-    else if (info.offset.x > threshold) goNext();
-   }
-  }, [containerSize.width, isRTL, goNext, goPrev]);
+    const threshold = (containerSize.height || 300) * 0.2;
+
+    if (info.offset.y < -threshold) {
+        goNext();
+    } else if (info.offset.y > threshold) {
+        goPrev();
+    }
+  }, [containerSize.height, goNext, goPrev]);
 
   // ═══════════════════════════════════════════════════════
   //  Render
