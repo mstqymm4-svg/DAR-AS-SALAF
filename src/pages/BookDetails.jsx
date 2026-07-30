@@ -140,7 +140,7 @@ export default function BookDetails() {
               onClick={handleToggleFavorite}
               className="shrink-0 w-11 h-11 rounded-xl border border-border flex items-center justify-center hover:bg-muted hover:border-primary/30 active:scale-95 transition-all">
 
-              <Heart className={`w-5 h-5 transition-all text-[hsl(var(--primary))] ${isFavorite ? "fill-red-500 scale-110" : "text-muted-foreground"}`} />
+              <Heart className={`w-5 h-5 transition-all text-[hsl(var(--background))] ${isFavorite ? "fill-red-500 scale-110" : "text-muted-foreground"}`} />
             </button>
             }
           </div>
