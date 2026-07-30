@@ -130,7 +130,7 @@ export default function BookDetails() {
         <div className="md:col-span-2">
           <div className="flex items-start justify-between gap-4 mb-4">
             <div>
-              <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full bg-primary/10 text-primary font-semibold mb-3">
+              <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full bg-primary/10 font-semibold mb-3 text-[hsl(var(--primary))]">
                 {book.category}
               </span>
               <h1 className="text-2xl md:text-3xl font-black text-foreground leading-tight">{book.title}</h1>
