@@ -146,7 +146,7 @@ export default function BookDetails() {
           </div>
 
           <div className="flex items-center gap-2 text-muted-foreground mb-6">
-            <User className="w-4 h-4 opacity-100 text-[#272996]" />
+            <User className="w-4 h-4 opacity-100 text-[hsl(var(--primary))]" />
             <span className="text-sm font-medium">{book.author}</span>
           </div>
 
