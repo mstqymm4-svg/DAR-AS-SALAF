@@ -383,7 +383,7 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
               animate="center"
               exit="exit"
               transition={{
-                x: { type: "spring", stiffness: 350, damping: 38 },
+               y : { type: "spring", stiffness: 350, damping: 38 },
                 opacity: { duration: 0.25 },
               }}
               drag={canDrag ? "y" : false}
