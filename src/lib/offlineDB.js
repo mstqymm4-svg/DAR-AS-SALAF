@@ -80,13 +80,24 @@ function reqAsPromise(request) {
   });
 }
 
+// Wait for a transaction to finish. `transaction.done` is not supported in all
+// browsers (e.g. older Safari), so we listen to events instead.
+function txDone(store) {
+  const tx = store.transaction;
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = () => resolve();
+    tx.onerror    = () => reject(tx.error);
+    tx.onabort    = () => reject(tx.error || new Error("Transaction aborted"));
+  });
+}
+
 // ─── Books ────────────────────────────────────────────────────────────────────
 export async function cacheBooks(books) {
   const store = await tx("books", "readwrite");
   for (const book of books) {
     store.put({ ...book, _cached_at: Date.now() });
   }
-  await reqAsPromise(store.transaction.done);
+  await txDone(store);
 }
 
 export async function getCachedBooks() {
@@ -102,14 +113,14 @@ export async function getCachedBook(id) {
 export async function deleteCachedBook(id) {
   const store = await tx("books", "readwrite");
   store.delete(id);
-  await reqAsPromise(store.transaction.done);
+  await txDone(store);
 }
 
 // ─── PDFs ─────────────────────────────────────────────────────────────────────
 export async function cachePdf(url, buffer, bookId, title) {
   const store = await tx("pdfs", "readwrite");
   store.put({ url, buffer, bookId, title, size: buffer.byteLength, date: Date.now() });
-  await reqAsPromise(store.transaction.done);
+  await txDone(store);
 }
 
 export async function getCachedPdf(url) {
@@ -125,7 +136,7 @@ export async function getAllCachedPdfs() {
 export async function deleteCachedPdf(url) {
   const store = await tx("pdfs", "readwrite");
   store.delete(url);
-  await reqAsPromise(store.transaction.done);
+  await txDone(store);
 }
 
 // ─── Images ───────────────────────────────────────────────────────────────────
@@ -133,7 +144,7 @@ export async function cacheImage(url, blob) {
   if (!url || !blob) return;
   const store = await tx("images", "readwrite");
   store.put({ url, blob, size: blob.size, date: Date.now() });
-  await reqAsPromise(store.transaction.done);
+  await txDone(store);
 }
 
 export async function getCachedImage(url) {
@@ -156,13 +167,13 @@ export async function getCachedImageBlobUrl(url) {
 export async function saveLocalFavorite(bookId, userEmail) {
   const store = await tx("favorites", "readwrite");
   store.put({ bookId, userEmail, date: Date.now() });
-  await reqAsPromise(store.transaction.done);
+  await txDone(store);
 }
 
 export async function removeLocalFavorite(bookId) {
   const store = await tx("favorites", "readwrite");
   store.delete(bookId);
-  await reqAsPromise(store.transaction.done);
+  await txDone(store);
 }
 
 export async function getLocalFavorites() {
@@ -179,7 +190,7 @@ export async function getLocalFavoriteIds() {
 export async function addPendingOp(op) {
   const store = await tx("pending", "readwrite");
   store.put({ ...op, date: Date.now() });
-  await reqAsPromise(store.transaction.done);
+  await txDone(store);
 }
 
 export async function getPendingOps() {
@@ -190,7 +201,7 @@ export async function getPendingOps() {
 export async function deletePendingOp(id) {
   const store = await tx("pending", "readwrite");
   store.delete(id);
-  await reqAsPromise(store.transaction.done);
+  await txDone(store);
 }
 
 // ─── Videos ───────────────────────────────────────────────────────────────────
@@ -199,7 +210,7 @@ export async function cacheVideos(videos) {
   for (const v of videos) {
     store.put({ ...v, _cached_at: Date.now() });
   }
-  await reqAsPromise(store.transaction.done);
+  await txDone(store);
 }
 
 export async function getCachedVideos() {
@@ -210,7 +221,7 @@ export async function getCachedVideos() {
 export async function deleteCachedVideo(id) {
   const store = await tx("videos", "readwrite");
   store.delete(id);
-  await reqAsPromise(store.transaction.done);
+  await txDone(store);
 }
 
 // ─── Video Channels ───────────────────────────────────────────────────────────
@@ -219,7 +230,7 @@ export async function cacheVideoChannels(channels) {
   for (const c of channels) {
     store.put({ ...c, _cached_at: Date.now() });
   }
-  await reqAsPromise(store.transaction.done);
+  await txDone(store);
 }
 
 export async function getCachedVideoChannels() {
@@ -230,7 +241,7 @@ export async function getCachedVideoChannels() {
 export async function deleteCachedVideoChannel(id) {
   const store = await tx("channels", "readwrite");
   store.delete(id);
-  await reqAsPromise(store.transaction.done);
+  await txDone(store);
 }
 
 // ─── Social Channels ──────────────────────────────────────────────────────────
@@ -239,7 +250,7 @@ export async function cacheSocialChannels(channels) {
   for (const c of channels) {
     store.put({ ...c, _cached_at: Date.now() });
   }
-  await reqAsPromise(store.transaction.done);
+  await txDone(store);
 }
 
 export async function getCachedSocialChannels() {
@@ -250,7 +261,7 @@ export async function getCachedSocialChannels() {
 export async function deleteCachedSocialChannel(id) {
   const store = await tx("social", "readwrite");
   store.delete(id);
-  await reqAsPromise(store.transaction.done);
+  await txDone(store);
 }
 
 // ─── Settings ─────────────────────────────────────────────────────────────────
@@ -259,7 +270,7 @@ export async function cacheSettings(settings) {
   for (const s of settings) {
     store.put({ ...s, _cached_at: Date.now() });
   }
-  await reqAsPromise(store.transaction.done);
+  await txDone(store);
 }
 
 export async function getCachedSettings() {
@@ -283,7 +294,7 @@ export async function getMeta(key) {
 export async function setMeta(key, value) {
   const store = await tx("meta", "readwrite");
   store.put({ key, value });
-  await reqAsPromise(store.transaction.done);
+  await txDone(store);
 }
 
 // ─── Storage management ───────────────────────────────────────────────────────
@@ -292,7 +303,7 @@ export async function clearAllCache() {
   for (const s of stores) {
     const store = await tx(s, "readwrite");
     store.clear();
-    await reqAsPromise(store.transaction.done);
+    await txDone(store);
   }
 }
 
