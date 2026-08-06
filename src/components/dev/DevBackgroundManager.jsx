@@ -15,7 +15,7 @@ import {
   ImageIcon, Sparkles, Globe, Star
 } from "lucide-react";
 import { getSetting, setSettings } from "@/lib/settingsStore";
-import { base44 } from "@/api/base44Client";
+import { uploads } from "@/lib/uploadFacade";
 import HeroBanner from "@/components/HeroBanner";
 
 // ── Background types ──────────────────────────────────────────────────────────
@@ -168,7 +168,7 @@ export default function DevBackgroundManager() {
     setUploading(true); setUploadPct(0); setUploadLabel(label);
     const timer = setInterval(() => setUploadPct(p => Math.min(p + 7, 88)), 350);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await uploads.upload({ file, kind: file.type?.startsWith("video/") ? "videos" : "covers" });
       clearInterval(timer); setUploadPct(100);
       onDone(file_url);
       toast.success("✓ تم رفع الملف بنجاح");

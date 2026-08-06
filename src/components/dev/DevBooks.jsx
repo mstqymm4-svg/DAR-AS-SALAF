@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { entities } from "@/lib/dataSource";
+import { uploads } from "@/lib/uploadFacade";
 import { BookPlus, Pencil, Trash2, Upload, Check, Search, RefreshCw, Star, Eye, EyeOff, BookOpen, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,7 +41,7 @@ export default function DevBooks() {
 
   const loadBooks = async () => {
     setLoading(true);
-    const all = await base44.entities.Book.list('-created_date', 1000);
+    const all = await entities.Book.list('-created_date', 1000);
     setBooks(all);
     setLoading(false);
   };
@@ -63,11 +64,11 @@ export default function DevBooks() {
     setSaving(true);
     const data = { ...form, pages_count: form.pages_count ? Number(form.pages_count) : null, rating: Number(form.rating)||0 };
     if (editBook) {
-      const updated = await base44.entities.Book.update(editBook.id, data);
+      const updated = await entities.Book.update(editBook.id, data);
       setBooks(prev => prev.map(b => b.id === editBook.id ? { ...b, ...updated } : b));
       toast.success("تم التحديث ✓");
     } else {
-      const created = await base44.entities.Book.create(data);
+      const created = await entities.Book.create(data);
       setBooks(prev => [created, ...prev]);
       toast.success("تمت الإضافة ✓");
     }
@@ -78,7 +79,7 @@ export default function DevBooks() {
   const handleDelete = async (book) => {
     if (!confirm(`حذف "${book.title}"؟`)) return;
     try {
-      await base44.entities.Book.delete(book.id);
+      await entities.Book.delete(book.id);
       await deleteCachedBook(book.id).catch(() => {});
       setBooks(prev => prev.filter(b => b.id !== book.id));
       toast.success("تم الحذف");
@@ -91,7 +92,7 @@ export default function DevBooks() {
     const count = selected.length;
     if (!confirm(`حذف ${count} كتاب؟`)) return;
     const ids = [...selected];
-    const results = await Promise.allSettled(ids.map(id => base44.entities.Book.delete(id)));
+    const results = await Promise.allSettled(ids.map(id => entities.Book.delete(id)));
     const failed = results.filter(r => r.status === "rejected").length;
     const succeeded = count - failed;
     await Promise.all(ids.map(id => deleteCachedBook(id).catch(() => {})));
@@ -114,7 +115,7 @@ export default function DevBooks() {
     }
 
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await uploads.upload({ file, kind: field === "pdf_url" ? "pdfs" : "covers" });
       setForm(p => ({...p, [field]: file_url}));
       toast.success("تم رفع " + (isPdf ? "الملف" : "الغلاف") + " ✓");
     } catch (err) {

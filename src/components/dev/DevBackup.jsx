@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { entities } from "@/lib/dataSource";
 import { Archive, Download, Upload, RefreshCw, Check, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -28,7 +28,7 @@ export default function DevBackup() {
 
   const handleExportBooks = async () => {
     setExporting(true);
-    const books = await base44.entities.Book.list('-created_date', 1000);
+    const books = await entities.Book.list('-created_date', 1000);
     const data = JSON.stringify({ type: "books_backup", date: new Date().toISOString(), count: books.length, data: books }, null, 2);
     const blob = new Blob([data], { type: "application/json" });
     const a = document.createElement("a");
@@ -66,7 +66,7 @@ export default function DevBackup() {
         let count = 0;
         for (const book of books) {
           const { id, created_date, updated_date, created_by_id, ...data } = book;
-          await base44.entities.Book.create(data);
+          await entities.Book.create(data);
           count++;
         }
         toast.success(`تم استيراد ${count} كتاب ✓`);

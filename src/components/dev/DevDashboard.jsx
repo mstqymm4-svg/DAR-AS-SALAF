@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { entities } from "@/lib/dataSource";
 import { BookOpen, Users, HardDrive, Activity, TrendingUp, Star, FileText, Clock, Video, Heart, Tv } from "lucide-react";
 
 export default function DevDashboard() {
@@ -11,10 +11,10 @@ export default function DevDashboard() {
     (async () => {
       setLoading(true);
       const [books, videos, channels, favs] = await Promise.all([
-        base44.entities.Book.list('-created_date', 1000).catch(() => []),
-        base44.entities.Video.list('-created_date', 1000).catch(() => []),
-        base44.entities.VideoChannel.list('-created_date', 1000).catch(() => []),
-        base44.entities.Favorite.list('-created_date', 1000).catch(() => []),
+        entities.Book.list('-created_date', 1000).catch(() => []),
+        entities.Video.list('-created_date', 1000).catch(() => []),
+        entities.VideoChannel.list('-created_date', 1000).catch(() => []),
+        entities.Favorite.list('-created_date', 1000).catch(() => []),
       ]);
       const cats = new Set(books.map(b => b.category));
       setStats({
