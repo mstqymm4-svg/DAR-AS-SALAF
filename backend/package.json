@@ -12,6 +12,7 @@
     "prisma:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
     "create-admin": "ts-node src/scripts/createAdmin.ts",
+    "migrate-from-base44": "ts-node src/scripts/migrateFromBase44.ts",
     "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
