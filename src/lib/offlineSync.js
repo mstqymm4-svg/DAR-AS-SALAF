@@ -10,6 +10,7 @@
  */
 
 import { base44 } from "@/api/base44Client";
+import { entities } from "@/lib/dataSource";
 import * as db from "@/lib/offlineDB";
 import { getSetting } from "@/lib/settingsStore";
 
@@ -29,7 +30,7 @@ export function isOfflineModeEnabled() {
  * Returns { total, new, updated, imagesCached }
  */
 export async function syncBooks(onProgress) {
-  const allBooks = await base44.entities.Book.list('-created_date', 1000);
+  const allBooks = await entities.Book.list('-created_date', 1000);
   const cached = await db.getCachedBooks();
   const cachedMap = {};
   cached.forEach(b => { cachedMap[b.id] = b; });
@@ -138,7 +139,7 @@ export async function downloadMultiplePdfs(books, onProgress) {
 
 // ─── Videos sync ──────────────────────────────────────────────────────────────
 export async function syncVideos(onProgress) {
-  const allVideos = await base44.entities.Video.list('-created_date', 1000);
+  const allVideos = await entities.Video.list('-created_date', 1000);
   const visibleVideos = allVideos.filter(v => v.visible !== false);
   await db.cacheVideos(visibleVideos);
 
@@ -167,7 +168,7 @@ export async function syncVideos(onProgress) {
 export async function getVideos() {
   if (isOnline()) {
     try {
-      const videos = await base44.entities.Video.list('-sort_order', 1000);
+      const videos = await entities.Video.list('-sort_order', 1000);
       const visible = videos.filter(v => v.visible !== false);
       db.cacheVideos(visible).catch(() => {});
       return visible;
@@ -180,7 +181,7 @@ export async function getVideos() {
 
 // ─── Video Channels sync ──────────────────────────────────────────────────────
 export async function syncVideoChannels(onProgress) {
-  const allChannels = await base44.entities.VideoChannel.list('-sort_order', 1000);
+  const allChannels = await entities.VideoChannel.list('-sort_order', 1000);
   const visibleChannels = allChannels.filter(c => c.visible !== false);
   await db.cacheVideoChannels(visibleChannels);
 
@@ -209,7 +210,7 @@ export async function syncVideoChannels(onProgress) {
 export async function getVideoChannels() {
   if (isOnline()) {
     try {
-      const channels = await base44.entities.VideoChannel.list('-sort_order', 1000);
+      const channels = await entities.VideoChannel.list('-sort_order', 1000);
       const visible = channels.filter(c => c.visible !== false);
       db.cacheVideoChannels(visible).catch(() => {});
       return visible;
@@ -222,7 +223,7 @@ export async function getVideoChannels() {
 
 // ─── Social Channels sync ─────────────────────────────────────────────────────
 export async function syncSocialChannels() {
-  const allChannels = await base44.entities.SocialChannel.list('-sort_order', 1000);
+  const allChannels = await entities.SocialChannel.list('-sort_order', 1000);
   const visibleChannels = allChannels.filter(c => c.visible !== false);
   await db.cacheSocialChannels(visibleChannels);
 
@@ -250,7 +251,7 @@ export async function syncSocialChannels() {
 export async function getSocialChannels() {
   if (isOnline()) {
     try {
-      const channels = await base44.entities.SocialChannel.list('-sort_order', 1000);
+      const channels = await entities.SocialChannel.list('-sort_order', 1000);
       const visible = channels.filter(c => c.visible !== false);
       db.cacheSocialChannels(visible).catch(() => {});
       return visible;
@@ -263,7 +264,7 @@ export async function getSocialChannels() {
 
 // ─── Settings sync ────────────────────────────────────────────────────────────
 export async function syncSettings() {
-  const allSettings = await base44.entities.AppSettings.list('-created_date', 1000);
+  const allSettings = await entities.AppSettings.list('-created_date', 1000);
   await db.cacheSettings(allSettings);
   return { total: allSettings.length };
 }
@@ -274,7 +275,7 @@ export async function syncSettings() {
 export async function getSettingValue(key) {
   if (isOnline()) {
     try {
-      const settings = await base44.entities.AppSettings.filter({ setting_key: key });
+      const settings = await entities.AppSettings.filter({ setting_key: key });
       if (settings.length > 0) {
         db.cacheSettings(settings).catch(() => {});
         return settings[0].setting_value;
@@ -303,7 +304,7 @@ export async function checkForUpdates() {
   const cachedCount = await db.getMeta("booksCount") || 0;
 
   try {
-    const serverBooks = await base44.entities.Book.list('-created_date', 1);
+    const serverBooks = await entities.Book.list('-created_date', 1);
     const serverCount = serverBooks.length; // This returns array, not total count — approximation
     const cached = await db.getCachedBooks();
 
@@ -313,7 +314,7 @@ export async function checkForUpdates() {
       : [];
 
     // Fetch a fresh list to compare
-    const freshBooks = await base44.entities.Book.list('-created_date', 1000);
+    const freshBooks = await entities.Book.list('-created_date', 1000);
     const cachedMap = {};
     cached.forEach(b => { cachedMap[b.id] = b; });
 
@@ -344,16 +345,16 @@ export async function syncPendingFavorites(userEmail) {
   for (const op of ops) {
     if (op.type === "favorite_add") {
       try {
-        const existing = await base44.entities.Favorite.filter({ book_id: op.bookId, user_email: userEmail });
+        const existing = await entities.Favorite.filter({ book_id: op.bookId, user_email: userEmail });
         if (existing.length === 0) {
-          await base44.entities.Favorite.create({ book_id: op.bookId, user_email: userEmail });
+          await entities.Favorite.create({ book_id: op.bookId, user_email: userEmail });
         }
         await db.deletePendingOp(op.id);
       } catch(e) { /* retry next time */ }
     } else if (op.type === "favorite_remove") {
       try {
-        const existing = await base44.entities.Favorite.filter({ book_id: op.bookId, user_email: userEmail });
-        for (const f of existing) await base44.entities.Favorite.delete(f.id);
+        const existing = await entities.Favorite.filter({ book_id: op.bookId, user_email: userEmail });
+        for (const f of existing) await entities.Favorite.delete(f.id);
         await db.deletePendingOp(op.id);
       } catch(e) { /* retry next time */ }
     }
@@ -368,7 +369,7 @@ export async function syncPendingFavorites(userEmail) {
 export async function getBooks() {
   if (isOnline()) {
     try {
-      const books = await base44.entities.Book.list('-created_date', 1000);
+      const books = await entities.Book.list('-created_date', 1000);
       // Cache in background
       db.cacheBooks(books).catch(() => {});
       return books;
@@ -402,7 +403,7 @@ export async function getRecentBooks() {
 export async function getBook(id) {
   if (isOnline()) {
     try {
-      const books = await base44.entities.Book.filter({ id });
+      const books = await entities.Book.filter({ id });
       if (books.length > 0) {
         db.cacheBooks([books[0]]).catch(() => {});
         return books[0];
@@ -422,7 +423,7 @@ export async function getFavoriteIds(userEmail) {
 
   if (isOnline()) {
     try {
-      const favs = await base44.entities.Favorite.filter({ user_email: userEmail });
+      const favs = await entities.Favorite.filter({ user_email: userEmail });
       const ids = favs.map(f => f.book_id);
       // Sync to local cache
       const localFavs = await db.getLocalFavorites();
@@ -450,13 +451,13 @@ export async function toggleFavorite(bookId, userEmail) {
 
   if (isOnline()) {
     try {
-      const existing = await base44.entities.Favorite.filter({ book_id: bookId, user_email: userEmail });
+      const existing = await entities.Favorite.filter({ book_id: bookId, user_email: userEmail });
       if (existing.length > 0) {
-        await base44.entities.Favorite.delete(existing[0].id);
+        await entities.Favorite.delete(existing[0].id);
         await db.removeLocalFavorite(bookId);
         return false; // removed
       } else {
-        await base44.entities.Favorite.create({ book_id: bookId, user_email: userEmail });
+        await entities.Favorite.create({ book_id: bookId, user_email: userEmail });
         await db.saveLocalFavorite(bookId, userEmail);
         return true; // added
       }

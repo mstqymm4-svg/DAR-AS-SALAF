@@ -11,6 +11,7 @@
  */
 
 import { base44 } from "@/api/base44Client";
+import { entities } from "@/lib/dataSource";
 import * as db from "@/lib/offlineDB";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -122,7 +123,7 @@ async function reconcile({
 
 async function syncBooksIncremental() {
   return reconcile({
-    listFn: () => base44.entities.Book.list("-created_date", 1000),
+    listFn: () => entities.Book.list("-created_date", 1000),
     cacheFn: db.cacheBooks,
     getCachedFn: db.getCachedBooks,
     deleteFn: db.deleteCachedBook,
@@ -133,7 +134,7 @@ async function syncBooksIncremental() {
 
 async function syncVideosIncremental() {
   return reconcile({
-    listFn: () => base44.entities.Video.list("-sort_order", 1000),
+    listFn: () => entities.Video.list("-sort_order", 1000),
     cacheFn: db.cacheVideos,
     getCachedFn: db.getCachedVideos,
     deleteFn: db.deleteCachedVideo,
@@ -145,7 +146,7 @@ async function syncVideosIncremental() {
 
 async function syncVideoChannelsIncremental() {
   return reconcile({
-    listFn: () => base44.entities.VideoChannel.list("-sort_order", 1000),
+    listFn: () => entities.VideoChannel.list("-sort_order", 1000),
     cacheFn: db.cacheVideoChannels,
     getCachedFn: db.getCachedVideoChannels,
     deleteFn: db.deleteCachedVideoChannel,
@@ -156,7 +157,7 @@ async function syncVideoChannelsIncremental() {
 
 async function syncSocialChannelsIncremental() {
   return reconcile({
-    listFn: () => base44.entities.SocialChannel.list("-sort_order", 1000),
+    listFn: () => entities.SocialChannel.list("-sort_order", 1000),
     cacheFn: db.cacheSocialChannels,
     getCachedFn: db.getCachedSocialChannels,
     deleteFn: db.deleteCachedSocialChannel,
@@ -166,7 +167,7 @@ async function syncSocialChannelsIncremental() {
 }
 
 async function syncSettingsIncremental() {
-  const serverSettings = await base44.entities.AppSettings.list("-created_date", 1000);
+  const serverSettings = await entities.AppSettings.list("-created_date", 1000);
   await db.cacheSettings(serverSettings);
   return { total: serverSettings.length };
 }

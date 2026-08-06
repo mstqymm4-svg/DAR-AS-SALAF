@@ -7,7 +7,7 @@
  *  3. On DB save   → dispatch "app-settings-changed" event so all components re-render
  *  4. If DB fails  → localStorage backup keeps it working + retry
  */
-import { base44 } from "@/api/base44Client";
+import { entities } from "@/lib/dataSource";
 
 // ─── Default settings ─────────────────────────────────────────────────────────
 export const DEFAULT_SETTINGS = {
@@ -107,7 +107,7 @@ const ls = {
 // ─── DB helpers ───────────────────────────────────────────────────────────────
 async function dbGetAll() {
   try {
-    const rows = await base44.entities.AppSettings.list('-updated_date', 200);
+    const rows = await entities.AppSettings.list('-updated_date', 200);
     const map = {};
     rows.forEach(r => { if (r.setting_key) map[r.setting_key] = r.setting_value || ""; });
     return map;
@@ -116,15 +116,15 @@ async function dbGetAll() {
 
 async function dbSet(key, value, previousValue, userEmail) {
   try {
-    const rows = await base44.entities.AppSettings.filter({ setting_key: key });
+    const rows = await entities.AppSettings.filter({ setting_key: key });
     if (rows && rows.length > 0) {
-      await base44.entities.AppSettings.update(rows[0].id, {
+      await entities.AppSettings.update(rows[0].id, {
         setting_value: value,
         previous_value: previousValue,
         changed_by: userEmail || "admin",
       });
     } else {
-      await base44.entities.AppSettings.create({
+      await entities.AppSettings.create({
         setting_key: key,
         setting_value: value,
         setting_type: "text",
