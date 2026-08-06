@@ -169,6 +169,14 @@
     unicode-bidi: isolate;
   }
 
+  /* ── RTL-safe control rows ──
+     Ensure toggles/switches/action buttons never overflow their card and
+     keep consistent spacing from the text, regardless of direction. */
+  [dir="rtl"] .setting-row,
+  [dir="rtl"] [data-setting-row] {
+    direction: rtl;
+  }
+
   body {
     @apply bg-background text-foreground font-tajawal;
     font-family: var(--font-app, var(--font-tajawal));

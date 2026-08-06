@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { MobileSelect } from "@/components/ui/mobile-select";
+import SettingRow from "@/components/SettingRow";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Trash2 } from "lucide-react";
 import MobileHeader from "@/components/MobileHeader";
@@ -115,17 +116,17 @@ export default function Settings() {
             </div>
             <h2 className="text-base font-bold">{t.appearance}</h2>
           </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">{t.darkMode}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{t.darkModeSub}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Sun className="w-4 h-4 text-muted-foreground" />
-              <Switch checked={darkMode} onCheckedChange={handleToggleDark} />
-              <Moon className="w-4 h-4 text-muted-foreground" />
-            </div>
-          </div>
+          <SettingRow
+            title={t.darkMode}
+            description={t.darkModeSub}
+            control={
+              <div className="flex items-center gap-2">
+                <Sun className="w-4 h-4 text-muted-foreground" />
+                <Switch checked={darkMode} onCheckedChange={handleToggleDark} />
+                <Moon className="w-4 h-4 text-muted-foreground" />
+              </div>
+            }
+          />
         </motion.div>
 
         {/* Preferences */}
@@ -137,16 +138,12 @@ export default function Settings() {
             <h2 className="text-base font-bold">{t.preferences}</h2>
           </div>
           <div className="space-y-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">{t.notifications}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{t.notificationsSub}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Bell className="w-4 h-4 text-muted-foreground" />
-                <Switch checked={notifications} onCheckedChange={setNotifications} />
-              </div>
-            </div>
+            <SettingRow
+              icon={<Bell className="w-4 h-4" />}
+              title={t.notifications}
+              description={t.notificationsSub}
+              control={<Switch checked={notifications} onCheckedChange={setNotifications} />}
+            />
             <div>
               <Label>{t.preferredLang}</Label>
               <p className="text-xs text-muted-foreground mt-0.5 mb-1.5">{t.preferredLangSub}</p>
