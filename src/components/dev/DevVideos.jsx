@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { entities } from "@/lib/dataSource";
-import { uploads } from "@/lib/uploadFacade";
+import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,7 +45,7 @@ function ChannelsTab() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const data = await entities.VideoChannel.list("sort_order", 200);
+    const data = await base44.entities.VideoChannel.list("sort_order", 200);
     setChannels(data || []);
     setLoading(false);
   }, []);
@@ -57,10 +56,10 @@ function ChannelsTab() {
     if (!form.name) { toast.error("أدخل اسم القناة"); return; }
     try {
       if (editing) {
-        await entities.VideoChannel.update(editing.id, form);
+        await base44.entities.VideoChannel.update(editing.id, form);
         toast.success("تم تحديث القناة");
       } else {
-        await entities.VideoChannel.create(form);
+        await base44.entities.VideoChannel.create(form);
         toast.success("تمت إضافة القناة");
       }
       setShowForm(false); setEditing(null);
@@ -73,7 +72,7 @@ function ChannelsTab() {
     const file = e.target.files[0]; if (!file) return;
     setUploading(true);
     try {
-      const { file_url } = await uploads.upload({ file, kind: "covers" });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
       setForm((prev) => ({ ...prev, channel_logo: file_url }));
       toast.success("تم رفع الشعار");
     } catch (e) { toast.error("فشل الرفع"); }
@@ -165,7 +164,7 @@ function ChannelsTab() {
                 <p className="text-xs text-muted-foreground truncate">{ch.category} • {ch.youtube_url || "بدون رابط"}</p>
               </div>
               <Button size="icon" variant="ghost" className="h-8 w-8" onClick={async () => {
-                await entities.VideoChannel.update(ch.id, { visible: !ch.visible }); load();
+                await base44.entities.VideoChannel.update(ch.id, { visible: !ch.visible }); load();
               }}>{ch.visible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}</Button>
               <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => {
                 setEditing(ch);
@@ -174,7 +173,7 @@ function ChannelsTab() {
               }}><Pencil className="w-3.5 h-3.5" /></Button>
               <Button size="icon" variant="ghost" className="h-8 w-8" onClick={async () => {
                 if (!confirm(`حذف "${ch.name}"؟`)) return;
-                await entities.VideoChannel.delete(ch.id); toast.success("تم الحذف"); load();
+                await base44.entities.VideoChannel.delete(ch.id); toast.success("تم الحذف"); load();
               }}><Trash2 className="w-3.5 h-3.5 text-destructive" /></Button>
             </div>
           ))}
@@ -200,8 +199,8 @@ function VideosTab() {
   const load = useCallback(async () => {
     setLoading(true);
     const [vData, chData] = await Promise.all([
-      entities.Video.list("-created_date", 500),
-      entities.VideoChannel.list("sort_order", 200),
+      base44.entities.Video.list("-created_date", 500),
+      base44.entities.VideoChannel.list("sort_order", 200),
     ]);
     setVideos(vData || []);
     setChannels(chData || []);
@@ -222,10 +221,10 @@ function VideosTab() {
 };
     try {
       if (editing) {
-        await entities.Video.update(editing.id, data);
+        await base44.entities.Video.update(editing.id, data);
         toast.success("تم تحديث الفيديو");
       } else {
-        await entities.Video.create(data);
+        await base44.entities.Video.create(data);
         toast.success("تمت إضافة الفيديو");
       }
       setShowForm(false); setEditing(null);
@@ -374,10 +373,10 @@ function VideosTab() {
               </div>
               <div className="flex gap-1 mt-2">
                 <Button size="icon" variant="ghost" className="h-7 w-7" onClick={async () => {
-                  await entities.Video.update(v.id, { is_featured: !v.is_featured }); load();
+                  await base44.entities.Video.update(v.id, { is_featured: !v.is_featured }); load();
                 }}>{v.is_featured ? <Star className="w-3 h-3 text-amber-500 fill-amber-500" /> : <StarOff className="w-3 h-3" />}</Button>
                 <Button size="icon" variant="ghost" className="h-7 w-7" onClick={async () => {
-                  await entities.Video.update(v.id, { visible: !v.visible }); load();
+                  await base44.entities.Video.update(v.id, { visible: !v.visible }); load();
                 }}>{v.visible ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}</Button>
                 <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => {
                   setEditing(v);
@@ -386,7 +385,7 @@ function VideosTab() {
                 }}><Pencil className="w-3 h-3" /></Button>
                 <Button size="icon" variant="ghost" className="h-7 w-7" onClick={async () => {
                   if (!confirm(`حذف "${v.title}"؟`)) return;
-                  await entities.Video.delete(v.id); toast.success("تم الحذف"); load();
+                  await base44.entities.Video.delete(v.id); toast.success("تم الحذف"); load();
                 }}><Trash2 className="w-3 h-3 text-destructive" /></Button>
               </div>
             </div>

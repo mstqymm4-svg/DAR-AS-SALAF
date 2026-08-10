@@ -49,7 +49,6 @@ export default function Layout() {
       html.style.setProperty("--font-app", t.fontFamily);
       document.body.style.fontFamily = t.fontFamily;
     }
-    document.body.style.lineHeight = t.langCode === "ur" ? "2.8" : "";
   }, [t.dir, t.langCode, t.fontFamily]);
 
   return (
@@ -139,13 +138,13 @@ export default function Layout() {
          <div className="flex items-center justify-between">
            <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} {appNameOverride || t.appName}</p>
            <nav className="flex items-center gap-5">
-             <Link to="/about" className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">عن التطبيق 
+             <Link to="/about" className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">{t.aboutTitle} 
 
 
               </Link>
              <Link to="/contact" className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
                <MessageCircle className="w-3.5 h-3.5" />
-               تواصل معنا
+               {t.contactTitle}
              </Link>
            </nav>
          </div>

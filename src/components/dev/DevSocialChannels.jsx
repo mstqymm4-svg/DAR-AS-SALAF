@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { entities } from "@/lib/dataSource";
-import { uploads } from "@/lib/uploadFacade";
+import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,7 +42,7 @@ export default function DevSocialChannels() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const data = await entities.SocialChannel.list("sort_order", 200);
+    const data = await base44.entities.SocialChannel.list("sort_order", 200);
     setChannels(data || []);
     setLoading(false);
   }, []);
@@ -54,10 +53,10 @@ export default function DevSocialChannels() {
     if (!form.name || !form.url) { toast.error("أدخل الاسم والرابط"); return; }
     try {
       if (editing) {
-        await entities.SocialChannel.update(editing.id, form);
+        await base44.entities.SocialChannel.update(editing.id, form);
         toast.success("تم تحديث القناة");
       } else {
-        await entities.SocialChannel.create(form);
+        await base44.entities.SocialChannel.create(form);
         toast.success("تمت إضافة القناة");
       }
       setShowForm(false); setEditing(null);
@@ -77,13 +76,13 @@ export default function DevSocialChannels() {
   };
 
   const handleToggleVisible = async (ch) => {
-    await entities.SocialChannel.update(ch.id, { visible: !ch.visible });
+    await base44.entities.SocialChannel.update(ch.id, { visible: !ch.visible });
     load();
   };
 
   const handleDelete = async (ch) => {
     if (!confirm(`حذف "${ch.name}"؟`)) return;
-    await entities.SocialChannel.delete(ch.id);
+    await base44.entities.SocialChannel.delete(ch.id);
     toast.success("تم الحذف");
     load();
   };
@@ -92,7 +91,7 @@ export default function DevSocialChannels() {
     const file = e.target.files[0]; if (!file) return;
     setUploading(true);
     try {
-      const { file_url } = await uploads.upload({ file, kind: "covers" });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
       setForm((prev) => ({ ...prev, icon_url: file_url }));
       toast.success("تم رفع الصورة");
     } catch (e) { toast.error("فشل الرفع"); }
@@ -104,8 +103,8 @@ export default function DevSocialChannels() {
     const swapIdx = idx + dir;
     if (swapIdx < 0 || swapIdx >= channels.length) return;
     const swapCh = channels[swapIdx];
-    await entities.SocialChannel.update(ch.id, { sort_order: swapCh.sort_order });
-    await entities.SocialChannel.update(swapCh.id, { sort_order: ch.sort_order });
+    await base44.entities.SocialChannel.update(ch.id, { sort_order: swapCh.sort_order });
+    await base44.entities.SocialChannel.update(swapCh.id, { sort_order: ch.sort_order });
     load();
   };
 

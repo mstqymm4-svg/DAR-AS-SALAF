@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { uploads } from "@/lib/uploadFacade";
+import { base44 } from "@/api/base44Client";
 import { Image, Upload, Check, BookOpen, Youtube, ExternalLink, Sparkles, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,7 +32,7 @@ export default function DevBranding() {
   const handleLogoUpload = async (e) => {
     const file = e.target.files[0]; if (!file) return;
     setUploading(true);
-    const { file_url } = await uploads.upload({ file, kind: "covers" });
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
     setLogoUrl(file_url);
     setSetting("logo_url", file_url);
     setUploading(false);

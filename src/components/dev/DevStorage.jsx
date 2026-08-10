@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { entities } from "@/lib/dataSource";
+import { base44 } from "@/api/base44Client";
 import { HardDrive, BookOpen, Image, FileText, RefreshCw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -12,7 +12,7 @@ export default function DevStorage() {
 
   const loadData = async () => {
     setLoading(true);
-    const all = await entities.Book.list('-created_date', 1000);
+    const all = await base44.entities.Book.list('-created_date', 1000);
     setBooks(all);
     setLoading(false);
   };

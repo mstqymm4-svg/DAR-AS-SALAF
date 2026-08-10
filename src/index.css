@@ -184,13 +184,12 @@
     overscroll-behavior: none;
   }
 
-  /* Urdu Nastaliq needs extra line-height to prevent letter overlap */
-  :lang(ur) body,
-  [lang="ur"] body,
-  [lang="ur"] *,
-  [data-lang="ur"] * {
-    line-height: 2.4 !important;
-    font-family: var(--font-nastaliq) !important;
+  /* Urdu Nastaliq needs extra line-height for content readability, but the
+     previous blanket `*` rule broke compact UI chrome (bottom nav, badges,
+     buttons). Scope the larger line-height to main content only; the Nastaliq
+     font itself is applied via --font-app on <body> by the theme engine. */
+  [lang="ur"] main {
+    line-height: 2;
   }
 
   h1, h2 {

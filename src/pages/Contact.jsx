@@ -23,7 +23,7 @@ export default function Contact() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim() || !email.trim() || !message.trim()) {
-      toast.error("يرجى ملء جميع الحقول");
+      toast.error(t.contactFillAll);
       return;
     }
     setSending(true);
@@ -31,15 +31,15 @@ export default function Contact() {
       const { base44 } = await import("@/api/base44Client");
       await base44.integrations.Core.SendEmail({
         to: contactEmail,
-        subject: `رسالة من ${name} — ${email}`,
+        subject: `${name} — ${email}`,
         body: message,
       });
-      toast.success("تم إرسال رسالتك بنجاح");
+      toast.success(t.contactSent);
       setName("");
       setEmail("");
       setMessage("");
     } catch (err) {
-      toast.error("تعذر إرسال الرسالة، يرجى المحاولة لاحقاً");
+      toast.error(t.contactSendError);
     } finally {
       setSending(false);
     }
@@ -56,12 +56,11 @@ export default function Contact() {
           <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
             <MessageCircle className="w-6 h-6 text-primary" />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">تواصل معنا</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{t.contactTitle}</h1>
         </div>
 
         <p className="text-muted-foreground text-sm leading-relaxed mb-8">
-          نسعد بتواصلكم معنا لأي استفسار أو اقتراح أو ملاحظة. يمكنكم مراسلتنا عبر النموذج
-          أدناه أو من خلال وسائل التواصل المتاحة.
+          {t.contactIntro}
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
@@ -73,7 +72,7 @@ export default function Contact() {
               <Mail className="w-5 h-5 text-primary" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs text-muted-foreground">البريد الإلكتروني</p>
+              <p className="text-xs text-muted-foreground">{t.contactEmailLabel}</p>
               <p className="text-sm font-medium text-foreground truncate">{contactEmail}</p>
             </div>
           </a>
@@ -89,8 +88,8 @@ export default function Contact() {
                 <WhatsAppIcon className="w-5 h-5 text-green-600" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs text-muted-foreground">واتساب</p>
-                <p className="text-sm font-medium text-foreground">تواصل مباشر</p>
+                <p className="text-xs text-muted-foreground">{t.whatsappLabel}</p>
+                <p className="text-sm font-medium text-foreground">{t.directContact}</p>
               </div>
             </a>
           )}
@@ -100,16 +99,16 @@ export default function Contact() {
         <form onSubmit={handleSubmit} className="bg-card border border-border rounded-2xl p-5 sm:p-6 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium text-foreground mb-1.5 block">الاسم</label>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">{t.contactName}</label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="اسمك الكريم"
+                placeholder={t.contactNamePlaceholder}
                 className="w-full"
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-foreground mb-1.5 block">البريد الإلكتروني</label>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">{t.contactEmailLabel}</label>
               <Input
                 type="email"
                 value={email}
@@ -120,11 +119,11 @@ export default function Contact() {
             </div>
           </div>
           <div>
-            <label className="text-sm font-medium text-foreground mb-1.5 block">الرسالة</label>
+            <label className="text-sm font-medium text-foreground mb-1.5 block">{t.contactMessage}</label>
             <Textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="اكتب رسالتك هنا..."
+              placeholder={t.contactMessagePlaceholder}
               rows={5}
               className="w-full resize-none"
             />
@@ -133,21 +132,21 @@ export default function Contact() {
             {sending ? (
               <>
                 <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                جاري الإرسال...
+                {t.sending}
               </>
             ) : (
               <>
                 <Send className="w-4 h-4" />
-                إرسال الرسالة
+                {t.sendMessage}
               </>
             )}
           </Button>
         </form>
 
         <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
-          <p className="text-xs text-muted-foreground">سنرد على رسالتك في أقرب وقت ممكن</p>
+          <p className="text-xs text-muted-foreground">{t.contactReplySoon}</p>
           <Link to="/" className="text-sm text-primary font-medium hover:underline flex items-center gap-1">
-            العودة للرئيسية
+            {t.backToHome}
             <ArrowLeft className="w-3.5 h-3.5" />
           </Link>
         </div>

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { entities } from "@/lib/dataSource";
-import { uploads } from "@/lib/uploadFacade";
+import { base44 } from "@/api/base44Client";
 import { Plus, Pencil, Trash2, BookOpen, X, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,7 +49,7 @@ export default function Admin() {
   }, []);
 
   const loadBooks = async () => {
-    const allBooks = await entities.Book.list('-created_date', 1000);
+    const allBooks = await base44.entities.Book.list('-created_date', 1000);
     setBooks(allBooks);
     setLoading(false);
   };
@@ -91,10 +90,10 @@ export default function Admin() {
     };
 
     if (editingBook) {
-      await entities.Book.update(editingBook.id, data);
+      await base44.entities.Book.update(editingBook.id, data);
       toast.success("تم تحديث الكتاب");
     } else {
-      await entities.Book.create(data);
+      await base44.entities.Book.create(data);
       toast.success("تمت إضافة الكتاب");
     }
 
@@ -105,7 +104,7 @@ export default function Admin() {
 
   const handleDelete = async (book) => {
     if (!confirm(`هل أنت متأكد من حذف "${book.title}"؟`)) return;
-    await entities.Book.delete(book.id);
+    await base44.entities.Book.delete(book.id);
     toast.success("تم حذف الكتاب");
     loadBooks();
   };
@@ -117,7 +116,7 @@ export default function Admin() {
     if (type === "cover") setUploadingCover(true);
     else setUploadingPdf(true);
 
-    const { file_url } = await uploads.upload({ file, kind: type === "cover" ? "covers" : "pdfs" });
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
     
     if (type === "cover") {
       setForm((prev) => ({ ...prev, cover_image: file_url }));
