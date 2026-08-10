@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Loader2, AlertCircle } from "lucide-react";
 import { loadPdfDocument, extractPageText, clearPageCache } from "@/lib/pdfLoader";
-import PdfPageRenderer from "./PdfPageRenderer";
 import ViewerToolbar from "./ViewerToolbar";
 import { TocPanel, SearchPanel, GoToPanel } from "./ViewerPanels";
+import VerticalPageStream from "./VerticalPageStream";
 
 const BM_PREFIX = "dau_bm_";
 
@@ -38,8 +38,9 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
     try { return JSON.parse(localStorage.getItem(BM_PREFIX + bookId) || "[]"); } catch { return []; }
   });
 
-  const pageAreaRef = useRef(null);
-  const [dims, setDims] = useState({ w: 0, h: 0 });
+  const rootRef = useRef(null);
+  const scrollToPageRef = useRef(null);
+  const currentPageRef = useRef(1);
 
   const isRTL = language === "ar" || language === "ur";
 
@@ -62,19 +63,9 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
     return () => { cancelled = true; };
   }, [pdfUrl, bookId, title, reloadKey]);
 
-  // ── Measure page area ──
-  useEffect(() => {
-    const el = pageAreaRef.current;
-    if (!el) return;
-    const update = () => setDims({ w: el.clientWidth, h: el.clientHeight });
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  // ── Keep total pages in a ref for synchronous access ──
+  // ── Keep total pages & current page in refs for synchronous access ──
   useEffect(() => { totalPagesRef.current = totalPages; }, [totalPages]);
+  useEffect(() => { currentPageRef.current = currentPage; }, [currentPage]);
 
   // ── Persist bookmarks ──
   useEffect(() => {
@@ -84,11 +75,15 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
   // ── Navigation helpers ──
   const goToPage = useCallback((p) => {
     const tp = totalPagesRef.current || totalPages;
-    setCurrentPage(Math.max(1, Math.min(tp, Number(p) || 1)));
+    const n = Math.max(1, Math.min(tp, Number(p) || 1));
+    setCurrentPage(n);
+    scrollToPageRef.current?.(n);
   }, [totalPages]);
 
-  const nextPage = useCallback(() => setCurrentPage(p => Math.min(totalPages, p + 1)), [totalPages]);
-  const prevPage = useCallback(() => setCurrentPage(p => Math.max(1, p - 1)), []);
+  const nextPage = useCallback(() => goToPage((currentPageRef.current || 1) + 1), [goToPage]);
+  const prevPage = useCallback(() => goToPage((currentPageRef.current || 1) - 1), [goToPage]);
+
+  const onStreamPageChange = useCallback((n) => setCurrentPage(n), []);
   const zoomIn = useCallback(() => setZoom(z => Math.min(3, +(z + 0.2).toFixed(2))), []);
   const zoomOut = useCallback(() => setZoom(z => Math.max(0.5, +(z - 0.2).toFixed(2))), []);
 
@@ -100,7 +95,7 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
   }, []);
 
   const toggleFullscreen = useCallback(() => {
-    const el = pageAreaRef.current?.parentElement;
+    const el = rootRef.current;
     if (!document.fullscreenElement) (el || document.documentElement).requestFullscreen?.();
     else document.exitFullscreen?.();
   }, []);
@@ -110,14 +105,16 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
     const onKey = (e) => {
       if (showToc || showSearch || showGoTo) return;
       if (e.target?.tagName === "INPUT" || e.target?.tagName === "TEXTAREA") return;
-      if (e.key === "ArrowLeft") isRTL ? nextPage() : prevPage();
-      else if (e.key === "ArrowRight") isRTL ? prevPage() : nextPage();
+      if (e.key === "ArrowDown" || e.key === "PageDown") nextPage();
+      else if (e.key === "ArrowUp" || e.key === "PageUp") prevPage();
+      else if (e.key === "ArrowRight") nextPage();
+      else if (e.key === "ArrowLeft") prevPage();
       else if (e.key === "+" || e.key === "=") zoomIn();
       else if (e.key === "-") zoomOut();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [nextPage, prevPage, zoomIn, zoomOut, isRTL, showToc, showSearch, showGoTo]);
+  }, [nextPage, prevPage, zoomIn, zoomOut, showToc, showSearch, showGoTo]);
 
   // ── Search across all pages ──
   const runSearch = useCallback(async () => {
@@ -151,8 +148,6 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
   // ── Cleanup caches on unmount ──
   useEffect(() => () => clearPageCache(), []);
 
-  const darkFilter = darkMode ? "invert(0.92) hue-rotate(180deg)" : "none";
-
   if (loading) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center gap-4 bg-background">
@@ -175,19 +170,17 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
   }
 
   return (
-    <div className="relative w-full h-full flex flex-col bg-muted/30 select-none" onContextMenu={(e) => e.preventDefault()}>
-      {/* Page area */}
-      <div ref={pageAreaRef} className="flex-1 overflow-auto flex items-start justify-center p-2 sm:p-4">
-        <div style={{ filter: darkFilter }}>
-          <PdfPageRenderer
-            pdf={pdf}
-            pageNumber={currentPage}
-            zoom={zoom}
-            containerWidth={Math.max(0, dims.w - 24)}
-            containerHeight={Math.max(0, dims.h - 24)}
-          />
-        </div>
-      </div>
+    <div ref={rootRef} className="relative w-full h-full flex flex-col bg-muted/30 select-none" onContextMenu={(e) => e.preventDefault()}>
+      {/* Vertical continuous page stream */}
+      <VerticalPageStream
+        pdf={pdf}
+        totalPages={totalPages}
+        currentPage={currentPage}
+        zoom={zoom}
+        darkMode={darkMode}
+        onCurrentPageChange={onStreamPageChange}
+        scrollToPageRef={scrollToPageRef}
+      />
 
       {/* Panels */}
       <TocPanel

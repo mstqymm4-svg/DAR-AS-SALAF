@@ -28,7 +28,7 @@ export default function ViewerToolbar({
 }) {
   return (
     <div className={`shrink-0 border-t ${darkMode ? "border-gray-700 bg-gray-800" : "border-border bg-card"}`}>
-      <div className="flex items-center justify-center px-2 py-1.5 gap-0.5 sm:gap-1 overflow-x-auto scrollbar-hide">
+      <div dir="ltr" className="flex items-center justify-center px-2 py-1.5 gap-0.5 sm:gap-1 overflow-x-auto scrollbar-hide">
         <ToolBtn onClick={onZoomOut} dark={darkMode} title="تصغير">
           <ZoomOut className="w-4 h-4" />
         </ToolBtn>
@@ -42,13 +42,13 @@ export default function ViewerToolbar({
         <Divider dark={darkMode} />
 
         <ToolBtn onClick={onPrev} dark={darkMode} title="السابقة" disabled={currentPage <= 1}>
-          <ChevronRight className="w-4 h-4" />
+          <ChevronLeft className="w-4 h-4" />
         </ToolBtn>
         <span className={`text-xs font-mono font-bold px-2 shrink-0 ${darkMode ? "text-gray-300" : "text-foreground"}`}>
           {currentPage} / {totalPages}
         </span>
         <ToolBtn onClick={onNext} dark={darkMode} title="التالية" disabled={currentPage >= totalPages}>
-          <ChevronLeft className="w-4 h-4" />
+          <ChevronRight className="w-4 h-4" />
         </ToolBtn>
 
         <Divider dark={darkMode} />
