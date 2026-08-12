@@ -79,7 +79,7 @@ export default function Videos() {
     if (navigator.share) {
       try {await navigator.share({ title: video.title, url: video.youtube_url });} catch (e) {}
     } else {
-      try {await navigator.clipboard.writeText(video.youtube_url);toast.success("تم نسخ الرابط");} catch (e) {}
+      try {await navigator.clipboard.writeText(video.youtube_url);toast.success(t.linkCopied);} catch (e) {}
     }
   };
 
@@ -90,7 +90,7 @@ export default function Videos() {
       {!isOnline &&
       <div className="flex items-center gap-2 px-4 py-2 mx-4 mt-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-700 dark:text-orange-400 text-xs font-medium">
           <WifiOff className="w-4 h-4" />
-          تعمل بدون اتصال — البيانات محفوظة محلياً
+          {t.offlineMode}
         </div>
       }
       {/* Header */}
