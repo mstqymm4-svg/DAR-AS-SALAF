@@ -124,7 +124,8 @@ export const TRANSLATIONS = {
     contactSent: "تم إرسال رسالتك بنجاح",
     contactSendError: "تعذر إرسال الرسالة، يرجى المحاولة لاحقاً",
     backBtn: "رجوع",
-  },
+    aboutContactSub: "تعرّف على التطبيق والتواصل معنا",
+    },
   en: {
     dir: "ltr",
     appName: "Islamic Library",
@@ -247,7 +248,8 @@ export const TRANSLATIONS = {
     contactSent: "Your message was sent successfully",
     contactSendError: "Could not send the message, please try again later",
     backBtn: "Back",
-  },
+    aboutContactSub: "Learn about the app and contact us",
+    },
   fr: {
     dir: "ltr",
     appName: "Bibliothèque Islamique",
@@ -370,7 +372,8 @@ export const TRANSLATIONS = {
     contactSent: "Votre message a été envoyé avec succès",
     contactSendError: "Impossible d'envoyer le message, veuillez réessayer plus tard",
     backBtn: "Retour",
-  },
+    aboutContactSub: "Découvrez l'application et contactez-nous",
+    },
   ur: {
     dir: "rtl",
     appName: "اسلامی کتب خانہ",
@@ -493,7 +496,8 @@ export const TRANSLATIONS = {
     contactSent: "آپ کا پیغام کامیابی سے بھیج دیا گیا",
     contactSendError: "پیغام نہیں بھیجا جا سکا، براہ کرم بعد میں کوشش کریں",
     backBtn: "واپس",
-  },
+    aboutContactSub: "ایپ کے بارے میں جانیں اور ہم سے رابطہ کریں",
+    },
   hi: {
     dir: "ltr",
     appName: "इस्लामी पुस्तकालय",
@@ -616,7 +620,8 @@ export const TRANSLATIONS = {
     contactSent: "आपका संदेश सफलतापूर्वक भेज दिया गया",
     contactSendError: "संदेश नहीं भेजा जा सका, कृपया बाद में प्रयास करें",
     backBtn: "वापस",
-  },
+    aboutContactSub: "ऐप के बारे में जानें और हमसे संपर्क करें",
+    },
   tr: {
     dir: "ltr",
     appName: "İslami Kütüphane",
@@ -739,7 +744,8 @@ export const TRANSLATIONS = {
     contactSent: "Mesajınız başarıyla gönderildi",
     contactSendError: "Mesaj gönderilemedi, lütfen daha sonra tekrar deneyin",
     backBtn: "Geri",
-  },
+    aboutContactSub: "Uygulamayı öğrenin ve bizimle iletişime geçin",
+    },
 };
 
 const ls = {

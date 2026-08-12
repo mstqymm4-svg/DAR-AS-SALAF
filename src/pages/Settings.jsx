@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { User, Bell, Moon, Sun, Globe, LogOut, Save, Languages } from "lucide-react";
+import { User, Bell, Moon, Sun, Globe, LogOut, Save, Languages, Info, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,7 @@ import { Trash2 } from "lucide-react";
 import MobileHeader from "@/components/MobileHeader";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { useT, TRANSLATIONS } from "@/lib/i18n";
 import { setThemeMode, getThemeState, subscribeToTheme } from "@/lib/themeEngine";
 import { PageSpinner } from "@/components/Skeleton";
@@ -199,6 +200,25 @@ export default function Settings() {
           <Button onClick={handleSaveAppLang} className="gap-2 rounded-xl w-full">
             <Save className="w-4 h-4" /> {t.applyLang}
           </Button>
+        </motion.div>
+
+        {/* About & Contact */}
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.3 }} className="bg-card border border-border rounded-2xl p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Info className="w-4 h-4 text-primary" />
+            </div>
+            <h2 className="text-base font-bold">{t.aboutTitle} & {t.contactTitle}</h2>
+          </div>
+          <p className="text-sm text-muted-foreground mb-4">{t.aboutContactSub}</p>
+          <div className="grid grid-cols-2 gap-2">
+            <Link to="/about" className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary/10 text-primary font-medium text-sm hover:bg-primary/15 transition-colors">
+              <Info className="w-4 h-4" /> {t.aboutTitle}
+            </Link>
+            <Link to="/contact" className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary/10 text-primary font-medium text-sm hover:bg-primary/15 transition-colors">
+              <Mail className="w-4 h-4" /> {t.contactTitle}
+            </Link>
+          </div>
         </motion.div>
 
         {/* Logout */}

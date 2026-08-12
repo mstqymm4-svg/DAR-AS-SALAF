@@ -1,6 +1,6 @@
 import {
   ChevronLeft, ChevronRight, Bookmark, BookmarkCheck,
-  ZoomIn, ZoomOut, Moon, Sun, List, Maximize,
+  ZoomIn, ZoomOut, Moon, Sun, List, Maximize, ChevronDown,
   Search, ListOrdered,
 } from "lucide-react";
 
@@ -25,6 +25,7 @@ export default function ViewerToolbar({
   onToggleSearch,
   onToggleGoTo,
   onToggleFullscreen,
+  onHide,
 }) {
   return (
     <div className={`shrink-0 border-t ${darkMode ? "border-gray-700 bg-gray-800" : "border-border bg-card"}`}>
@@ -72,6 +73,10 @@ export default function ViewerToolbar({
         </ToolBtn>
         <ToolBtn onClick={onToggleFullscreen} dark={darkMode} title="ملء الشاشة">
           <Maximize className="w-4 h-4" />
+        </ToolBtn>
+        <Divider dark={darkMode} />
+        <ToolBtn onClick={onHide} dark={darkMode} title="إخفاء الشريط">
+          <ChevronDown className="w-4 h-4" />
         </ToolBtn>
       </div>
 

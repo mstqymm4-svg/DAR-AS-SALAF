@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, ChevronUp } from "lucide-react";
 import { loadPdfDocument, extractPageText, clearPageCache } from "@/lib/pdfLoader";
 import ViewerToolbar from "./ViewerToolbar";
 import { TocPanel, SearchPanel, GoToPanel } from "./ViewerPanels";
@@ -16,6 +16,7 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  const [showToolbar, setShowToolbar] = useState(true);
 
   // Panels
   const [showToc, setShowToc] = useState(false);
@@ -41,6 +42,10 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
   const rootRef = useRef(null);
   const scrollToPageRef = useRef(null);
   const currentPageRef = useRef(1);
+  const pinchRef = useRef({ dist: 0, zoom: 1 });
+  const zoomRef = useRef(zoom);
+  zoomRef.current = zoom;
+  const didRestoreRef = useRef(false);
 
   const isRTL = language === "ar" || language === "ur";
 
@@ -66,6 +71,24 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
   // ── Keep total pages & current page in refs for synchronous access ──
   useEffect(() => { totalPagesRef.current = totalPages; }, [totalPages]);
   useEffect(() => { currentPageRef.current = currentPage; }, [currentPage]);
+
+  // ── Save & restore last read page ──
+  useEffect(() => {
+    if (pdf && totalPages > 0 && !didRestoreRef.current) {
+      didRestoreRef.current = true;
+      const saved = Number(localStorage.getItem(`lastpage_${bookId}`));
+      if (saved && saved > 0 && saved <= totalPages) {
+        setCurrentPage(saved);
+        setTimeout(() => scrollToPageRef.current?.(saved), 120);
+      }
+    }
+  }, [pdf, totalPages, bookId]);
+
+  useEffect(() => {
+    if (totalPages > 0 && currentPage > 0) {
+      localStorage.setItem(`lastpage_${bookId}`, String(currentPage));
+    }
+  }, [currentPage, totalPages, bookId]);
 
   // ── Persist bookmarks ──
   useEffect(() => {
@@ -115,6 +138,35 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [nextPage, prevPage, zoomIn, zoomOut, showToc, showSearch, showGoTo]);
+
+  // ── Pinch-to-zoom (touch) ──
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const onStart = (e) => {
+      if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        pinchRef.current.dist = Math.hypot(dx, dy);
+        pinchRef.current.zoom = zoomRef.current;
+      }
+    };
+    const onMove = (e) => {
+      if (e.touches.length === 2 && pinchRef.current.dist > 0) {
+        e.preventDefault();
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const ratio = Math.hypot(dx, dy) / pinchRef.current.dist;
+        setZoom(Math.max(0.5, Math.min(4, +(pinchRef.current.zoom * ratio).toFixed(2))));
+      }
+    };
+    el.addEventListener("touchstart", onStart, { passive: false });
+    el.addEventListener("touchmove", onMove, { passive: false });
+    return () => {
+      el.removeEventListener("touchstart", onStart);
+      el.removeEventListener("touchmove", onMove);
+    };
+  }, []);
 
   // ── Search across all pages ──
   const runSearch = useCallback(async () => {
@@ -212,24 +264,35 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
       />
 
       {/* Toolbar */}
-      <ViewerToolbar
-        currentPage={currentPage}
-        totalPages={totalPages}
-        zoom={zoom}
-        darkMode={darkMode}
-        bookmarks={bookmarks}
-        hasOutline={outline.length > 0}
-        onNext={nextPage}
-        onPrev={prevPage}
-        onZoomIn={zoomIn}
-        onZoomOut={zoomOut}
-        onToggleDark={() => setDarkMode(d => !d)}
-        onToggleBookmark={toggleBookmark}
-        onToggleToc={() => setShowToc(s => !s)}
-        onToggleSearch={() => setShowSearch(s => !s)}
-        onToggleGoTo={openGoTo}
-        onToggleFullscreen={toggleFullscreen}
-      />
+      {showToolbar ? (
+        <ViewerToolbar
+          currentPage={currentPage}
+          totalPages={totalPages}
+          zoom={zoom}
+          darkMode={darkMode}
+          bookmarks={bookmarks}
+          hasOutline={outline.length > 0}
+          onNext={nextPage}
+          onPrev={prevPage}
+          onZoomIn={zoomIn}
+          onZoomOut={zoomOut}
+          onToggleDark={() => setDarkMode(d => !d)}
+          onToggleBookmark={toggleBookmark}
+          onToggleToc={() => setShowToc(s => !s)}
+          onToggleSearch={() => setShowSearch(s => !s)}
+          onToggleGoTo={openGoTo}
+          onToggleFullscreen={toggleFullscreen}
+          onHide={() => setShowToolbar(false)}
+        />
+      ) : (
+        <button
+          onClick={() => setShowToolbar(true)}
+          className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 w-9 h-9 rounded-full bg-card border border-border shadow-lg flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+          title="إظهار الشريط"
+        >
+          <ChevronUp className="w-4 h-4" />
+        </button>
+      )}
     </div>
   );
 }
