@@ -2,9 +2,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { BookOpen, X, Search, Loader2 } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 /** Side panel showing the PDF outline (table of contents). */
-export function TocPanel({ show, isRTL, darkMode, outline, onClose, onPageClick }) {
+export function TocPanel({ show, isRTL, darkMode, outline, totalPages, onClose, onPageClick }) {
+  const t = useT();
   return (
     <AnimatePresence>
       {show && (
@@ -25,7 +27,7 @@ export function TocPanel({ show, isRTL, darkMode, outline, onClose, onPageClick 
           >
             <div className={`p-3 border-b border-border flex items-center justify-between sticky top-0 z-10 ${darkMode ? "bg-gray-800" : "bg-card"}`}>
               <h3 className="text-sm font-bold flex items-center gap-2">
-                <BookOpen className="w-4 h-4" /> الفهرس
+                <BookOpen className="w-4 h-4" /> {t.idxTitle}
               </h3>
               <button onClick={onClose} className="p-1 rounded hover:bg-muted">
                 <X className="w-4 h-4" />
@@ -33,7 +35,18 @@ export function TocPanel({ show, isRTL, darkMode, outline, onClose, onPageClick 
             </div>
             <div className="p-2">
               {outline.length === 0 ? (
-                <p className="text-xs text-muted-foreground text-center py-4">لا يوجد فهرس</p>
+                <div>
+                  <p className="text-xs text-muted-foreground text-center py-2">{t.idxEmpty}</p>
+                  <p className="text-[11px] font-medium text-muted-foreground mb-2 px-1">{t.idxJumpPage}</p>
+                  <div className="grid grid-cols-5 gap-1.5 max-h-[55vh] overflow-y-auto pe-1">
+                    {Array.from({ length: totalPages || 0 }, (_, i) => i + 1).map((p) => (
+                      <button key={p} onClick={() => { onPageClick(p); onClose(); }}
+                        className="aspect-square rounded-lg bg-muted/60 hover:bg-primary hover:text-primary-foreground text-xs font-medium transition-colors">
+                        {p}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               ) : (
                 <OutlineTree items={outline} onPageClick={(p) => { onPageClick(p); onClose(); }} darkMode={darkMode} />
               )}
@@ -47,6 +60,7 @@ export function TocPanel({ show, isRTL, darkMode, outline, onClose, onPageClick 
 
 /** Search bar with results navigation. */
 export function SearchPanel({ show, query, setQuery, onSearch, searching, results, resultIdx, onNextResult, onClose }) {
+  const t = useT();
   return (
     <AnimatePresence>
       {show && (
@@ -60,7 +74,7 @@ export function SearchPanel({ show, query, setQuery, onSearch, searching, result
             <Input
               type="text"
               autoFocus
-              placeholder="ابحث في الكتاب..."
+              placeholder={t.idxSearchPlaceholder}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && onSearch()}
@@ -76,7 +90,7 @@ export function SearchPanel({ show, query, setQuery, onSearch, searching, result
           {results.length > 0 && (
             <div className="flex items-center justify-between mt-2 text-xs">
               <span className="text-muted-foreground">{resultIdx + 1} / {results.length}</span>
-              <button onClick={onNextResult} className="text-primary font-medium hover:underline">التالي ←</button>
+              <button onClick={onNextResult} className="text-primary font-medium hover:underline">{t.idxNext} ←</button>
             </div>
           )}
         </motion.div>
@@ -87,6 +101,7 @@ export function SearchPanel({ show, query, setQuery, onSearch, searching, result
 
 /** Modal for jumping to a specific page. */
 export function GoToPanel({ show, value, setValue, totalPages, onGo, onClose }) {
+  const t = useT();
   return (
     <AnimatePresence>
       {show && (
@@ -109,13 +124,13 @@ export function GoToPanel({ show, value, setValue, totalPages, onGo, onClose }) 
               autoFocus
               min="1"
               max={totalPages}
-              placeholder="رقم الصفحة"
+              placeholder={t.idxPageNumber}
               value={value}
               onChange={(e) => setValue(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && onGo()}
               className="w-32 text-center"
             />
-            <Button size="sm" onClick={onGo}>انتقال</Button>
+            <Button size="sm" onClick={onGo}>{t.idxGo}</Button>
           </motion.div>
         </motion.div>
       )}

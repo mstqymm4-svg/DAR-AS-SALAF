@@ -240,6 +240,7 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
         isRTL={isRTL}
         darkMode={darkMode}
         outline={outline}
+        totalPages={totalPages}
         onClose={() => setShowToc(false)}
         onPageClick={goToPage}
       />
