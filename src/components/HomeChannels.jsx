@@ -50,7 +50,7 @@ export default function HomeChannels() {
           
             <Link
             to="/videos"
-            className="group block bg-card border border-border overflow-hidden hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 hover:border-primary/30 transition-all duration-300 rounded-2xl text-xs">
+            className="group block bg-card border border-border overflow-hidden hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 hover:border-primary/30 transition-all duration-300 rounded-2xl text-5xl">
             
               <div className="aspect-video bg-gradient-to-br from-red-500/15 to-primary/5 flex items-center justify-center relative overflow-hidden">
                 {ch.channel_logo ?
