@@ -188,7 +188,7 @@ export default function BookDetails() {
           {book.pdf_url &&
           <div className="space-y-2">
             <Link to={`/read/${book.id}`} className="block">
-              <Button className="w-full gap-2 h-12 text-sm font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow rounded-[4px_20px_4px_4px]">
+              <Button className="w-full gap-2 h-12 text-sm font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow rounded-[4px_20px_4px_24px]">
                 <BookMarked className="w-4 h-4" />
                 {t.readBook}
               </Button>
