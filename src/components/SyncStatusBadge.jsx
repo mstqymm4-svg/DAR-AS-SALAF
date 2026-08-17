@@ -59,24 +59,24 @@ export default function SyncStatusBadge() {
 
   return (
     <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.8, y: 10 }}
-        className="fixed bottom-20 lg:bottom-4 left-4 z-40 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card/95 backdrop-blur-sm border border-border shadow-lg text-xs font-medium hidden">
-        
-        {status.isSyncing ?
-        <>
-            <RefreshCw className="w-3 h-3 animate-spin text-primary" />
-            <span className="text-foreground">جارٍ تحديث المحتوى…</span>
-          </> :
-        showSuccess ?
-        <>
-            <Check className="w-3 h-3 text-green-500" />
-            <span className="text-foreground">تم تحديث المحتوى</span>
-          </> :
-        null}
-      </motion.div>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
     </AnimatePresence>);
 
 }
