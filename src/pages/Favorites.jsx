@@ -94,7 +94,7 @@ export default function Favorites() {
         </button>
         <button
           onClick={() => setTab("videos")}
-          className={`px-4 py-2 text-sm font-medium transition-colors rounded-[20px_4px_20px_4px] ${tab === "videos" ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}>
+          className={`px-4 py-2 text-sm font-medium transition-colors rounded-[20px_20px_6px_4px] ${tab === "videos" ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}>
           
           {t.navVideos}
         </button>
