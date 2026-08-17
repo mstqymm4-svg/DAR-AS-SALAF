@@ -215,7 +215,7 @@ export default function Settings() {
             <Link to="/about" className="flex items-center justify-center gap-2 py-2.5 bg-primary/10 text-primary font-medium text-sm hover:bg-primary/15 transition-colors rounded-[4px_20px_4px_20px]">
               <Info className="w-4 h-4" /> {t.aboutTitle}
             </Link>
-            <Link to="/contact" className="flex items-center justify-center gap-2 py-2.5 bg-primary/10 text-primary font-medium text-sm hover:bg-primary/15 transition-colors rounded-[4px_6px_4px_4px]">
+            <Link to="/contact" className="flex items-center justify-center gap-2 py-2.5 bg-primary/10 text-primary font-medium text-sm hover:bg-primary/15 transition-colors rounded-[4px_20px_4px_20px]">
               <Mail className="w-4 h-4" /> {t.contactTitle}
             </Link>
           </div>
