@@ -103,7 +103,7 @@ export default function Settings() {
               <Label>{t.email}</Label>
               <Input value={user?.email || ""} disabled className="mt-1.5 opacity-60" />
             </div>
-            <Button onClick={handleSaveProfile} disabled={saving} className="gap-2 rounded-xl">
+            <Button onClick={handleSaveProfile} disabled={saving} className="gap-2 rounded-[4px_20px_4px_20px]">
               <Save className="w-4 h-4" /> {t.saveChanges}
             </Button>
           </div>
@@ -121,13 +121,13 @@ export default function Settings() {
             title={t.darkMode}
             description={t.darkModeSub}
             control={
-              <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
                 <Sun className="w-4 h-4 text-muted-foreground" />
                 <Switch checked={darkMode} onCheckedChange={handleToggleDark} />
                 <Moon className="w-4 h-4 text-muted-foreground" />
               </div>
-            }
-          />
+            } />
+          
         </motion.div>
 
         {/* Preferences */}
@@ -143,8 +143,8 @@ export default function Settings() {
               icon={<Bell className="w-4 h-4" />}
               title={t.notifications}
               description={t.notificationsSub}
-              control={<Switch checked={notifications} onCheckedChange={setNotifications} />}
-            />
+              control={<Switch checked={notifications} onCheckedChange={setNotifications} />} />
+            
             <div>
               <Label>{t.preferredLang}</Label>
               <p className="text-xs text-muted-foreground mt-0.5 mb-1.5">{t.preferredLangSub}</p>
@@ -154,17 +154,17 @@ export default function Settings() {
                 placeholder={t.preferredLangPlaceholder}
                 triggerClassName="mt-1.5"
                 options={[
-                  { value: "الكل", label: "الكل" },
-                  { value: "العربية", label: "العربية" },
-                  { value: "الإنجليزية", label: "الإنجليزية" },
-                  { value: "الفرنسية", label: "الفرنسية" },
-                  { value: "الأوردو", label: "الأوردو" },
-                  { value: "الهندية", label: "الهندية" },
-                  { value: "التركية", label: "التركية" },
-                ]}
-              />
+                { value: "الكل", label: "الكل" },
+                { value: "العربية", label: "العربية" },
+                { value: "الإنجليزية", label: "الإنجليزية" },
+                { value: "الفرنسية", label: "الفرنسية" },
+                { value: "الأوردو", label: "الأوردو" },
+                { value: "الهندية", label: "الهندية" },
+                { value: "التركية", label: "التركية" }]
+                } />
+              
             </div>
-            <Button onClick={handleSavePreferences} disabled={saving} className="gap-2 rounded-xl">
+            <Button onClick={handleSavePreferences} disabled={saving} className="gap-2 rounded-[4px_6px_4px_4px]">
               <Save className="w-4 h-4" /> {t.savePreferences}
             </Button>
           </div>
