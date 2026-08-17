@@ -112,7 +112,7 @@ export default function BookCard({ book, isFavorite, onToggleFavorite, index = 0
 
           <button
             onClick={handleRead}
-            className="w-full flex items-center justify-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground transition-all active:scale-95 shadow-sm hover:shadow-md hover:shadow-primary/20 mt-3 pb-2 pt-2 text-xs rounded-[4px_16px_4px_16px] [font-family:'Roboto_Mono',_monospace] font-normal">
+            className="w-full flex items-center justify-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground transition-all active:scale-95 shadow-sm hover:shadow-md hover:shadow-primary/20 mt-3 pb-2 pt-2 text-xs rounded-[4px_16px_4px_16px] font-bold [font-family:'Passion_One',_system-ui]">
             
             <BookMarked className="w-3.5 h-3.5" />
             {t.readBook}
