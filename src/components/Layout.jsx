@@ -121,7 +121,7 @@ export default function Layout() {
                 {isActive &&
                 <motion.div
                   layoutId="bottomNavIndicator"
-                  className="absolute -top-2 left-1/2 -translate-x-1/2 w-8 h-1 rounded-full bg-primary" />
+                  className="absolute -top-2 left-1/2 -translate-x-1/2 w-8 h-1 rounded-full bg-primary hidden" />
 
                 }
                 <item.icon className={`w-5 h-5 transition-transform ${isActive ? "fill-primary/20 scale-110" : ""}`} />
