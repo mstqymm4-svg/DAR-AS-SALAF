@@ -67,7 +67,7 @@ export default function SocialChannelsSection() {
               {ch.description && <p className="text-[10px] text-muted-foreground line-clamp-2 mb-3">{ch.description}</p>}
               <div className="flex gap-1.5 mt-auto w-full">
                 <a href={ch.url} target="_blank" rel="noopener noreferrer"
-                className="flex-1 flex items-center justify-center gap-1 bg-primary text-primary-foreground text-xs font-bold px-3 py-2 hover:bg-primary/90 transition-colors active:scale-95 shadow-sm rounded-[4px_20px_4px_6px]">
+                className="flex-1 flex items-center justify-center gap-1 bg-primary text-primary-foreground text-xs font-bold px-3 py-2 hover:bg-primary/90 transition-colors active:scale-95 shadow-sm rounded-[4px_20px_4px_16px]">
                   فتح <ExternalLink className="w-3 h-3" />
                 </a>
                 

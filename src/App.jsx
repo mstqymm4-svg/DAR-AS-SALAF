@@ -1,6 +1,6 @@
-import { Toaster } from "@/components/ui/toaster"
-import { QueryClientProvider } from '@tanstack/react-query'
-import { queryClientInstance } from '@/lib/query-client'
+import { Toaster } from "@/components/ui/toaster";
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClientInstance } from '@/lib/query-client';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
@@ -20,9 +20,9 @@ import InstallPrompt from './components/InstallPrompt';
 // Apply theme immediately from localStorage before any renders
 try {
   const lsMode = localStorage.getItem("devs_theme_mode") || (localStorage.getItem("devs_dark_mode") === "true" ? "dark" : "light");
-  if (lsMode === "dark") document.documentElement.classList.add("dark");
-  else if (lsMode === "light") document.documentElement.classList.remove("dark");
-} catch(e) {}
+  if (lsMode === "dark") document.documentElement.classList.add("dark");else
+  if (lsMode === "light") document.documentElement.classList.remove("dark");
+} catch (e) {}
 
 // Lazy-load pages for faster initial load
 const Home = lazy(() => import('./pages/Home'));
@@ -37,25 +37,25 @@ const Videos = lazy(() => import('./pages/Videos'));
 const About = lazy(() => import('./pages/About'));
 const Contact = lazy(() => import('./pages/Contact'));
 
-const PageLoader = () => (
-  <div className="flex items-center justify-center min-h-[60vh]">
+const PageLoader = () =>
+<div className="flex items-center justify-center min-h-[60vh] opacity-100">
     <LogoLoader size={72} />
-  </div>
-);
+  </div>;
+
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
 
   useEffect(() => {
-    base44.auth.me()
-      .then(u => {
-        loadSettings(u?.email);
-        if (u) syncPendingFavorites(u.email).catch(() => {});
-      })
-      .catch(() => {
-        loadSettings();
-      })
-      .finally(() => initThemeEngine());
+    base44.auth.me().
+    then((u) => {
+      loadSettings(u?.email);
+      if (u) syncPendingFavorites(u.email).catch(() => {});
+    }).
+    catch(() => {
+      loadSettings();
+    }).
+    finally(() => initThemeEngine());
   }, []);
 
   // Start the smart content sync engine (replaces manual fullSync calls)
@@ -69,8 +69,8 @@ const AuthenticatedApp = () => {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-background">
         <LogoLoader size={100} />
-      </div>
-    );
+      </div>);
+
   }
 
   if (authError) {
@@ -105,8 +105,8 @@ const AuthenticatedApp = () => {
         </Route>
       </Routes>
     </Suspense>
-    </>
-  );
+    </>);
+
 };
 
 function App() {
@@ -118,8 +118,8 @@ function App() {
         </Router>
         <Toaster />
       </QueryClientProvider>
-    </AuthProvider>
-  )
+    </AuthProvider>);
+
 }
 
-export default App
+export default App;
