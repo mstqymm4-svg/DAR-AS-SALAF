@@ -197,7 +197,7 @@ export default function Settings() {
               </label>
             )}
           </div>
-          <Button onClick={handleSaveAppLang} className="gap-2 rounded-xl w-full">
+          <Button onClick={handleSaveAppLang} className="gap-2 w-full rounded-[4px_20px_4px_20px]">
             <Save className="w-4 h-4" /> {t.applyLang}
           </Button>
         </motion.div>
