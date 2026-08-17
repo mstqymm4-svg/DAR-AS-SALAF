@@ -351,7 +351,7 @@ export default function HeroBanner() {
           </p>
           <Link
             to={s.btnLink || "/books"}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-accent text-accent-foreground font-bold text-sm hover:opacity-90 transition-opacity shadow-lg rounded-[4px_24px_4px_24px]">
+            className="inline-flex items-center gap-2 px-6 py-3 bg-accent text-accent-foreground font-bold text-sm hover:opacity-90 transition-opacity shadow-lg rounded-[4px_24px_4px_28px]">
             {s.btnText || t.browseLib}
             <ArrowLeft className="w-4 h-4" />
           </Link>
