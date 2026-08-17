@@ -164,7 +164,7 @@ export default function Settings() {
                 } />
               
             </div>
-            <Button onClick={handleSavePreferences} disabled={saving} className="gap-2 rounded-[4px_6px_4px_4px]">
+            <Button onClick={handleSavePreferences} disabled={saving} className="gap-2 rounded-[4px_20px_4px_20px]">
               <Save className="w-4 h-4" /> {t.savePreferences}
             </Button>
           </div>
