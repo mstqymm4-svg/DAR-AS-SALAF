@@ -24,7 +24,7 @@ export default function HomeChannels() {
   if (channels.length === 0) return null;
 
   return (
-    <section className="mb-12">
+    <section className="mb-12 hidden">
       <div className="flex items-center justify-between mb-5">
         <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
           <span className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center">
