@@ -73,7 +73,7 @@ export default function BookCard({ book, isFavorite, onToggleFavorite, index = 0
           }
 
           {book.pages_count > 0 &&
-          <div className="absolute bottom-3 right-3 rounded-full bg-black/50 backdrop-blur-md text-white text-[10px] font-medium flex items-center gap-1 border border-white/10 px-4">
+          <div className="absolute bottom-3 right-3 rounded-full bg-black/50 backdrop-blur-md text-white text-[10px] font-medium flex items-center gap-1 border border-white/10 px-1">
               <BookOpen className="w-2.5 h-2.5" />
               {book.pages_count} {t.pages}
             </div>
