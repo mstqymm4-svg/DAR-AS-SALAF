@@ -212,10 +212,10 @@ export default function Settings() {
           </div>
           <p className="text-sm text-muted-foreground mb-4">{t.aboutContactSub}</p>
           <div className="grid grid-cols-2 gap-2">
-            <Link to="/about" className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary/10 text-primary font-medium text-sm hover:bg-primary/15 transition-colors">
+            <Link to="/about" className="flex items-center justify-center gap-2 py-2.5 bg-primary/10 text-primary font-medium text-sm hover:bg-primary/15 transition-colors rounded-[4px_20px_4px_20px]">
               <Info className="w-4 h-4" /> {t.aboutTitle}
             </Link>
-            <Link to="/contact" className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary/10 text-primary font-medium text-sm hover:bg-primary/15 transition-colors">
+            <Link to="/contact" className="flex items-center justify-center gap-2 py-2.5 bg-primary/10 text-primary font-medium text-sm hover:bg-primary/15 transition-colors rounded-[4px_6px_4px_4px]">
               <Mail className="w-4 h-4" /> {t.contactTitle}
             </Link>
           </div>
