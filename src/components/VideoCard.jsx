@@ -47,7 +47,7 @@ export default function VideoCard({ video, isFavorite, onToggleFavorite, onPlay,
         {video.channel_name && <p className="text-xs text-muted-foreground mb-1">{video.channel_name}</p>}
         {video.description && <p className="text-[10px] text-muted-foreground line-clamp-2 mb-2">{video.description}</p>}
         <div className="flex items-center gap-1">
-          <Button size="sm" className="flex-1 h-8 text-xs gap-1 rounded-[4px_4px_4px_20px]" onClick={() => onPlay(video)}>
+          <Button size="sm" className="flex-1 h-8 text-xs gap-1 rounded-[4px_20px_4px_20px]" onClick={() => onPlay(video)}>
             <Play className="w-3.5 h-3.5" /> {t.play}
           </Button>
           <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => onToggleFavorite(video.id)}>
