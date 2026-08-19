@@ -81,7 +81,7 @@ export default function BookCard({ book, isFavorite, onToggleFavorite, index = 0
         </div>
 
         {/* Content */}
-        <div className="p-4">
+        <div className="py-4 px-4">
           <span className="inline-block text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold mb-2">
             {book.category}
           </span>
