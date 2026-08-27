@@ -27,6 +27,10 @@ if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations()
       .then((regs) => regs.forEach((r) => r.unregister()))
       .catch(() => {});
+    // Wipe any stale SW caches so old Vite chunks can't be served in dev
+    if (window.caches) {
+      caches.keys().then((keys) => keys.forEach((k) => caches.delete(k))).catch(() => {});
+    }
   } else {
     window.addEventListener("load", () => {
       navigator.serviceWorker.register("/sw.js").catch(() => {});

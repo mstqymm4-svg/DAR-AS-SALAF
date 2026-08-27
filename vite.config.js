@@ -9,7 +9,11 @@ export default defineConfig({
     dedupe: ['react', 'react-dom', 'react/jsx-runtime'],
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react/jsx-runtime'],
+    // Including react-dom/client (used by src/main.jsx) ensures the client API
+    // is pre-bundled alongside react/react-dom so they share one module
+    // instance — and any change here invalidates a stale .vite/deps cache
+    // (which otherwise causes "dispatcher.useState is null" hook errors).
+    include: ['react', 'react-dom', 'react-dom/client', 'react/jsx-runtime'],
   },
   plugins: [
     base44({
