@@ -12,7 +12,12 @@
          (which causes "dispatcher.useState is null" hook errors). In prod this
          is a no-op, so PWA offline caching is unaffected. -->
     <script>
-      if ("%MODE%" === "development" && "serviceWorker" in navigator) {
+      // Flush stale service workers + caches in DEV so a previously-registered
+      // worker can't keep cache-serving an old/broken Vite bundle (the root cause
+      // of "dispatcher.useState is null"). Runs if Vite flags dev OR if the page
+      // is detected to be a Vite dev build at runtime (loads /src/main.jsx).
+      function flushDevCaches() {
+        if (!("serviceWorker" in navigator)) return;
         navigator.serviceWorker.getRegistrations()
           .then(function (regs) { regs.forEach(function (r) { r.unregister(); }); })
           .catch(function () {});
@@ -20,6 +25,15 @@
           caches.keys().then(function (keys) { keys.forEach(function (k) { caches.delete(k); }); }).catch(function () {});
         }
       }
+      var isDevFlag = "%MODE%" === "development";
+      if (isDevFlag) { flushDevCaches(); }
+      // Runtime fallback: if this is a Vite dev build (entry is /src/main.jsx),
+      // clear as well — covers cases where %MODE% isn't interpolated.
+      window.addEventListener("DOMContentLoaded", function () {
+        if (isDevFlag) return; // already cleared
+        var entry = document.querySelector('script[src="/src/main.jsx"]');
+        if (entry) { flushDevCaches(); }
+      });
     </script>
 
     <!-- PWA / Mobile Web App -->
