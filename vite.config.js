@@ -15,6 +15,15 @@ export default defineConfig({
     // (which otherwise causes "dispatcher.useState is null" hook errors).
     include: ['react', 'react-dom', 'react-dom/client', 'react/jsx-runtime'],
   },
+  server: {
+    // Never let the browser cache dev JS/CSS. A stale cached Vite chunk or
+    // /src module (served with an outdated source map) is what produces the
+    // "dispatcher.useState is null" error in the preview. no-store forces a
+    // fresh fetch on every reload. (Dev-server only; prod serves hashed assets.)
+    headers: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate',
+    },
+  },
   plugins: [
     base44({
       // Support for legacy code that imports the base44 SDK with @/integrations, @/entities, etc.
