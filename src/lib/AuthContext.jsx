@@ -13,10 +13,6 @@ export const AuthProvider = ({ children }) => {
   const [authError, setAuthError] = useState(null);
   const [appPublicSettings, setAppPublicSettings] = useState(null); // Contains only { id, public_settings }
 
-  useEffect(() => {
-    checkAppState();
-  }, []);
-
   const checkAppState = async () => {
     try {
       setIsLoadingPublicSettings(true);
@@ -127,6 +123,10 @@ export const AuthProvider = ({ children }) => {
     // Use the SDK's redirectToLogin method
     base44.auth.redirectToLogin(window.location.href);
   };
+
+  useEffect(() => {
+    checkAppState();
+  }, []);
 
   return (
     <AuthContext.Provider value={{ 
