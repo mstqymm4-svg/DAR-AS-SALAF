@@ -75,7 +75,7 @@ export default function Layout() {
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    className={`relative flex items-center gap-2 rounded-xl text-sm font-medium transition-all duration-200 pt-2 pr-4 pb-2 pl-4 ${
                     isActive ?
                     "bg-primary text-primary-foreground shadow-md shadow-primary/20" :
                     "text-muted-foreground hover:text-foreground hover:bg-muted"}`
