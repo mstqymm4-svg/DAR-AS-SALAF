@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
-  BookOpen, Globe, Smartphone, Heart, ArrowLeft, Info, Sparkles,
+  BookOpen, Globe, Smartphone, Heart, ArrowLeft, Sparkles,
   Users, Languages, ShieldCheck, Library, WifiOff, Star, Download,
 } from "lucide-react";
 import { useT } from "@/lib/i18n";
@@ -10,22 +10,28 @@ import { getSetting } from "@/lib/settingsStore";
 export default function About() {
   const t = useT();
   const appName = getSetting("app_name") || t.appName || "دار العلوم";
-  const appSubtitle = getSetting("app_subtitle") || "";
+  const appSubtitle = getSetting("app_subtitle") || t.appSubtitle;
   const logoUrl = getSetting("logo_url");
 
   const features = [
     { icon: BookOpen, title: t.feat1Title, desc: t.feat1Desc, color: "text-primary" },
     { icon: Globe, title: t.feat2Title, desc: t.feat2Desc, color: "text-accent" },
     { icon: Smartphone, title: t.feat3Title, desc: t.feat3Desc, color: "text-primary" },
-    { icon: WifiOff, title: "يعمل دون إنترنت", desc: "اقرأ الكتب وشاهد الفيديوهات دون اتصال بالشبكة.", color: "text-accent" },
-    { icon: Languages, title: "لغات متعددة", desc: "واجهة وترجمات تدعم العربية والأردية والإنجليزية والفرنسية والهندية.", color: "text-primary" },
-    { icon: Download, title: "تحميل وتفضيلات", desc: "احفظ كتبك وفضّل مقاطعك للرجوع إليها بسرعة.", color: "text-accent" },
+    { icon: WifiOff, title: t.featOfflineTitle, desc: t.featOfflineDesc, color: "text-accent" },
+    { icon: Languages, title: t.featLangsTitle, desc: t.featLangsDesc, color: "text-primary" },
+    { icon: Download, title: t.featDownloadTitle, desc: t.featDownloadDesc, color: "text-accent" },
+  ];
+
+  const stats = [
+    { icon: Library, value: "+500", label: t.statBooks },
+    { icon: BookOpen, value: "+50", label: t.statVideos },
+    { icon: Globe, value: "5", label: t.statLangs },
   ];
 
   const values = [
-    { icon: ShieldCheck, title: "الأصالة", desc: "مصادر موثوقة من القرآن والسنة وعلومها." },
-    { icon: Star, title: "الجودة", desc: "تجربة قراءة احترافية وسلسة على كل الأجهزة." },
-    { icon: Users, title: "الوصول للجميع", desc: "محتوى مجاني ومفتوح لكل طالب علم." },
+    { icon: ShieldCheck, title: t.valueAuthenticity, desc: t.valueAuthenticityDesc },
+    { icon: Star, title: t.valueQuality, desc: t.valueQualityDesc },
+    { icon: Users, title: t.valueAccess, desc: t.valueAccessDesc },
   ];
 
   return (
@@ -39,7 +45,7 @@ export default function About() {
               <img src={logoUrl} alt={appName} className="w-20 h-20 object-contain rounded-2xl shadow-md" />
             )}
             <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-              <Sparkles className="w-3.5 h-3.5" /> مكتبة إسلامية رقمية مستقلة
+              <Sparkles className="w-3.5 h-3.5" /> {t.aboutEyebrow}
             </div>
             <h1 className="text-3xl sm:text-4xl font-black text-foreground">{t.aboutTitle}</h1>
             {appSubtitle && <p className="text-sm sm:text-base text-muted-foreground max-w-xl">{appSubtitle}</p>}
@@ -56,11 +62,7 @@ export default function About() {
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3 mt-8">
-          {[
-            { icon: Library, value: "+500", label: "كتاب" },
-            { icon: BookOpen, value: "+50", label: "فيديو" },
-            { icon: Globe, value: "5", label: "لغات" },
-          ].map((s, i) => (
+          {stats.map((s, i) => (
             <div key={i} className="bg-card border border-border rounded-2xl p-4 text-center">
               <s.icon className="w-6 h-6 text-primary mx-auto mb-1.5" />
               <p className="text-xl font-black text-foreground">{s.value}</p>
@@ -71,7 +73,7 @@ export default function About() {
 
         {/* Features */}
         <h2 className="text-lg font-bold mt-10 mb-4 flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-primary" /> المزايا
+          <Sparkles className="w-5 h-5 text-primary" /> {t.aboutFeatures}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {features.map((f, i) => (
@@ -85,7 +87,7 @@ export default function About() {
 
         {/* Values */}
         <h2 className="text-lg font-bold mt-10 mb-4 flex items-center gap-2">
-          <ShieldCheck className="w-5 h-5 text-primary" /> قيمنا
+          <ShieldCheck className="w-5 h-5 text-primary" /> {t.aboutValues}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {values.map((v, i) => (

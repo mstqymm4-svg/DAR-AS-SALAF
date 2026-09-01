@@ -1,7 +1,7 @@
 import {
   ChevronLeft, ChevronRight, Bookmark, BookmarkCheck,
   ZoomIn, ZoomOut, Moon, Sun, List, Maximize, ChevronDown,
-  Search, ListOrdered,
+  Search, ListOrdered, Download, Share2,
 } from "lucide-react";
 
 /**
@@ -25,6 +25,8 @@ export default function ViewerToolbar({
   onToggleSearch,
   onToggleGoTo,
   onToggleFullscreen,
+  onDownload,
+  onShare,
   onHide,
 }) {
   return (
@@ -73,6 +75,12 @@ export default function ViewerToolbar({
         </ToolBtn>
         <ToolBtn onClick={onToggleFullscreen} dark={darkMode} title="ملء الشاشة">
           <Maximize className="w-4 h-4" />
+        </ToolBtn>
+        <ToolBtn onClick={onDownload} dark={darkMode} title="تحميل">
+          <Download className="w-4 h-4" />
+        </ToolBtn>
+        <ToolBtn onClick={onShare} dark={darkMode} title="مشاركة">
+          <Share2 className="w-4 h-4" />
         </ToolBtn>
         <Divider dark={darkMode} />
         <ToolBtn onClick={onHide} dark={darkMode} title="إخفاء الشريط">

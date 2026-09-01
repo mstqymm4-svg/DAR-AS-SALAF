@@ -52,10 +52,10 @@ export default function Contact() {
   const channels = [
     { show: !!contactEmail, href: `mailto:${contactEmail}`, icon: Mail, color: "text-primary", bg: "bg-primary/10", label: t.contactEmailLabel, value: contactEmail },
     { show: !!whatsappUrl, href: whatsappUrl, icon: WhatsAppIcon, color: "text-green-600", bg: "bg-green-500/10", label: t.whatsappLabel, value: t.directContact, ext: true },
-    { show: !!telegramUrl, href: telegramUrl, icon: Send, color: "text-sky-600", bg: "bg-sky-500/10", label: "تيليجرام", value: "تواصل مباشر", ext: true },
-    { show: !!instagramUrl, href: instagramUrl, icon: Instagram, color: "text-pink-600", bg: "bg-pink-500/10", label: "إنستغرام", value: "تابعنا", ext: true },
-    { show: !!contactPhone, href: `tel:${contactPhone}`, icon: Phone, color: "text-primary", bg: "bg-primary/10", label: "الهاتف", value: contactPhone },
-    { show: !!contactAddress, href: null, icon: MapPin, color: "text-primary", bg: "bg-primary/10", label: "العنوان", value: contactAddress },
+    { show: !!telegramUrl, href: telegramUrl, icon: Send, color: "text-sky-600", bg: "bg-sky-500/10", label: t.contactTelegram, value: t.contactDirectMsg, ext: true },
+    { show: !!instagramUrl, href: instagramUrl, icon: Instagram, color: "text-pink-600", bg: "bg-pink-500/10", label: t.contactInstagram, value: t.contactFollowUs, ext: true },
+    { show: !!contactPhone, href: `tel:${contactPhone}`, icon: Phone, color: "text-primary", bg: "bg-primary/10", label: t.contactPhone, value: contactPhone },
+    { show: !!contactAddress, href: null, icon: MapPin, color: "text-primary", bg: "bg-primary/10", label: t.contactAddress, value: contactAddress },
   ].filter((c) => c.show);
 
   return (

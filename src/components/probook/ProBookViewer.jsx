@@ -123,6 +123,19 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
     else document.exitFullscreen?.();
   }, []);
 
+  const handleDownload = useCallback(() => {
+    if (pdfUrl) window.open(pdfUrl, "_blank");
+  }, [pdfUrl]);
+
+  const handleShare = useCallback(async () => {
+    if (!pdfUrl) return;
+    if (navigator.share) {
+      try { await navigator.share({ title: title || "Book", url: pdfUrl }); } catch {}
+    } else {
+      try { await navigator.clipboard.writeText(pdfUrl); } catch {}
+    }
+  }, [pdfUrl, title]);
+
   // ── Keyboard navigation ──
   useEffect(() => {
     const onKey = (e) => {
@@ -283,6 +296,8 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
           onToggleSearch={() => setShowSearch(s => !s)}
           onToggleGoTo={openGoTo}
           onToggleFullscreen={toggleFullscreen}
+          onDownload={handleDownload}
+          onShare={handleShare}
           onHide={() => setShowToolbar(false)}
         />
       ) : (

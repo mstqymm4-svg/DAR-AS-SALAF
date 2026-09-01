@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Maximize, Minimize, Play, Pause, RotateCcw, Volume2, VolumeX, Share2 } from "lucide-react";
+import { X, Maximize, Minimize, Play, Pause, RotateCcw, Volume2, VolumeX, Share2, Rewind, FastForward } from "lucide-react";
 import { extractYoutubeId } from "@/components/dev/DevVideos";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
@@ -28,6 +28,7 @@ export default function VideoPlayer({ video, onClose }) {
   const [showControls, setShowControls] = useState(true);
   const [ready, setReady] = useState(false);
   const [restoreTime, setRestoreTime] = useState(0);
+  const [rate, setRate] = useState(1);
 
   const videoId = extractYoutubeId(video?.youtube_url);
 
@@ -144,6 +145,20 @@ export default function VideoPlayer({ video, onClose }) {
     if (!player) return;
     player.seekTo(0, true);
     player.playVideo();
+  };
+
+  const skip = (sec) => {
+    if (!player) return;
+    const cur = (player.getCurrentTime?.() || 0) + sec;
+    player.seekTo(Math.max(0, cur), true);
+  };
+
+  const cycleSpeed = () => {
+    if (!player?.setPlaybackRate) return;
+    const steps = [0.75, 1, 1.25, 1.5, 2];
+    const next = steps[(steps.indexOf(rate) + 1) % steps.length];
+    setRate(next);
+    player.setPlaybackRate(next);
   };
 
   const handleSeek = (e) => {
@@ -300,6 +315,15 @@ export default function VideoPlayer({ video, onClose }) {
                   </button>
                   <button onClick={handleRestart} className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors" title={t.restartPlayback}>
                     <RotateCcw className="w-5 h-5" />
+                  </button>
+                  <button onClick={() => skip(-10)} className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors" title="-10s">
+                    <Rewind className="w-5 h-5" />
+                  </button>
+                  <button onClick={() => skip(10)} className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors" title="+10s">
+                    <FastForward className="w-5 h-5" />
+                  </button>
+                  <button onClick={cycleSpeed} className="h-10 px-2.5 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-xs font-bold transition-colors" title={t.speedLabel || "Speed"}>
+                    {rate}x
                   </button>
                   <button onClick={toggleMute} className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors">
                     {muted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
