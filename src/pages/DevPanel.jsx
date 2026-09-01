@@ -5,7 +5,7 @@ import {
   LayoutDashboard, BookOpen, Type, Palette, Layers, Sliders,
   Navigation, Image, Users, HardDrive, Archive, Activity,
   KeyRound, Zap, Settings, ChevronRight, Moon, Sun, Check, Menu, X,
-  ImagePlay, GalleryHorizontal, Paintbrush, Share2, Video, WifiOff, Wrench, FlaskConical
+  ImagePlay, GalleryHorizontal, Paintbrush, Share2, Video, WifiOff, Wrench, FlaskConical, MessageCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +35,7 @@ import DevBackgroundManager from "@/components/dev/DevBackgroundManager";
 import DevTheme from "@/components/dev/DevTheme";
 import DevSocialChannels from "@/components/dev/DevSocialChannels";
 import DevVideos from "@/components/dev/DevVideos";
+import DevContactSettings from "@/components/dev/DevContactSettings";
 import DevOffline from "@/components/dev/DevOffline";
 import DevMaintenance from "@/components/dev/DevMaintenance";
 import DevTesting from "@/components/dev/DevTesting";
@@ -71,6 +72,7 @@ const TABS = [
   { id: "bg_library",   label: "مكتبة الخلفيات",     icon: GalleryHorizontal },
   { id: "social",        label: "قنوات التواصل",        icon: Share2 },
   { id: "videos",        label: "إدارة الفيديوهات",      icon: Video },
+  { id: "contact",       label: "إدارة صفحة التواصل",   icon: MessageCircle },
   { id: "offline",       label: "إدارة وضع عدم الاتصال",  icon: WifiOff },
   { id: "maintenance",   label: "أدوات الصيانة",           icon: Wrench },
   { id: "testing",       label: "أدوات الاختبار",          icon: FlaskConical },
@@ -153,6 +155,7 @@ export default function DevPanel() {
     bg_library:   DevBackgroundLibrary,
     social:        DevSocialChannels,
     videos:        DevVideos,
+    contact:       DevContactSettings,
     offline:       DevOffline,
     maintenance:   DevMaintenance,
     testing:       DevTesting,

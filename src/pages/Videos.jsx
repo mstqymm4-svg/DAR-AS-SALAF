@@ -104,6 +104,30 @@ export default function Videos() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 space-y-8">
+        {/* Channels — top, horizontal */}
+        {channels.length > 0 && (
+          <section>
+            <h2 className="text-sm font-bold mb-2 flex items-center gap-2 text-muted-foreground">
+              <Tv className="w-4 h-4 text-primary" /> {t.videoChannels}
+            </h2>
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+              {channels.map((ch) => (
+                <a key={ch.id} href={ch.youtube_url} target="_blank" rel="noopener noreferrer"
+                  className="shrink-0 w-28 bg-card border border-border rounded-2xl p-3 flex flex-col items-center text-center hover:shadow-md hover:border-primary/40 transition-all">
+                  <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center mb-2 overflow-hidden">
+                    {ch.channel_logo ? (
+                      <SmartImage src={ch.channel_logo} alt={ch.name} className="w-full h-full object-cover" fallback={() => <Tv className="w-6 h-6 text-red-500" />} />
+                    ) : (
+                      <Tv className="w-6 h-6 text-red-500" />
+                    )}
+                  </div>
+                  <p className="text-xs font-bold truncate w-full">{ch.name}</p>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Search + Categories */}
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
@@ -184,28 +208,8 @@ export default function Videos() {
           }
         </section>
 
-        {/* Channels */}
-        {channels.length > 0 &&
-        <section>
-            <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
-              <Tv className="w-5 h-5 text-primary" /> {t.videoChannels}
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              {channels.map((ch) =>
-            <a key={ch.id} href={ch.youtube_url} target="_blank" rel="noopener noreferrer"
-            className="bg-card border border-border rounded-xl p-4 flex flex-col items-center text-center hover:shadow-md transition-shadow">
-                  <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center mb-2 overflow-hidden">
-                    {ch.channel_logo ?
-                <SmartImage src={ch.channel_logo} alt={ch.name} className="w-full h-full rounded-xl object-cover" fallback={() => <Tv className="w-6 h-6 text-red-500" />} /> :
-                <Tv className="w-6 h-6 text-red-500" />}
-                  </div>
-                  <p className="text-sm font-bold truncate w-full">{ch.name}</p>
-                  {ch.description && <p className="text-[10px] text-muted-foreground line-clamp-2 mt-1">{ch.description}</p>}
-                </a>
-            )}
-            </div>
-          </section>
-        }
+        {/* channels moved to top */}
+
       </div>
 
       {/* Player Modal */}

@@ -343,18 +343,29 @@ export default function HeroBanner() {
 
         {/* Content */}
         <div className="relative z-10 max-w-2xl p-8 md:p-14 w-full">
+          {(() => { const eyebrow = read("app_subtitle"); return eyebrow ? (
+            <div className="inline-flex items-center gap-1.5 mb-3 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+              ✦ {eyebrow}
+            </div>) : null; })()}
           <h1 className="mb-4 text-3xl font-black leading-tight md:text-5xl text-white drop-shadow-lg">
             {s.title || t.heroTitle}
           </h1>
           <p className="mb-8 text-base leading-relaxed opacity-90 md:text-lg max-w-lg text-white/90 drop-shadow">
             {s.subtitle || t.heroSub}
           </p>
-          <Link
-            to={s.btnLink || "/books"}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-accent text-accent-foreground font-bold text-sm hover:opacity-90 transition-opacity shadow-lg rounded-[4px_24px_4px_28px]">
-            {s.btnText || t.browseLib}
-            <ArrowLeft className="w-4 h-4" />
-          </Link>
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              to={s.btnLink || "/books"}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-accent text-accent-foreground font-bold text-sm hover:opacity-90 transition-opacity shadow-lg rounded-[4px_24px_4px_28px]">
+              {s.btnText || t.browseLib}
+              <ArrowLeft className="w-4 h-4" />
+            </Link>
+            {(() => { const yt = read("youtube_url"); const yl = read("youtube_label") || "قناتنا"; return yt ? (
+              <a href={yt} target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-3 bg-white/15 text-white font-semibold text-sm hover:bg-white/25 transition-colors rounded-[4px_20px_4px_20px] backdrop-blur-sm">
+                ▶ {yl}
+              </a>) : null; })()}
+          </div>
         </div>
       </div>
     </motion.section>);

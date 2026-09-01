@@ -86,6 +86,14 @@ export const DEFAULT_SETTINGS = {
   show_dev_nav:      "true",
   categories:        "",
   offline_mode:      "true",
+  // Contact page
+  contact_email:       "",
+  contact_phone:       "",
+  contact_address:     "",
+  contact_intro:       "",
+  contact_show_form:   "true",
+  contact_telegram_url:"",
+  contact_instagram_url:"",
 };
 
 // ─── localStorage helpers ─────────────────────────────────────────────────────

@@ -1,59 +1,109 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { BookOpen, Globe, Smartphone, Heart, ArrowLeft, Info } from "lucide-react";
+import {
+  BookOpen, Globe, Smartphone, Heart, ArrowLeft, Info, Sparkles,
+  Users, Languages, ShieldCheck, Library, WifiOff, Star, Download,
+} from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { getSetting } from "@/lib/settingsStore";
 
 export default function About() {
   const t = useT();
-  const appName = t.appName;
+  const appName = getSetting("app_name") || t.appName || "دار العلوم";
+  const appSubtitle = getSetting("app_subtitle") || "";
+  const logoUrl = getSetting("logo_url");
+
+  const features = [
+    { icon: BookOpen, title: t.feat1Title, desc: t.feat1Desc, color: "text-primary" },
+    { icon: Globe, title: t.feat2Title, desc: t.feat2Desc, color: "text-accent" },
+    { icon: Smartphone, title: t.feat3Title, desc: t.feat3Desc, color: "text-primary" },
+    { icon: WifiOff, title: "يعمل دون إنترنت", desc: "اقرأ الكتب وشاهد الفيديوهات دون اتصال بالشبكة.", color: "text-accent" },
+    { icon: Languages, title: "لغات متعددة", desc: "واجهة وترجمات تدعم العربية والأردية والإنجليزية والفرنسية والهندية.", color: "text-primary" },
+    { icon: Download, title: "تحميل وتفضيلات", desc: "احفظ كتبك وفضّل مقاطعك للرجوع إليها بسرعة.", color: "text-accent" },
+  ];
+
+  const values = [
+    { icon: ShieldCheck, title: "الأصالة", desc: "مصادر موثوقة من القرآن والسنة وعلومها." },
+    { icon: Star, title: "الجودة", desc: "تجربة قراءة احترافية وسلسة على كل الأجهزة." },
+    { icon: Users, title: "الوصول للجميع", desc: "محتوى مجاني ومفتوح لكل طالب علم." },
+  ];
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}>
-
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Info className="w-6 h-6 text-primary" />
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8" dir="rtl">
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+        {/* Hero */}
+        <div className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-primary/10 via-card to-accent/10 p-8 sm:p-10 mb-8">
+          <div className="absolute top-4 left-6 text-6xl opacity-10 select-none">﷽</div>
+          <div className="relative flex flex-col items-center text-center gap-4">
+            {logoUrl && (
+              <img src={logoUrl} alt={appName} className="w-20 h-20 object-contain rounded-2xl shadow-md" />
+            )}
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+              <Sparkles className="w-3.5 h-3.5" /> مكتبة إسلامية رقمية مستقلة
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-black text-foreground">{t.aboutTitle}</h1>
+            {appSubtitle && <p className="text-sm sm:text-base text-muted-foreground max-w-xl">{appSubtitle}</p>}
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{t.aboutTitle}</h1>
         </div>
 
+        {/* Intro */}
         <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none">
           <p className="text-foreground leading-relaxed text-base sm:text-lg">
             {t.aboutP1.replace("{appName}", appName)}
           </p>
-
-          <p className="text-muted-foreground leading-relaxed mt-4">
-            {t.aboutP2}
-          </p>
+          <p className="text-muted-foreground leading-relaxed mt-4">{t.aboutP2}</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
-          <div className="bg-card border border-border rounded-2xl p-5 text-center">
-            <BookOpen className="w-8 h-8 text-primary mx-auto mb-2" />
-            <h2 className="font-bold text-sm text-foreground">{t.feat1Title}</h2>
-            <p className="text-xs text-muted-foreground mt-1">{t.feat1Desc}</p>
-          </div>
-          <div className="bg-card border border-border rounded-2xl p-5 text-center">
-            <Globe className="w-8 h-8 text-accent mx-auto mb-2" />
-            <h2 className="font-bold text-sm text-foreground">{t.feat2Title}</h2>
-            <p className="text-xs text-muted-foreground mt-1">{t.feat2Desc}</p>
-          </div>
-          <div className="bg-card border border-border rounded-2xl p-5 text-center">
-            <Smartphone className="w-8 h-8 text-primary mx-auto mb-2" />
-            <h2 className="font-bold text-sm text-foreground">{t.feat3Title}</h2>
-            <p className="text-xs text-muted-foreground mt-1">{t.feat3Desc}</p>
-          </div>
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-3 mt-8">
+          {[
+            { icon: Library, value: "+500", label: "كتاب" },
+            { icon: BookOpen, value: "+50", label: "فيديو" },
+            { icon: Globe, value: "5", label: "لغات" },
+          ].map((s, i) => (
+            <div key={i} className="bg-card border border-border rounded-2xl p-4 text-center">
+              <s.icon className="w-6 h-6 text-primary mx-auto mb-1.5" />
+              <p className="text-xl font-black text-foreground">{s.value}</p>
+              <p className="text-[11px] text-muted-foreground">{s.label}</p>
+            </div>
+          ))}
         </div>
 
+        {/* Features */}
+        <h2 className="text-lg font-bold mt-10 mb-4 flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-primary" /> المزايا
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {features.map((f, i) => (
+            <div key={i} className="bg-card border border-border rounded-2xl p-5">
+              <f.icon className={`w-8 h-8 ${f.color} mb-2`} />
+              <h3 className="font-bold text-sm text-foreground">{f.title}</h3>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Values */}
+        <h2 className="text-lg font-bold mt-10 mb-4 flex items-center gap-2">
+          <ShieldCheck className="w-5 h-5 text-primary" /> قيمنا
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {values.map((v, i) => (
+            <div key={i} className="bg-card border border-border rounded-2xl p-5 text-center">
+              <v.icon className="w-8 h-8 text-accent mx-auto mb-2" />
+              <h3 className="font-bold text-sm text-foreground">{v.title}</h3>
+              <p className="text-xs text-muted-foreground mt-1">{v.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Footer */}
         <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
-          <p className="text-xs text-muted-foreground flex items-center gap-1.5">{t.madeWithCare}</p>
+          <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+            <Heart className="w-3.5 h-3.5 text-red-500" /> {t.madeWithCare}
+          </p>
           <Link to="/" className="text-sm text-primary font-medium hover:underline flex items-center gap-1">
-            {t.backToHome}
-            <ArrowLeft className="w-3.5 h-3.5" />
+            {t.backToHome} <ArrowLeft className="w-3.5 h-3.5" />
           </Link>
         </div>
       </motion.div>

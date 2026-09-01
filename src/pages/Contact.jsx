@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Mail, ArrowLeft, MessageCircle, Send } from "lucide-react";
+import { Mail, ArrowLeft, MessageCircle, Send, Phone, MapPin, Instagram } from "lucide-react";
 import { WhatsAppIcon } from "@/components/BrandIcons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,12 @@ export default function Contact() {
 
   const contactEmail = getSetting("contact_email") || "support@example.com";
   const whatsappUrl = getSetting("whatsapp_url") || "";
+  const contactPhone = getSetting("contact_phone") || "";
+  const contactAddress = getSetting("contact_address") || "";
+  const contactIntro = getSetting("contact_intro") || t.contactIntro;
+  const telegramUrl = getSetting("contact_telegram_url") || "";
+  const instagramUrl = getSetting("contact_instagram_url") || "";
+  const showForm = getSetting("contact_show_form") !== "false";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,9 +41,7 @@ export default function Contact() {
         body: message,
       });
       toast.success(t.contactSent);
-      setName("");
-      setEmail("");
-      setMessage("");
+      setName(""); setEmail(""); setMessage("");
     } catch (err) {
       toast.error(t.contactSendError);
     } finally {
@@ -45,109 +49,88 @@ export default function Contact() {
     }
   };
 
+  const channels = [
+    { show: !!contactEmail, href: `mailto:${contactEmail}`, icon: Mail, color: "text-primary", bg: "bg-primary/10", label: t.contactEmailLabel, value: contactEmail },
+    { show: !!whatsappUrl, href: whatsappUrl, icon: WhatsAppIcon, color: "text-green-600", bg: "bg-green-500/10", label: t.whatsappLabel, value: t.directContact, ext: true },
+    { show: !!telegramUrl, href: telegramUrl, icon: Send, color: "text-sky-600", bg: "bg-sky-500/10", label: "تيليجرام", value: "تواصل مباشر", ext: true },
+    { show: !!instagramUrl, href: instagramUrl, icon: Instagram, color: "text-pink-600", bg: "bg-pink-500/10", label: "إنستغرام", value: "تابعنا", ext: true },
+    { show: !!contactPhone, href: `tel:${contactPhone}`, icon: Phone, color: "text-primary", bg: "bg-primary/10", label: "الهاتف", value: contactPhone },
+    { show: !!contactAddress, href: null, icon: MapPin, color: "text-primary", bg: "bg-primary/10", label: "العنوان", value: contactAddress },
+  ].filter((c) => c.show);
+
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-      >
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8" dir="rtl">
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
             <MessageCircle className="w-6 h-6 text-primary" />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{t.contactTitle}</h1>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{t.contactTitle}</h1>
+            <p className="text-xs text-muted-foreground mt-0.5">{contactIntro}</p>
+          </div>
         </div>
 
-        <p className="text-muted-foreground text-sm leading-relaxed mb-8">
-          {t.contactIntro}
-        </p>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-          <a
-            href={`mailto:${contactEmail}`}
-            className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border hover:border-primary/40 transition-colors"
-          >
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-              <Mail className="w-5 h-5 text-primary" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs text-muted-foreground">{t.contactEmailLabel}</p>
-              <p className="text-sm font-medium text-foreground truncate">{contactEmail}</p>
-            </div>
-          </a>
-
-          {whatsappUrl && (
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border hover:border-primary/40 transition-colors"
-            >
-              <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
-                <WhatsAppIcon className="w-5 h-5 text-green-600" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground">{t.whatsappLabel}</p>
-                <p className="text-sm font-medium text-foreground">{t.directContact}</p>
-              </div>
-            </a>
-          )}
-        </div>
+        {/* Contact channels */}
+        {channels.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+            {channels.map((c, i) => {
+              const Inner = (
+                <div className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border hover:border-primary/40 transition-colors h-full">
+                  <div className={`w-10 h-10 rounded-lg ${c.bg} flex items-center justify-center shrink-0`}>
+                    <c.icon className={`w-5 h-5 ${c.color}`} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground">{c.label}</p>
+                    <p className="text-sm font-medium text-foreground truncate">{c.value}</p>
+                  </div>
+                </div>
+              );
+              return c.href ? (
+                <a key={i} href={c.href} target={c.ext ? "_blank" : undefined} rel={c.ext ? "noopener noreferrer" : undefined}>{Inner}</a>
+              ) : (
+                <div key={i}>{Inner}</div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Contact form */}
-        <form onSubmit={handleSubmit} className="bg-card border border-border rounded-2xl p-5 sm:p-6 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium text-foreground mb-1.5 block">{t.contactName}</label>
-              <Input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder={t.contactNamePlaceholder}
-                className="w-full"
-              />
+        {showForm && (
+          <form onSubmit={handleSubmit} className="bg-card border border-border rounded-2xl p-5 sm:p-6 space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1.5 block">{t.contactName}</label>
+                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t.contactNamePlaceholder} className="w-full" />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1.5 block">{t.contactEmailLabel}</label>
+                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@example.com" className="w-full" />
+              </div>
             </div>
             <div>
-              <label className="text-sm font-medium text-foreground mb-1.5 block">{t.contactEmailLabel}</label>
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="email@example.com"
-                className="w-full"
-              />
+              <label className="text-sm font-medium text-foreground mb-1.5 block">{t.contactMessage}</label>
+              <Textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder={t.contactMessagePlaceholder} rows={5} className="w-full resize-none" />
             </div>
-          </div>
-          <div>
-            <label className="text-sm font-medium text-foreground mb-1.5 block">{t.contactMessage}</label>
-            <Textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder={t.contactMessagePlaceholder}
-              rows={5}
-              className="w-full resize-none"
-            />
-          </div>
-          <Button type="submit" disabled={sending} className="w-full sm:w-auto">
-            {sending ? (
-              <>
-                <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                {t.sending}
-              </>
-            ) : (
-              <>
-                <Send className="w-4 h-4" />
-                {t.sendMessage}
-              </>
-            )}
-          </Button>
-        </form>
+            <Button type="submit" disabled={sending} className="w-full sm:w-auto rounded-[4px_20px_4px_20px]">
+              {sending ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                  {t.sending}
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4" /> {t.sendMessage}
+                </>
+              )}
+            </Button>
+          </form>
+        )}
 
         <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
           <p className="text-xs text-muted-foreground">{t.contactReplySoon}</p>
           <Link to="/" className="text-sm text-primary font-medium hover:underline flex items-center gap-1">
-            {t.backToHome}
-            <ArrowLeft className="w-3.5 h-3.5" />
+            {t.backToHome} <ArrowLeft className="w-3.5 h-3.5" />
           </Link>
         </div>
       </motion.div>
