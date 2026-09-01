@@ -7,7 +7,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import Layout from './components/Layout';
 import SaveStatusIndicator from './components/SaveStatusIndicator';
-import { useEffect, lazy, Suspense } from 'react';
+import { useEffect, lazy, Suspense, useState } from 'react';
 import { loadSettings } from '@/lib/settingsStore';
 import { initThemeEngine } from '@/lib/themeEngine';
 import { base44 } from '@/api/base44Client';
@@ -36,6 +36,8 @@ const ReadBook = lazy(() => import('./pages/ReadBook'));
 const Videos = lazy(() => import('./pages/Videos'));
 const About = lazy(() => import('./pages/About'));
 const Contact = lazy(() => import('./pages/Contact'));
+const SplashPreview = lazy(() => import('./pages/SplashPreview'));
+import SplashScreen from './components/splash/SplashScreen';
 
 const PageLoader = () =>
 <div className="flex items-center justify-center min-h-[60vh] opacity-100">
@@ -45,6 +47,9 @@ const PageLoader = () =>
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const [splashDone, setSplashDone] = useState(
+    () => { try { return sessionStorage.getItem('dar_splash_shown') === '1'; } catch { return false; } }
+  );
 
   useEffect(() => {
     base44.auth.me().
@@ -82,6 +87,17 @@ const AuthenticatedApp = () => {
     }
   }
 
+  if (!splashDone) {
+    return (
+      <SplashScreen
+        onComplete={() => {
+          try { sessionStorage.setItem('dar_splash_shown', '1'); } catch {}
+          setSplashDone(true);
+        }}
+      />
+    );
+  }
+
   return (
     <>
     <SaveStatusIndicator />
@@ -101,6 +117,7 @@ const AuthenticatedApp = () => {
           <Route path="/videos" element={<Videos />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/splash-preview" element={<SplashPreview />} />
           <Route path="*" element={<PageNotFound />} />
         </Route>
       </Routes>
