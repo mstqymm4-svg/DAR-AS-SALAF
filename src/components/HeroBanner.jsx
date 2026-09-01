@@ -344,7 +344,7 @@ export default function HeroBanner() {
         {/* Content */}
         <div className="relative z-10 max-w-2xl p-8 md:p-14 w-full">
           {(() => {const eyebrow = read("app_subtitle");return eyebrow ?
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm mb-3 mt-2">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm mb-3 mt-2 hidden">
               ✦ {eyebrow}
             </div> : null;})()}
           <h1 className="mb-4 text-3xl font-black leading-tight md:text-5xl text-white drop-shadow-lg">
