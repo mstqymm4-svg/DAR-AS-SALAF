@@ -1,7 +1,7 @@
 import {
   ChevronLeft, ChevronRight, Bookmark, BookmarkCheck,
   ZoomIn, ZoomOut, Moon, Sun, List, Maximize, ChevronDown,
-  Search, ListOrdered, Download, Share2, Headphones, Square,
+  Search, ListOrdered, Download, Share2, Headphones, Square, Languages,
 } from "lucide-react";
 
 /**
@@ -29,6 +29,7 @@ export default function ViewerToolbar({
   onShare,
   reading,
   onToggleRead,
+  onToggleTranslate,
   onHide,
 }) {
   return (
@@ -65,6 +66,9 @@ export default function ViewerToolbar({
         )}
         <ToolBtn onClick={onToggleSearch} dark={darkMode} title="بحث">
           <Search className="w-4 h-4" />
+        </ToolBtn>
+        <ToolBtn onClick={onToggleTranslate} dark={darkMode} title="ترجمة الصفحة">
+          <Languages className="w-4 h-4" />
         </ToolBtn>
         <ToolBtn onClick={onToggleBookmark} dark={darkMode} title="علامة مرجعية" active={bookmarks.includes(currentPage)}>
           {bookmarks.includes(currentPage) ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
