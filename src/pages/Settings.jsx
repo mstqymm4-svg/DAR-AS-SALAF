@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { MobileSelect } from "@/components/ui/mobile-select";
 import SettingRow from "@/components/SettingRow";
+import EmailVerification from "@/components/EmailVerification";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Trash2 } from "lucide-react";
 import MobileHeader from "@/components/MobileHeader";
@@ -108,6 +109,9 @@ export default function Settings() {
             </Button>
           </div>
         </motion.div>
+
+        {/* Email Verification */}
+        <EmailVerification email={user?.email} />
 
         {/* Appearance */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className="bg-card border border-border rounded-2xl p-6">
