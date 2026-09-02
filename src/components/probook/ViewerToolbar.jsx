@@ -68,7 +68,7 @@ export default function ViewerToolbar({
           <Search className="w-4 h-4" />
         </ToolBtn>
         <ToolBtn onClick={onToggleTranslate} dark={darkMode} title="ترجمة الصفحة">
-          <Languages className="w-4 h-4 hidden" />
+          
         </ToolBtn>
         <ToolBtn onClick={onToggleBookmark} dark={darkMode} title="علامة مرجعية" active={bookmarks.includes(currentPage)}>
           {bookmarks.includes(currentPage) ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
@@ -89,7 +89,7 @@ export default function ViewerToolbar({
           <Download className="w-4 h-4" />
         </ToolBtn>
         <ToolBtn onClick={onShare} dark={darkMode} title="مشاركة">
-          <Share2 className="w-4 h-4 hidden" />
+          
         </ToolBtn>
         <Divider dark={darkMode} />
         <ToolBtn onClick={onHide} dark={darkMode} title="إخفاء الشريط">
