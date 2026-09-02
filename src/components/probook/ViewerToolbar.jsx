@@ -1,7 +1,7 @@
 import {
   ChevronLeft, ChevronRight, Bookmark, BookmarkCheck,
   ZoomIn, ZoomOut, Moon, Sun, List, Maximize, ChevronDown,
-  Search, ListOrdered, Download, Share2,
+  Search, ListOrdered, Download, Share2, Headphones, Square,
 } from "lucide-react";
 
 /**
@@ -27,6 +27,8 @@ export default function ViewerToolbar({
   onToggleFullscreen,
   onDownload,
   onShare,
+  reading,
+  onToggleRead,
   onHide,
 }) {
   return (
@@ -69,6 +71,9 @@ export default function ViewerToolbar({
         </ToolBtn>
         <ToolBtn onClick={onToggleGoTo} dark={darkMode} title="انتقال لصفحة">
           <ListOrdered className="w-4 h-4" />
+        </ToolBtn>
+        <ToolBtn onClick={onToggleRead} dark={darkMode} title={reading ? "إيقاف القراءة الصوتية" : "قراءة صوتية"} active={reading}>
+          {reading ? <Square className="w-4 h-4" /> : <Headphones className="w-4 h-4" />}
         </ToolBtn>
         <ToolBtn onClick={onToggleDark} dark={darkMode} title={darkMode ? "نهاري" : "ليلي"}>
           {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}

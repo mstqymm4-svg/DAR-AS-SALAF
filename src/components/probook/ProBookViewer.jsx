@@ -32,7 +32,11 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
 
   // Go-to input
   const [goToValue, setGoToValue] = useState("");
+  const [reading, setReading] = useState(false);
   const totalPagesRef = useRef(0);
+  const readingRef = useRef(false);
+  const readingPageRef = useRef(1);
+  const readPageRef = useRef(null);
 
   // Bookmarks (persisted per book)
   const [bookmarks, setBookmarks] = useState(() => {
@@ -135,6 +139,47 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
       try { await navigator.clipboard.writeText(pdfUrl); } catch {}
     }
   }, [pdfUrl, title]);
+
+  // ── Text-to-speech (read aloud) with auto page-turn ──
+  const stopReading = useCallback(() => {
+    readingRef.current = false;
+    setReading(false);
+    try { window.speechSynthesis?.cancel(); } catch {}
+  }, []);
+
+  const readPage = useCallback(async (p) => {
+    if (!pdf || !readingRef.current) return;
+    let text = "";
+    try { text = (await extractPageText(pdf, p)).trim(); } catch {}
+    if (!readingRef.current) return;
+    if (!text) {
+      const nxt = p + 1;
+      if (nxt <= totalPagesRef.current) { readingPageRef.current = nxt; setCurrentPage(nxt); scrollToPageRef.current?.(nxt); readPageRef.current?.(nxt); }
+      else stopReading();
+      return;
+    }
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = language === "ur" ? "ur-PK" : language === "ar" ? "ar-SA" : "en-US";
+    u.onend = () => {
+      if (!readingRef.current) return;
+      const nxt = readingPageRef.current + 1;
+      if (nxt <= totalPagesRef.current) { readingPageRef.current = nxt; setCurrentPage(nxt); scrollToPageRef.current?.(nxt); readPageRef.current?.(nxt); }
+      else stopReading();
+    };
+    window.speechSynthesis.speak(u);
+  }, [pdf, language, stopReading]);
+
+  useEffect(() => { readPageRef.current = readPage; }, [readPage]);
+
+  const toggleReadAloud = useCallback(() => {
+    if (!("speechSynthesis" in window)) return;
+    if (readingRef.current) { stopReading(); return; }
+    readingRef.current = true; setReading(true);
+    readingPageRef.current = currentPageRef.current || 1;
+    readPageRef.current?.(readingPageRef.current);
+  }, [stopReading]);
+
+  useEffect(() => () => stopReading(), [stopReading]);
 
   // ── Keyboard navigation ──
   useEffect(() => {
@@ -298,6 +343,8 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
           onToggleFullscreen={toggleFullscreen}
           onDownload={handleDownload}
           onShare={handleShare}
+          reading={reading}
+          onToggleRead={toggleReadAloud}
           onHide={() => setShowToolbar(false)}
         />
       ) : (

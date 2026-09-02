@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Maximize, Minimize, Play, Pause, RotateCcw, Volume2, VolumeX, Share2, Rewind, FastForward } from "lucide-react";
+import { X, Maximize, Minimize, Play, Pause, RotateCcw, Volume2, VolumeX, Share2, Rewind, FastForward, Repeat } from "lucide-react";
 import { extractYoutubeId } from "@/components/dev/DevVideos";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
@@ -29,6 +29,8 @@ export default function VideoPlayer({ video, onClose }) {
   const [ready, setReady] = useState(false);
   const [restoreTime, setRestoreTime] = useState(0);
   const [rate, setRate] = useState(1);
+  const [loop, setLoop] = useState(false);
+  const loopRef = useRef(false);
 
   const videoId = extractYoutubeId(video?.youtube_url);
 
@@ -66,6 +68,9 @@ export default function VideoPlayer({ video, onClose }) {
             setPlaying(e.data === window.YT.PlayerState.PLAYING);
             if (e.data === window.YT.PlayerState.PLAYING) {
               setDuration(e.target.getDuration());
+            } else if (e.data === window.YT.PlayerState.ENDED && loopRef.current && e.target) {
+              e.target.seekTo(0, true);
+              e.target.playVideo();
             }
           },
         },
@@ -129,11 +134,24 @@ export default function VideoPlayer({ video, onClose }) {
         e.preventDefault();
         if (playing) player.pauseVideo();
         else player.playVideo();
+      } else if (e.key === "ArrowLeft" && player) {
+        e.preventDefault();
+        player.seekTo(Math.max(0, (player.getCurrentTime?.() || 0) - 5), true);
+      } else if (e.key === "ArrowRight" && player) {
+        e.preventDefault();
+        player.seekTo((player.getCurrentTime?.() || 0) + 5, true);
+      } else if (e.key === "ArrowUp" && player) {
+        e.preventDefault();
+        if (muted) { player.unMute(); setMuted(false); }
+        player.setVolume?.(Math.min(100, (player.getVolume?.() || 100) + 10));
+      } else if (e.key === "ArrowDown" && player) {
+        e.preventDefault();
+        player.setVolume?.(Math.max(0, (player.getVolume?.() || 100) - 10));
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [player, playing, onClose]);
+  }, [player, playing, onClose, muted]);
 
   const togglePlay = () => {
     if (!player) return;
@@ -159,6 +177,12 @@ export default function VideoPlayer({ video, onClose }) {
     const next = steps[(steps.indexOf(rate) + 1) % steps.length];
     setRate(next);
     player.setPlaybackRate(next);
+  };
+
+  const toggleLoop = () => {
+    const v = !loop;
+    setLoop(v);
+    loopRef.current = v;
   };
 
   const handleSeek = (e) => {
@@ -324,6 +348,9 @@ export default function VideoPlayer({ video, onClose }) {
                   </button>
                   <button onClick={cycleSpeed} className="h-10 px-2.5 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-xs font-bold transition-colors" title={t.speedLabel || "Speed"}>
                     {rate}x
+                  </button>
+                  <button onClick={toggleLoop} className={`w-10 h-10 rounded-full flex items-center justify-center text-white transition-colors ${loop ? "bg-primary/80" : "bg-white/10 hover:bg-white/20"}`} title="تكرار">
+                    <Repeat className="w-5 h-5" />
                   </button>
                   <button onClick={toggleMute} className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors">
                     {muted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
