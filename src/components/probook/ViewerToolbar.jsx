@@ -1,8 +1,8 @@
 import {
   ChevronLeft, ChevronRight, Bookmark, BookmarkCheck,
   ZoomIn, ZoomOut, Moon, Sun, List, Maximize, ChevronDown,
-  Search, ListOrdered, Download, Share2, Headphones, Square, Languages,
-} from "lucide-react";
+  Search, ListOrdered, Download, Share2, Headphones, Square, Languages } from
+"lucide-react";
 
 /**
  * Bottom toolbar for the ProBookViewer.
@@ -30,7 +30,7 @@ export default function ViewerToolbar({
   reading,
   onToggleRead,
   onToggleTranslate,
-  onHide,
+  onHide
 }) {
   return (
     <div className={`shrink-0 border-t ${darkMode ? "border-gray-700 bg-gray-800" : "border-border bg-card"}`}>
@@ -59,16 +59,16 @@ export default function ViewerToolbar({
 
         <Divider dark={darkMode} />
 
-        {hasOutline && (
-          <ToolBtn onClick={onToggleToc} dark={darkMode} title="الفهرس">
+        {hasOutline &&
+        <ToolBtn onClick={onToggleToc} dark={darkMode} title="الفهرس">
             <List className="w-4 h-4" />
           </ToolBtn>
-        )}
+        }
         <ToolBtn onClick={onToggleSearch} dark={darkMode} title="بحث">
           <Search className="w-4 h-4" />
         </ToolBtn>
         <ToolBtn onClick={onToggleTranslate} dark={darkMode} title="ترجمة الصفحة">
-          <Languages className="w-4 h-4" />
+          <Languages className="w-4 h-4 hidden" />
         </ToolBtn>
         <ToolBtn onClick={onToggleBookmark} dark={darkMode} title="علامة مرجعية" active={bookmarks.includes(currentPage)}>
           {bookmarks.includes(currentPage) ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
@@ -101,11 +101,11 @@ export default function ViewerToolbar({
       <div className={`h-1 ${darkMode ? "bg-gray-700" : "bg-muted"}`}>
         <div
           className="h-full bg-primary transition-all duration-300"
-          style={{ width: `${totalPages ? (currentPage / totalPages) * 100 : 0}%` }}
-        />
+          style={{ width: `${totalPages ? currentPage / totalPages * 100 : 0}%` }} />
+        
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 function ToolBtn({ children, onClick, dark, title, active, disabled }) {
@@ -115,16 +115,16 @@ function ToolBtn({ children, onClick, dark, title, active, disabled }) {
       title={title}
       disabled={disabled}
       className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors shrink-0 disabled:opacity-30 disabled:cursor-default ${
-        active
-          ? "bg-primary/15 text-primary"
-          : dark
-          ? "hover:bg-gray-700 text-gray-300"
-          : "hover:bg-muted text-muted-foreground"
-      }`}
-    >
+      active ?
+      "bg-primary/15 text-primary" :
+      dark ?
+      "hover:bg-gray-700 text-gray-300" :
+      "hover:bg-muted text-muted-foreground"}`
+      }>
+      
       {children}
-    </button>
-  );
+    </button>);
+
 }
 
 function Divider({ dark }) {
