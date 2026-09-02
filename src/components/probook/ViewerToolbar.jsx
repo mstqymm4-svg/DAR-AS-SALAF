@@ -89,7 +89,7 @@ export default function ViewerToolbar({
           <Download className="w-4 h-4" />
         </ToolBtn>
         <ToolBtn onClick={onShare} dark={darkMode} title="مشاركة">
-          <Share2 className="w-4 h-4" />
+          <Share2 className="w-4 h-4 hidden" />
         </ToolBtn>
         <Divider dark={darkMode} />
         <ToolBtn onClick={onHide} dark={darkMode} title="إخفاء الشريط">
