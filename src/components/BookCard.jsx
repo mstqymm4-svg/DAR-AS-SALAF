@@ -68,7 +68,7 @@ export default function BookCard({ book, isFavorite, onToggleFavorite, index = 0
           {book.is_featured &&
           <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-accent text-accent-foreground text-[10px] font-bold shadow-lg flex items-center gap-1">
               <Star className="w-2.5 h-2.5 fill-current" />
-              مميز
+              {t.featured}
             </div>
           }
 
@@ -112,7 +112,7 @@ export default function BookCard({ book, isFavorite, onToggleFavorite, index = 0
 
           <button
             onClick={handleRead}
-            className="w-full flex items-center justify-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground transition-all active:scale-95 shadow-sm hover:shadow-md hover:shadow-primary/20 text-xs rounded-[4px_16px_4px_16px] font-bold [font-family:'DM_Sans',_sans-serif] py-2">
+            className="w-full flex items-center justify-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground transition-all active:scale-95 shadow-sm hover:shadow-md hover:shadow-primary/20 text-xs rounded-[4px_16px_4px_16px] font-bold py-2">
             
             <BookMarked className="w-3.5 h-3.5" />
             {t.readBook}

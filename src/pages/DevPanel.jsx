@@ -5,13 +5,14 @@ import {
   LayoutDashboard, BookOpen, Type, Palette, Layers, Sliders,
   Navigation, Image, Users, HardDrive, Archive, Activity,
   KeyRound, Zap, Settings, ChevronRight, Moon, Sun, Check, Menu, X,
-  ImagePlay, GalleryHorizontal, Paintbrush, Share2, Video, WifiOff, Wrench, FlaskConical, MessageCircle
+  ImagePlay, GalleryHorizontal, Paintbrush, Share2, Video, WifiOff, Wrench, FlaskConical, MessageCircle, Search
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { getSetting, setSetting, setSettings, subscribeToSettings } from "@/lib/settingsStore";
+import { subscribeToSettings } from "@/lib/settingsStore";
+import { setThemeMode, getThemeState } from "@/lib/themeEngine";
 
 // ─── Section Components ───────────────────────────────────────────────────────
 import DevDashboard from "@/components/dev/DevDashboard";
@@ -78,17 +79,24 @@ const TABS = [
   { id: "testing",       label: "أدوات الاختبار",          icon: FlaskConical },
 ];
 
+const TAB_GROUPS = [
+  { title: "المحتوى", ids: ["books", "videos", "social", "contact"] },
+  { title: "التصميم والمظهر", ids: ["fonts", "colors", "cards", "app_design", "theme", "branding", "navigation", "background", "bg_library"] },
+  { title: "النظام والأدوات", ids: ["users", "storage", "backup", "logs", "security", "performance", "system", "offline", "maintenance", "testing"] },
+];
+
 export default function DevPanel() {
   const [unlocked, setUnlocked]           = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
   const [showPwd, setShowPwd]             = useState(false);
   const [activeTab, setActiveTab]         = useState("dashboard");
-  const [sidebarOpen, setSidebarOpen]     = useState(true);
-  const [darkMode, setDarkMode]           = useState(() => getSetting("dark_mode") === "true");
+  const [sidebarOpen, setSidebarOpen]     = useState(() => typeof window !== "undefined" && window.innerWidth >= 768);
+  const [tabSearch, setTabSearch]         = useState("");
+  const [darkMode, setDarkMode]           = useState(() => getThemeState().isDark);
 
   // Sync dark mode
   useEffect(() => {
-    const unsub = subscribeToSettings((s) => setDarkMode(s.dark_mode === "true"));
+    const unsub = subscribeToSettings(() => setDarkMode(getThemeState().isDark));
     return unsub;
   }, []);
 
@@ -98,9 +106,7 @@ export default function DevPanel() {
   };
 
   const handleToggleDark = () => {
-    const val = !darkMode;
-    setDarkMode(val);
-    setSetting("dark_mode", String(val));
+    setThemeMode(getThemeState().isDark ? "light" : "dark");
   };
 
   // ── Lock screen ──
@@ -171,7 +177,7 @@ export default function DevPanel() {
             animate={{ width: 256, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="shrink-0 bg-card border-l border-border flex flex-col overflow-hidden z-10"
+            className="shrink-0 fixed md:relative inset-y-0 right-0 bg-card border-l border-border flex flex-col overflow-hidden z-40 shadow-2xl md:shadow-none"
             style={{ width: 256 }}
           >
             {/* Sidebar Header */}
@@ -187,23 +193,62 @@ export default function DevPanel() {
               </div>
             </div>
 
+            {/* Tab Search */}
+            <div className="px-3 pt-3 pb-1">
+              <div className="relative">
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                <input
+                  value={tabSearch}
+                  onChange={(e) => setTabSearch(e.target.value)}
+                  placeholder="بحث سريع في الأقسام..."
+                  className="w-full h-9 rounded-lg bg-muted border border-border pr-9 pl-3 text-xs outline-none focus:ring-1 focus:ring-primary/40 text-right" />
+              </div>
+            </div>
+
             {/* Nav Items */}
             <nav className="flex-1 overflow-y-auto p-2 space-y-0.5">
-              {TABS.map(tab => {
-                const isActive = activeTab === tab.id;
+              {(() => {
+                const q = tabSearch.trim();
+                const select = (id) => {
+                  setActiveTab(id);
+                  if (window.innerWidth < 768) setSidebarOpen(false);
+                };
+                const TabBtn = ({ tab }) => {
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button onClick={() => select(tab.id)}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-right ${
+                        isActive
+                          ? "bg-primary text-primary-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      }`}>
+                      <tab.icon className="w-4 h-4 shrink-0" />
+                      <span className="flex-1 text-right truncate">{tab.label}</span>
+                      {isActive && <ChevronRight className="w-3 h-3 shrink-0 rotate-180" />}
+                    </button>
+                  );
+                };
+                if (q) {
+                  const found = TABS.filter(tab => tab.label.includes(q));
+                  return found.length > 0
+                    ? found.map(tab => <TabBtn key={tab.id} tab={tab} />)
+                    : <p className="text-center text-xs text-muted-foreground py-6">لا توجد نتائج</p>;
+                }
                 return (
-                  <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-right ${
-                      isActive
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                    }`}>
-                    <tab.icon className="w-4 h-4 shrink-0" />
-                    <span className="flex-1 text-right truncate">{tab.label}</span>
-                    {isActive && <ChevronRight className="w-3 h-3 shrink-0 rotate-180" />}
-                  </button>
+                  <>
+                    <TabBtn tab={TABS[0]} />
+                    {TAB_GROUPS.map(group => (
+                      <div key={group.title}>
+                        <p className="text-[10px] font-bold text-muted-foreground/70 px-3 pt-4 pb-1">{group.title}</p>
+                        {group.ids.map(id => {
+                          const tab = TABS.find(t => t.id === id);
+                          return tab ? <TabBtn key={tab.id} tab={tab} /> : null;
+                        })}
+                      </div>
+                    ))}
+                  </>
                 );
-              })}
+              })()}
             </nav>
 
             {/* Sidebar Footer */}
@@ -222,6 +267,11 @@ export default function DevPanel() {
           </motion.aside>
         )}
       </AnimatePresence>
+
+      {/* Mobile backdrop */}
+      {sidebarOpen && (
+        <div className="md:hidden fixed inset-0 bg-black/40 z-30" onClick={() => setSidebarOpen(false)} />
+      )}
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">

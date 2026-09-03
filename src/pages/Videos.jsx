@@ -1,12 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
-import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
-import { Play, Star, Search, Video, Tv, Clock, WifiOff } from "lucide-react";
+import { Sparkles, Search, Video, Tv, Clock, WifiOff } from "lucide-react";
 import { toast } from "sonner";
 import VideoPlayer from "@/components/VideoPlayer";
 import VideoCard from "@/components/VideoCard";
 import { PageSpinner } from "@/components/Skeleton";
-import { getThumbnail } from "@/components/dev/DevVideos";
 import { useT } from "@/lib/i18n";
 import { getVideos, getVideoChannels } from "@/lib/offlineSync";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
@@ -20,7 +18,6 @@ export default function Videos() {
   const [channels, setChannels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
   const [playingVideo, setPlayingVideo] = useState(null);
   const [favorites, setFavorites] = useState(() => {
     try {return JSON.parse(localStorage.getItem("video_favorites") || "[]");} catch (e) {return [];}
@@ -28,8 +25,8 @@ export default function Videos() {
 
   const loadData = () => {
     Promise.all([
-    getVideos(),
-    getVideoChannels()]
+      getVideos(),
+      getVideoChannels()]
     ).then(([vData, chData]) => {
       setVideos(vData || []);
       setChannels(chData || []);
@@ -42,26 +39,18 @@ export default function Videos() {
   // Auto-refresh when videos or channels change in background
   useContentRefresh(["videos", "channels"], loadData);
 
-  const categories = ["all", "live", "short"];
-
   const filtered = useMemo(() => {
     return videos.filter((v) => {
-
-      if (category === "live" && v.video_type !== "live") return false;
-
-      if (category === "short" && v.video_type !== "short") return false;
-
       if (
-      search &&
-      !v.title?.includes(search) &&
-      !v.channel_name?.includes(search))
+        search &&
+        !v.title?.toLowerCase().includes(search.toLowerCase()) &&
+        !v.channel_name?.toLowerCase().includes(search.toLowerCase()))
       {
         return false;
       }
-
       return true;
     });
-  }, [videos, search, category]);
+  }, [videos, search]);
 
   const featured = useMemo(() => videos.filter((v) => v.is_featured), [videos]);
   const recent = useMemo(() => [...filtered].sort((a, b) => new Date(b.created_date) - new Date(a.created_date)), [filtered]);
@@ -86,7 +75,7 @@ export default function Videos() {
   if (loading) return <PageSpinner />;
 
   return (
-    <div className="pb-8" dir="rtl">
+    <div className="pb-8" dir={t.dir}>
       {!isOnline &&
       <div className="flex items-center gap-2 px-4 py-2 mx-4 mt-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-700 dark:text-orange-400 text-xs font-medium">
           <WifiOff className="w-4 h-4" />
@@ -94,7 +83,7 @@ export default function Videos() {
         </div>
       }
       {/* Header */}
-      <div className="bg-gradient-to-l from-primary/10 to-transparent py-8 px-4 sm:px-6 lg:px-8">
+      <div className="bg-gradient-to-l from-primary/10 to-transparent py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-2xl font-black mb-2 flex items-center gap-2">
             <Video className="w-6 h-6 text-primary" /> {t.videosTitle}
@@ -113,7 +102,7 @@ export default function Videos() {
             <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
               {channels.map((ch) => (
                 <a key={ch.id} href={ch.youtube_url} target="_blank" rel="noopener noreferrer"
-                  className="shrink-0 w-28 bg-card border border-border rounded-2xl p-3 flex flex-col items-center text-center hover:shadow-md hover:border-primary/40 transition-all">
+                  className="shrink-0 w-28 bg-card border border-border rounded-2xl p-3 flex flex-col items-center text-center hover:shadow-lg hover:shadow-primary/10 hover:border-primary/40 hover:-translate-y-1 transition-all">
                   <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center mb-2 overflow-hidden">
                     {ch.channel_logo ? (
                       <SmartImage src={ch.channel_logo} alt={ch.name} className="w-full h-full object-cover" fallback={() => <Tv className="w-6 h-6 text-red-500" />} />
@@ -128,49 +117,22 @@ export default function Videos() {
           </section>
         )}
 
-        {/* Search + Categories */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input placeholder={t.searchVideo} value={search} onChange={(e) => setSearch(e.target.value)}
-            className="pr-9" />
-          </div>
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-            
-
-
-
-
-
-
-
-
-            
-
-
-
-
-
-
-
-
-
-
-            
-          </div>
+        {/* Search */}
+        <div className="relative group">
+          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 group-focus-within:text-primary transition-colors text-muted-foreground" />
+          <Input placeholder={t.searchVideo} value={search} onChange={(e) => setSearch(e.target.value)}
+            className="pr-11 h-12 rounded-xl bg-card border-border text-sm focus-visible:border-primary focus-visible:ring-primary/20 transition-colors" />
         </div>
 
         {/* Featured */}
-        {featured.length > 0 && category === "all" && !search &&
+        {featured.length > 0 && !search &&
         <section>
-            
-
-
-
-
-
-
-          
+            <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
+              <span className="w-8 h-8 rounded-lg bg-accent/15 flex items-center justify-center">
+                <Sparkles className="w-4 h-4 text-accent" />
+              </span>
+              {t.featuredVideos}
+            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {featured.slice(0, 3).map((v, i) =>
             <VideoCard key={v.id} video={v} index={i}
@@ -187,7 +149,10 @@ export default function Videos() {
         {/* Recent */}
         <section>
           <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
-            <Clock className="w-5 h-5 text-primary" /> {t.recentVideos}
+            <span className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center">
+              <Clock className="w-4 h-4 text-primary" />
+            </span>
+            {t.recentVideos}
           </h2>
           {recent.length === 0 ?
           <div className="text-center py-12">
@@ -207,9 +172,6 @@ export default function Videos() {
             </div>
           }
         </section>
-
-        {/* channels moved to top */}
-
       </div>
 
       {/* Player Modal */}
