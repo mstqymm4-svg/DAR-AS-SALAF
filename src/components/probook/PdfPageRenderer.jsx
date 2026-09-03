@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 /**
  * Renders a single PDF page to a canvas element.
@@ -16,6 +17,7 @@ export default function PdfPageRenderer({
   containerWidth = 0,
   containerHeight = 0,
 }) {
+  const t = useT();
   const canvasRef = useRef(null);
   const renderTaskRef = useRef(null);
   const [rendering, setRendering] = useState(true);
@@ -103,12 +105,12 @@ export default function PdfPageRenderer({
       {rendering && !error && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/80">
           <Loader2 className="w-8 h-8 text-primary animate-spin" />
-          <span className="text-xs text-muted-foreground">صفحة {pageNumber}</span>
+          <span className="text-xs text-muted-foreground">{t.pageNo} {pageNumber}</span>
         </div>
       )}
       {error && (
         <div className="absolute inset-0 flex items-center justify-center bg-white/80">
-          <span className="text-sm text-destructive">فشل عرض الصفحة {pageNumber}</span>
+          <span className="text-sm text-destructive">{t.renderPageFail} {pageNumber}</span>
         </div>
       )}
     </div>

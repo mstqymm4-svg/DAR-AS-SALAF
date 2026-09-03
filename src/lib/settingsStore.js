@@ -21,8 +21,17 @@ export const DEFAULT_SETTINGS = {
   color_secondary:   "",
   color_accent:      "",
   color_card:        "",
-  color_border:      "",
-  color_button:      "",
+  color_border:       "",
+  color_button:       "",
+  // Dark mode colors (HSL strings)
+  color_dark_bg:      "",
+  color_dark_fg:      "",
+  color_dark_primary: "",
+  color_dark_secondary: "",
+  color_dark_accent:  "",
+  color_dark_card:    "",
+  color_dark_border:  "",
+  color_dark_button:  "",
   // Fonts per role
   font_body:         "",
   font_heading:      "",
@@ -182,7 +191,18 @@ export function applySettingsToDom(settings) {
       colorVars.forEach(v => document.documentElement.style.removeProperty(v));
     }
   } else {
-    colorVars.forEach(v => document.documentElement.style.removeProperty(v));
+    // Dark mode — apply the dark custom overrides (removed automatically when empty)
+    applyColorVar("--background",      settings.color_dark_bg);
+    applyColorVar("--foreground",      settings.color_dark_fg);
+    applyColorVar("--card",            settings.color_dark_card);
+    applyColorVar("--popover",         settings.color_dark_card);
+    applyColorVar("--accent",          settings.color_dark_accent);
+    applyColorVar("--secondary",       settings.color_dark_secondary);
+    applyColorVar("--border",          settings.color_dark_border);
+    applyColorVar("--input",           settings.color_dark_border);
+    applyColorVar("--primary",         settings.color_dark_primary);
+    applyColorVar("--ring",            settings.color_dark_primary);
+    applyColorVar("--sidebar-primary", settings.color_dark_primary);
   }
 
   // Fonts

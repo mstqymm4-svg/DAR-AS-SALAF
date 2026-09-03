@@ -1,16 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Loader2, AlertCircle, ChevronUp } from "lucide-react";
 import { loadPdfDocument, extractPageText, clearPageCache } from "@/lib/pdfLoader";
+import { useT } from "@/lib/i18n";
 import ViewerToolbar from "./ViewerToolbar";
 import { TocPanel, SearchPanel, GoToPanel } from "./ViewerPanels";
 import VerticalPageStream from "./VerticalPageStream";
-import TranslatePanel from "./TranslatePanel";
-import ReadingControls from "./ReadingControls";
-import { base44 } from "@/api/base44Client";
 
 const BM_PREFIX = "dau_bm_";
 
 export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }) {
+  const t = useT();
   const [pdf, setPdf] = useState(null);
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -35,20 +34,7 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
 
   // Go-to input
   const [goToValue, setGoToValue] = useState("");
-  const [reading, setReading] = useState(false);
-  const [paused, setPaused] = useState(false);
-  const [ttsRate, setTtsRate] = useState(1);
-  const [showTranslate, setShowTranslate] = useState(false);
-  const [targetLang, setTargetLang] = useState("en");
-  const [translating, setTranslating] = useState(false);
-  const [translatedText, setTranslatedText] = useState("");
   const totalPagesRef = useRef(0);
-  const readingRef = useRef(false);
-  const readingPageRef = useRef(1);
-  const readPageRef = useRef(null);
-  const pausedRef = useRef(false);
-  const ttsRateRef = useRef(1);
-  const translateCacheRef = useRef(new Map());
 
   // Bookmarks (persisted per book)
   const [bookmarks, setBookmarks] = useState(() => {
@@ -152,112 +138,6 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
     }
   }, [pdfUrl, title]);
 
-  // ── Text-to-speech (read aloud) with auto page-turn, pause & speed ──
-  const stopReading = useCallback(() => {
-    readingRef.current = false;
-    pausedRef.current = false;
-    setReading(false);
-    setPaused(false);
-    try { window.speechSynthesis?.cancel(); } catch {}
-  }, []);
-
-  const readPage = useCallback(async (p) => {
-    if (!pdf || !readingRef.current) return;
-    let text = "";
-    try { text = (await extractPageText(pdf, p)).trim(); } catch {}
-    if (!readingRef.current) return;
-    if (!text) {
-      const nxt = p + 1;
-      if (nxt <= totalPagesRef.current) { readingPageRef.current = nxt; setCurrentPage(nxt); scrollToPageRef.current?.(nxt); readPageRef.current?.(nxt); }
-      else stopReading();
-      return;
-    }
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = language === "ur" ? "ur-PK" : language === "ar" ? "ar-SA" : "en-US";
-    u.rate = ttsRateRef.current;
-    u.onend = () => {
-      if (!readingRef.current) return;
-      const nxt = readingPageRef.current + 1;
-      if (nxt <= totalPagesRef.current) { readingPageRef.current = nxt; setCurrentPage(nxt); scrollToPageRef.current?.(nxt); readPageRef.current?.(nxt); }
-      else stopReading();
-    };
-    window.speechSynthesis.speak(u);
-  }, [pdf, language, stopReading]);
-
-  useEffect(() => { readPageRef.current = readPage; }, [readPage]);
-
-  const toggleReadAloud = useCallback(() => {
-    if (!("speechSynthesis" in window)) return;
-    if (readingRef.current) { stopReading(); return; }
-    readingRef.current = true; pausedRef.current = false;
-    setReading(true); setPaused(false);
-    readingPageRef.current = currentPageRef.current || 1;
-    readPageRef.current?.(readingPageRef.current);
-  }, [stopReading]);
-
-  const togglePauseReading = useCallback(() => {
-    if (!readingRef.current) return;
-    if (pausedRef.current) {
-      try { window.speechSynthesis?.resume(); } catch {}
-      pausedRef.current = false; setPaused(false);
-    } else {
-      try { window.speechSynthesis?.pause(); } catch {}
-      pausedRef.current = true; setPaused(true);
-    }
-  }, []);
-
-  const cycleTtsRate = useCallback(() => {
-    const steps = [0.75, 1, 1.25, 1.5];
-    const next = steps[(steps.indexOf(ttsRateRef.current) + 1) % steps.length];
-    ttsRateRef.current = next;
-    setTtsRate(next);
-  }, []);
-
-  // Keep long utterances alive (Chrome stops after ~15s) without un-pausing a user pause
-  useEffect(() => {
-    if (!reading) return;
-    const id = setInterval(() => {
-      if (readingRef.current && !pausedRef.current && window.speechSynthesis?.speaking) {
-        try { window.speechSynthesis.resume(); } catch {}
-      }
-    }, 10000);
-    return () => clearInterval(id);
-  }, [reading]);
-
-  useEffect(() => () => stopReading(), [stopReading]);
-
-  // ── Page translation (InvokeLLM) ──
-  const translateCurrentPage = useCallback(async () => {
-    if (!pdf) return;
-    const p = currentPageRef.current;
-    const key = `${p}_${targetLang}`;
-    const cached = translateCacheRef.current.get(key);
-    if (cached) { setTranslatedText(cached); return; }
-    setTranslating(true); setTranslatedText("");
-    try {
-      const original = (await extractPageText(pdf, p)).trim();
-      if (!original) { setTranslatedText("لا يوجد نص قابل للترجمة في هذه الصفحة"); setTranslating(false); return; }
-      const langName = { ar: "Arabic", ur: "Urdu", en: "English", hi: "Hindi", fr: "French", tr: "Turkish" }[targetLang] || "English";
-      const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `Translate the following text into ${langName}. Preserve Islamic and religious terminology accurately. Output only the translation, without any extra commentary or notes.\n\nTEXT:\n${original}`,
-        response_json_schema: { type: "object", properties: { translation: { type: "string" } } },
-      });
-      const out = res?.translation || (typeof res === "string" ? res : "");
-      translateCacheRef.current.set(key, out);
-      setTranslatedText(out);
-    } catch {
-      setTranslatedText("تعذّر الترجمة، حاول لاحقاً");
-    }
-    setTranslating(false);
-  }, [pdf, targetLang]);
-
-  // Show cached translation when navigating, clear otherwise
-  useEffect(() => {
-    if (!showTranslate) return;
-    const key = `${currentPage}_${targetLang}`;
-    setTranslatedText(translateCacheRef.current.get(key) || "");
-  }, [currentPage, showTranslate, targetLang]);
-
   // ── Keyboard navigation ──
   useEffect(() => {
     const onKey = (e) => {
@@ -339,7 +219,7 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
     return (
       <div className="w-full h-full flex flex-col items-center justify-center gap-4 bg-background">
         <Loader2 className="w-10 h-10 text-primary animate-spin" />
-        <p className="text-sm text-muted-foreground">جاري تحميل الكتاب...</p>
+        <p className="text-sm text-muted-foreground">{t.readerLoading}</p>
       </div>
     );
   }
@@ -348,9 +228,9 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
     return (
       <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-background px-4 text-center">
         <AlertCircle className="w-10 h-10 text-destructive" />
-        <p className="text-sm text-destructive font-medium">تعذّر تحميل الملف</p>
+        <p className="text-sm text-destructive font-medium">{t.readerLoadError}</p>
         <button onClick={() => setReloadKey(k => k + 1)} className="text-xs text-primary hover:underline">
-          إعادة المحاولة
+          {t.readerRetry}
         </button>
       </div>
     );
@@ -398,28 +278,6 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
         onGo={() => { goToPage(goToValue); setShowGoTo(false); }}
         onClose={() => setShowGoTo(false)}
       />
-      <TranslatePanel
-        show={showTranslate}
-        isRTL={isRTL}
-        darkMode={darkMode}
-        currentPage={currentPage}
-        targetLang={targetLang}
-        setTargetLang={setTargetLang}
-        translating={translating}
-        translated={translatedText}
-        onTranslate={translateCurrentPage}
-        onClose={() => setShowTranslate(false)}
-      />
-      <ReadingControls
-        show={reading}
-        paused={paused}
-        rate={ttsRate}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onTogglePause={togglePauseReading}
-        onCycleRate={cycleTtsRate}
-        onStop={stopReading}
-      />
 
       {/* Toolbar */}
       {showToolbar ? (
@@ -439,19 +297,16 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
           onToggleToc={() => setShowToc(s => !s)}
           onToggleSearch={() => setShowSearch(s => !s)}
           onToggleGoTo={openGoTo}
-          onToggleTranslate={() => setShowTranslate(s => !s)}
           onToggleFullscreen={toggleFullscreen}
           onDownload={handleDownload}
           onShare={handleShare}
-          reading={reading}
-          onToggleRead={toggleReadAloud}
           onHide={() => setShowToolbar(false)}
         />
       ) : (
         <button
           onClick={() => setShowToolbar(true)}
           className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 w-9 h-9 rounded-full bg-card border border-border shadow-lg flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-          title="إظهار الشريط"
+          title={t.tbShow}
         >
           <ChevronUp className="w-4 h-4" />
         </button>
