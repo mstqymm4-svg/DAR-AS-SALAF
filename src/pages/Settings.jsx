@@ -135,22 +135,22 @@ export default function Settings() {
             <EmailVerification email={emailInput} sendSignal={sendSignal} />
 
             {/* Everything tied to this email: favorites + offline downloads */}
-            <div className="grid grid-cols-2 gap-2 mt-4 hidden">
-              <div className="flex items-center gap-3 rounded-xl bg-muted/50 border border-border p-3">
-                <Heart className="w-4 h-4 text-primary shrink-0" />
-                <div>
-                  <p className="text-base font-bold leading-tight">{stats.favs}</p>
-                  <p className="text-xs text-muted-foreground">{t.accFavorites}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 rounded-xl bg-muted/50 border border-border p-3">
-                <Download className="w-4 h-4 text-primary shrink-0" />
-                <div>
-                  <p className="text-base font-bold leading-tight">{stats.dls}</p>
-                  <p className="text-xs text-muted-foreground">{t.accOfflineBooks}</p>
-                </div>
-              </div>
-            </div>
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
           </div>
         </motion.div>
 
