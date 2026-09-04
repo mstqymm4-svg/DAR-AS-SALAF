@@ -360,7 +360,7 @@ export default function HeroBanner() {
               {s.btnText || t.browseLib}
               <ArrowLeft className="w-4 h-4" />
             </Link>
-            {(() => {const yt = read("youtube_url");const yl = read("youtube_label") || "قناتنا";return yt ?
+            {(() => {const yt = read("youtube_url");const yl = read("youtube_label") || t.youtubeBtn;return yt ?
               <a href={yt} target="_blank" rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-5 py-3 bg-white/15 text-white font-semibold text-sm hover:bg-white/25 transition-colors rounded-[4px_20px_4px_20px] backdrop-blur-sm">
                 ▶ {yl}

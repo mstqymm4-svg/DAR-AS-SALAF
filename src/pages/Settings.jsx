@@ -107,11 +107,12 @@ export default function Settings() {
             <Button onClick={handleSaveProfile} disabled={saving} className="gap-2 rounded-[4px_20px_4px_20px]">
               <Save className="w-4 h-4" /> {t.saveChanges}
             </Button>
+
+            {/* Email Verification — merged into profile card */}
+            <div className="border-t border-border my-5" />
+            <EmailVerification email={user?.email} />
           </div>
         </motion.div>
-
-        {/* Email Verification */}
-        <EmailVerification email={user?.email} />
 
         {/* Appearance */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className="bg-card border border-border rounded-2xl p-6">

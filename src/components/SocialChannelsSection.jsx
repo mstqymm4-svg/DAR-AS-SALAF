@@ -6,8 +6,10 @@ import { ExternalLink, Share2, ChevronLeft } from "lucide-react";
 import { getSocialChannels } from "@/lib/offlineSync";
 import { useContentRefresh } from "@/hooks/useContentSync";
 import SmartImage from "./SmartImage";
+import { useT } from "@/lib/i18n";
 
 export default function SocialChannelsSection() {
+  const t = useT();
   const [channels, setChannels] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -34,16 +36,16 @@ export default function SocialChannelsSection() {
     } else {
       try {
         await navigator.clipboard.writeText(ch.url);
-        toast.success("تم نسخ الرابط");
+        toast.success(t.linkCopied);
       } catch (e) {}
     }
   };
 
   return (
-    <section className="px-4 sm:px-6 lg:px-8 py-8 max-w-6xl mx-auto" dir="rtl">
+    <section className="px-4 sm:px-6 lg:px-8 py-8 max-w-6xl mx-auto" dir={t.dir}>
       <div className="text-center mb-6">
-        <h2 className="text-xl font-bold mb-1">Our social media channels</h2>
-        <p className="text-sm text-muted-foreground">Follow and connect with us via our platforms.</p>
+        <h2 className="text-xl font-bold mb-1">{t.socialTitle}</h2>
+        <p className="text-sm text-muted-foreground">{t.socialSub}</p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -68,7 +70,7 @@ export default function SocialChannelsSection() {
               <div className="flex gap-1.5 mt-auto w-full">
                 <a href={ch.url} target="_blank" rel="noopener noreferrer"
                 className="flex-1 flex items-center justify-center gap-1 bg-primary text-primary-foreground text-xs font-bold px-3 py-2 hover:bg-primary/90 transition-colors active:scale-95 shadow-sm rounded-[4px_20px_4px_20px]">
-                  فتح <ExternalLink className="w-3 h-3" />
+                  {t.openBtn} <ExternalLink className="w-3 h-3" />
                 </a>
                 
 

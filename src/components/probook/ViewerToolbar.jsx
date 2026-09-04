@@ -1,7 +1,7 @@
 import {
   ChevronLeft, ChevronRight, Bookmark, BookmarkCheck,
   ZoomIn, ZoomOut, Moon, Sun, List, Maximize, ChevronDown,
-  Search, ListOrdered, Download, Share2,
+  Search, ListOrdered,
 } from "lucide-react";
 import { useT } from "@/lib/i18n";
 
@@ -26,8 +26,6 @@ export default function ViewerToolbar({
   onToggleSearch,
   onToggleGoTo,
   onToggleFullscreen,
-  onDownload,
-  onShare,
   onHide,
 }) {
   const t = useT();
@@ -77,12 +75,6 @@ export default function ViewerToolbar({
         </ToolBtn>
         <ToolBtn onClick={onToggleFullscreen} dark={darkMode} title={t.tbFullscreen}>
           <Maximize className="w-4 h-4" />
-        </ToolBtn>
-        <ToolBtn onClick={onDownload} dark={darkMode} title={t.readerDownload}>
-          <Download className="w-4 h-4" />
-        </ToolBtn>
-        <ToolBtn onClick={onShare} dark={darkMode} title={t.readerShare}>
-          <Share2 className="w-4 h-4" />
         </ToolBtn>
         <Divider dark={darkMode} />
         <ToolBtn onClick={onHide} dark={darkMode} title={t.tbHide}>

@@ -95,7 +95,7 @@ export default function VerticalPageStream({
 
   return (
     <div ref={scrollRef} className="flex-1 overflow-auto bg-muted/30" onContextMenu={(e) => e.preventDefault()}>
-      <div dir="ltr" className="flex flex-col items-center gap-3 py-3 px-2">
+      <div dir="ltr" className="flex flex-col items-start gap-3 py-3 px-2">
         {Array.from({ length: totalPages }, (_, idx) => {
           const p = idx + 1;
           const r = aspect[p] || DEFAULT_RATIO;
@@ -105,7 +105,7 @@ export default function VerticalPageStream({
             <div
               key={p}
               data-page={p}
-              className="bg-white shadow-lg shrink-0"
+              className="bg-white shadow-lg shrink-0 mx-auto"
               style={{
                 width: slotWidth > 0 ? slotWidth * zoom : "100%",
                 height: h,

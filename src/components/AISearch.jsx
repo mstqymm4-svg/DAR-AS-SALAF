@@ -3,8 +3,10 @@ import { base44 } from "@/api/base44Client";
 import { Sparkles, Search, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useT } from "@/lib/i18n";
 
 export default function AISearch({ books, onResults, onClear }) {
+  const t = useT();
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [active, setActive] = useState(false);
@@ -66,7 +68,7 @@ export default function AISearch({ books, onResults, onClear }) {
       {active && !loading &&
       <div className="flex items-center gap-1.5 mt-2">
           <Sparkles className="w-3 h-3 text-accent" />
-          <span className="text-xs text-muted-foreground">البحث الذكي نشط</span>
+          <span className="text-xs text-muted-foreground">{t.aiSearchActive}</span>
         </div>
       }
     </div>);

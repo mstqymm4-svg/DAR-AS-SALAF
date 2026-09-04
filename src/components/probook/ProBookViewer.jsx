@@ -8,6 +8,9 @@ import VerticalPageStream from "./VerticalPageStream";
 
 const BM_PREFIX = "dau_bm_";
 
+// Unified zoom limits for buttons & pinch
+const clampZoom = (z) => Math.max(0.5, Math.min(3, +Number(z).toFixed(2)));
+
 export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }) {
   const t = useT();
   const [pdf, setPdf] = useState(null);
@@ -44,7 +47,7 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
   const rootRef = useRef(null);
   const scrollToPageRef = useRef(null);
   const currentPageRef = useRef(1);
-  const pinchRef = useRef({ dist: 0, zoom: 1 });
+  const pinchRef = useRef({ dist: 0, zoom: 1, ratio: 1, last: 0 });
   const zoomRef = useRef(zoom);
   zoomRef.current = zoom;
   const didRestoreRef = useRef(false);
@@ -109,8 +112,8 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
   const prevPage = useCallback(() => goToPage((currentPageRef.current || 1) - 1), [goToPage]);
 
   const onStreamPageChange = useCallback((n) => setCurrentPage(n), []);
-  const zoomIn = useCallback(() => setZoom(z => Math.min(3, +(z + 0.2).toFixed(2))), []);
-  const zoomOut = useCallback(() => setZoom(z => Math.max(0.5, +(z - 0.2).toFixed(2))), []);
+  const zoomIn = useCallback(() => setZoom(z => clampZoom(z + 0.2)), []);
+  const zoomOut = useCallback(() => setZoom(z => clampZoom(z - 0.2)), []);
 
   const toggleBookmark = useCallback(() => {
     setCurrentPage(cp => {
@@ -124,19 +127,6 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
     if (!document.fullscreenElement) (el || document.documentElement).requestFullscreen?.();
     else document.exitFullscreen?.();
   }, []);
-
-  const handleDownload = useCallback(() => {
-    if (pdfUrl) window.open(pdfUrl, "_blank");
-  }, [pdfUrl]);
-
-  const handleShare = useCallback(async () => {
-    if (!pdfUrl) return;
-    if (navigator.share) {
-      try { await navigator.share({ title: title || "Book", url: pdfUrl }); } catch {}
-    } else {
-      try { await navigator.clipboard.writeText(pdfUrl); } catch {}
-    }
-  }, [pdfUrl, title]);
 
   // ── Keyboard navigation ──
   useEffect(() => {
@@ -164,6 +154,8 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
         const dy = e.touches[0].clientY - e.touches[1].clientY;
         pinchRef.current.dist = Math.hypot(dx, dy);
         pinchRef.current.zoom = zoomRef.current;
+        pinchRef.current.ratio = 1;
+        pinchRef.current.last = 0;
       }
     };
     const onMove = (e) => {
@@ -172,14 +164,27 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
         const dx = e.touches[0].clientX - e.touches[1].clientX;
         const dy = e.touches[0].clientY - e.touches[1].clientY;
         const ratio = Math.hypot(dx, dy) / pinchRef.current.dist;
-        setZoom(Math.max(0.5, Math.min(4, +(pinchRef.current.zoom * ratio).toFixed(2))));
+        pinchRef.current.ratio = ratio;
+        // Throttle live updates to keep rendering smooth during the gesture
+        const now = Date.now();
+        if (now - pinchRef.current.last < 100) return;
+        pinchRef.current.last = now;
+        setZoom(clampZoom(pinchRef.current.zoom * ratio));
       }
+    };
+    const onEnd = () => {
+      if (pinchRef.current.dist > 0 && pinchRef.current.ratio !== 1) {
+        setZoom(clampZoom(pinchRef.current.zoom * pinchRef.current.ratio));
+      }
+      pinchRef.current.dist = 0;
     };
     el.addEventListener("touchstart", onStart, { passive: false });
     el.addEventListener("touchmove", onMove, { passive: false });
+    el.addEventListener("touchend", onEnd);
     return () => {
       el.removeEventListener("touchstart", onStart);
       el.removeEventListener("touchmove", onMove);
+      el.removeEventListener("touchend", onEnd);
     };
   }, []);
 
@@ -298,8 +303,6 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
           onToggleSearch={() => setShowSearch(s => !s)}
           onToggleGoTo={openGoTo}
           onToggleFullscreen={toggleFullscreen}
-          onDownload={handleDownload}
-          onShare={handleShare}
           onHide={() => setShowToolbar(false)}
         />
       ) : (

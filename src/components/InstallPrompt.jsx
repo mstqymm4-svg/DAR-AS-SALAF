@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Share, Plus } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 export default function InstallPrompt() {
+  const t = useT();
   const deferredRef = useRef(null);
   const [showIOSGuide, setShowIOSGuide] = useState(false);
 
@@ -76,19 +78,19 @@ export default function InstallPrompt() {
               <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
                 <Plus className="w-7 h-7 text-primary" />
               </div>
-              <h3 className="text-base font-bold mb-1">ثبّت التطبيق على آيفون</h3>
-              <p className="text-xs text-muted-foreground">للتثبيت، اتبع الخطوات التالية</p>
+              <h3 className="text-base font-bold mb-1">{t.installTitle}</h3>
+              <p className="text-xs text-muted-foreground">{t.installSub}</p>
             </div>
 
             <div className="space-y-3 mb-4">
               <div className="flex items-center gap-3 bg-muted/50 rounded-xl p-3">
                 <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center shrink-0">1</span>
-                <p className="text-xs">اضغط على زر المشاركة في سفاري</p>
+                <p className="text-xs">{t.installStep1}</p>
                 <Share className="w-4 h-4 text-primary mr-auto" />
               </div>
               <div className="flex items-center gap-3 bg-muted/50 rounded-xl p-3">
                 <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center shrink-0">2</span>
-                <p className="text-xs">اختر «إضافة إلى الشاشة الرئيسية»</p>
+                <p className="text-xs">{t.installStep2}</p>
                 <Plus className="w-4 h-4 text-primary mr-auto" />
               </div>
             </div>
@@ -97,7 +99,7 @@ export default function InstallPrompt() {
               onClick={dismissIOS}
               className="w-full bg-primary text-primary-foreground text-sm font-bold py-2.5 rounded-xl hover:bg-primary/90 active:scale-95 transition-all"
             >
-              حسناً
+              {t.installOk}
             </button>
           </motion.div>
         </motion.div>

@@ -35,8 +35,8 @@ export default function ReadBook() {
     return (
       <div className="text-center py-20 px-4">
         <BookOpen className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-        <h3 className="text-lg font-bold mb-2">لا يوجد ملف PDF لهذا الكتاب</h3>
-        <Link to="/books" className="text-primary text-sm hover:underline">العودة للمكتبة</Link>
+        <h3 className="text-lg font-bold mb-2">{t.noPdf}</h3>
+        <Link to="/books" className="text-primary text-sm hover:underline">{t.backToLib}</Link>
       </div>
     );
   }
@@ -48,7 +48,7 @@ export default function ReadBook() {
         <Link to={`/book/${book.id}`} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
           <ArrowRight className="w-4 h-4" />
           <span className="hidden sm:inline">{book.title}</span>
-          <span className="sm:hidden">رجوع</span>
+          <span className="sm:hidden">{t.backBtn}</span>
         </Link>
       </div>
 

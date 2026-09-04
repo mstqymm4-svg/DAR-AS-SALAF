@@ -62,7 +62,7 @@ export default function EmailVerification({ email }) {
   };
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-6">
+    <div>
       <div className="flex items-center gap-3 mb-4">
         <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
           {verified ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <ShieldCheck className="w-4 h-4 text-primary" />}

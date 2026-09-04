@@ -55,9 +55,9 @@ export default function BookDetails() {
         if (p.percent !== undefined) setDownloadProgress(p.percent);
       });
       setPdfDownloaded(true);
-      toast.success("تم تنزيل الكتاب للقراءة بدون إنترنت");
+      toast.success(t.downloadDone);
     } catch (e) {
-      toast.error("فشل التنزيل: " + (e.message || ""));
+      toast.error(t.downloadFailed);
     }
     setDownloading(false);
   };
@@ -85,7 +85,7 @@ export default function BookDetails() {
     return (
       <div className="text-center py-20 px-4">
         <BookOpen className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-        <h3 className="text-lg font-bold mb-2">الكتاب غير موجود</h3>
+        <h3 className="text-lg font-bold mb-2">{t.bookNotFound}</h3>
         <Link to="/books" className="text-primary text-sm hover:underline">{t.backToLib}</Link>
       </div>);
 
@@ -196,13 +196,13 @@ export default function BookDetails() {
             {isOnline && !pdfDownloaded && !downloading &&
             <Button variant="outline" onClick={handleDownload} className="w-full gap-2 h-10 rounded-xl text-sm hover:border-primary/30 bg-[hsl(var(--foreground))] text-[hsl(var(--background))]">
                 <Download className="w-4 h-4" />
-                تنزيل للقراءة بدون إنترنت
+                {t.downloadOffline}
               </Button>
             }
             {downloading &&
             <div className="w-full px-4 py-3 rounded-xl border border-primary/20 bg-primary/5">
                 <div className="flex items-center justify-between text-xs mb-2">
-                  <span className="text-muted-foreground">جاري التنزيل...</span>
+                  <span className="text-muted-foreground">{t.downloading}</span>
                   <span className="font-bold text-primary">{downloadProgress}%</span>
                 </div>
                 <div className="h-2 rounded-full bg-muted overflow-hidden">
@@ -213,7 +213,7 @@ export default function BookDetails() {
             {pdfDownloaded &&
             <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-green-500/5 border border-green-500/20 text-green-700 dark:text-green-400 text-xs font-bold">
                 <CheckCircle className="w-4 h-4" />
-                متوفر للقراءة بدون إنترنت
+                {t.availableOffline}
               </div>
             }
           </div>
