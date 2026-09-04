@@ -66,7 +66,7 @@ export default function Settings() {
 
   const handleSaveProfile = async () => {
     const em = emailInput.trim();
-    if (!em || !/^\S+@\S+\.\S+$/.test(em)) { toast.error(t.evInvalidEmail); return; }
+    if (!em || !/^\S+@\S+\.\S+$/.test(em)) {toast.error(t.evInvalidEmail);return;}
     setSaving(true);
     try {
       await base44.auth.updateMe({ full_name: fullName });
@@ -135,7 +135,7 @@ export default function Settings() {
             <EmailVerification email={emailInput} sendSignal={sendSignal} />
 
             {/* Everything tied to this email: favorites + offline downloads */}
-            <div className="grid grid-cols-2 gap-2 mt-4">
+            <div className="grid grid-cols-2 gap-2 mt-4 hidden">
               <div className="flex items-center gap-3 rounded-xl bg-muted/50 border border-border p-3">
                 <Heart className="w-4 h-4 text-primary shrink-0" />
                 <div>
