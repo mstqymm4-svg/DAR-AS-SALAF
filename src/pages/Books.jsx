@@ -9,6 +9,7 @@ import { SkeletonGrid } from "../components/Skeleton";
 import { Input } from "@/components/ui/input";
 import { useT } from "@/lib/i18n";
 import { getBooks, getFavoriteIds, toggleFavorite } from "@/lib/offlineSync";
+import { getAccountEmail } from "@/lib/activeUser";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { useContentRefresh } from "@/hooks/useContentSync";
 import PullToRefresh from "@/components/PullToRefresh";
@@ -43,7 +44,7 @@ export default function Books() {
       setPreferredLanguage(u.preferred_language);
     }
     if (u) {
-      const favIds = await getFavoriteIds(u.email);
+      const favIds = await getFavoriteIds(getAccountEmail(u));
       setFavorites(favIds);
     }
     setLoading(false);
@@ -56,7 +57,7 @@ export default function Books() {
 
   const handleToggleFavorite = async (bookId) => {
     if (!user) return;
-    const added = await toggleFavorite(bookId, user.email);
+    const added = await toggleFavorite(bookId, getAccountEmail(user));
     setFavorites((prev) =>
     added ? [...prev, bookId] : prev.filter((id) => id !== bookId)
     );

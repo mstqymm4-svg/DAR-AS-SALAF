@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Mail, ShieldCheck, Send, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ const CODE_KEY = (email) => `ev_code_${email}`;
 const VERIFIED_KEY = (email) => `email_verified_${email}`;
 const EXPIRY_MS = 10 * 60 * 1000;
 
-export default function EmailVerification({ email }) {
+export default function EmailVerification({ email, sendSignal }) {
   const t = useT();
   const [code, setCode] = useState("");
   const [sending, setSending] = useState(false);
@@ -19,6 +19,22 @@ export default function EmailVerification({ email }) {
   const [verified, setVerified] = useState(() => {
     try { return localStorage.getItem(VERIFIED_KEY(email)) === "1"; } catch { return false; }
   });
+
+  // Reset state when the email changes
+  useEffect(() => {
+    if (!email) return;
+    setVerified(() => { try { return localStorage.getItem(VERIFIED_KEY(email)) === "1"; } catch { return false; } });
+    setSent(false);
+    setCode("");
+  }, [email]);
+
+  // Send a fresh code whenever the parent signals (Save & Send button)
+  const lastSignal = useRef(0);
+  useEffect(() => {
+    if (!sendSignal || !email || sendSignal === lastSignal.current) return;
+    lastSignal.current = sendSignal;
+    sendCode();
+  }, [sendSignal]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!email) return null;
 

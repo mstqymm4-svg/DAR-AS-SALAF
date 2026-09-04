@@ -11,6 +11,7 @@ import { motion } from "framer-motion";
 import { useT } from "@/lib/i18n";
 import { getSetting, subscribeToSettings } from "@/lib/settingsStore";
 import { getFeaturedBooks, getRecentBooks, getFavoriteIds, toggleFavorite } from "@/lib/offlineSync";
+import { getAccountEmail } from "@/lib/activeUser";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { useContentRefresh } from "@/hooks/useContentSync";
 import PullToRefresh from "@/components/PullToRefresh";
@@ -39,7 +40,7 @@ export default function Home() {
     setFeaturedBooks(featured);
     setRecentBooks(recent);
     if (u) {
-      const favIds = await getFavoriteIds(u.email);
+      const favIds = await getFavoriteIds(getAccountEmail(u));
       setFavorites(favIds);
     }
     setLoading(false);
@@ -60,7 +61,7 @@ export default function Home() {
 
   const handleToggleFavorite = async (bookId) => {
     if (!user) return;
-    const added = await toggleFavorite(bookId, user.email);
+    const added = await toggleFavorite(bookId, getAccountEmail(user));
     setFavorites((prev) =>
       added ? [...prev, bookId] : prev.filter((id) => id !== bookId)
     );

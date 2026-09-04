@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useT } from "@/lib/i18n";
 import { getBook, getFavoriteIds, toggleFavorite, downloadBookPdf, isPdfDownloaded } from "@/lib/offlineSync";
+import { getAccountEmail, addDownloadedBookId } from "@/lib/activeUser";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { toast } from "sonner";
 import SmartImage from "@/components/SmartImage";
@@ -31,7 +32,7 @@ export default function BookDetails() {
     const b = await getBook(id);
     if (b) setBook(b);
     if (u) {
-      const favIds = await getFavoriteIds(u.email);
+      const favIds = await getFavoriteIds(getAccountEmail(u));
       setIsFavorite(favIds.includes(id));
     }
     if (b?.pdf_url) {
@@ -42,7 +43,7 @@ export default function BookDetails() {
 
   const handleToggleFavorite = async () => {
     if (!user) return;
-    const added = await toggleFavorite(id, user.email);
+    const added = await toggleFavorite(id, getAccountEmail(user));
     setIsFavorite(added);
   };
 
@@ -55,6 +56,7 @@ export default function BookDetails() {
         if (p.percent !== undefined) setDownloadProgress(p.percent);
       });
       setPdfDownloaded(true);
+      addDownloadedBookId(getAccountEmail(user), book.id);
       toast.success(t.downloadDone);
     } catch (e) {
       toast.error(t.downloadFailed);

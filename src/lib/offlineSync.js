@@ -13,6 +13,7 @@ import { base44 } from "@/api/base44Client";
 import { entities } from "@/lib/dataSource";
 import * as db from "@/lib/offlineDB";
 import { getSetting } from "@/lib/settingsStore";
+import { getAccountEmail } from "@/lib/activeUser";
 
 // ─── Online status ────────────────────────────────────────────────────────────
 export function isOnline() {
@@ -533,7 +534,7 @@ export async function fullSync(onProgress) {
     const u = await base44.auth.me().catch(() => null);
     if (u) {
       onProgress?.({ step: "favorites", status: "started" });
-      await syncPendingFavorites(u.email);
+      await syncPendingFavorites(getAccountEmail(u));
       onProgress?.({ step: "favorites", status: "done" });
     }
   } catch(e) {}

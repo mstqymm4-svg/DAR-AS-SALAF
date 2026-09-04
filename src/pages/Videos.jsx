@@ -6,7 +6,9 @@ import VideoPlayer from "@/components/VideoPlayer";
 import VideoCard from "@/components/VideoCard";
 import { PageSpinner } from "@/components/Skeleton";
 import { useT } from "@/lib/i18n";
+import { base44 } from "@/api/base44Client";
 import { getVideos, getVideoChannels } from "@/lib/offlineSync";
+import { getAccountEmail, getVideoFavIds, setVideoFavIds } from "@/lib/activeUser";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { useContentRefresh } from "@/hooks/useContentSync";
 import SmartImage from "@/components/SmartImage";
@@ -19,11 +21,14 @@ export default function Videos() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [playingVideo, setPlayingVideo] = useState(null);
-  const [favorites, setFavorites] = useState(() => {
-    try {return JSON.parse(localStorage.getItem("video_favorites") || "[]");} catch (e) {return [];}
-  });
+  const [favorites, setFavorites] = useState([]);
+  const [user, setUser] = useState(null);
 
   const loadData = () => {
+    base44.auth.me().then((u) => {
+      setUser(u);
+      setFavorites(getVideoFavIds(getAccountEmail(u)));
+    }).catch(() => {});
     Promise.all([
       getVideos(),
       getVideoChannels()]
@@ -60,7 +65,7 @@ export default function Videos() {
     favorites.filter((id) => id !== videoId) :
     [...favorites, videoId];
     setFavorites(next);
-    localStorage.setItem("video_favorites", JSON.stringify(next));
+    setVideoFavIds(getAccountEmail(user), next);
     toast.success(favorites.includes(videoId) ? t.removeFav : t.addFav);
   };
 

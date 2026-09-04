@@ -12,6 +12,7 @@ import { loadSettings } from '@/lib/settingsStore';
 import { initThemeEngine } from '@/lib/themeEngine';
 import { base44 } from '@/api/base44Client';
 import { syncPendingFavorites } from '@/lib/offlineSync';
+import { getAccountEmail } from '@/lib/activeUser';
 import { startContentSyncEngine } from '@/lib/contentSyncEngine';
 import LogoLoader from './components/LogoLoader';
 import SyncStatusBadge from './components/SyncStatusBadge';
@@ -55,7 +56,7 @@ const AuthenticatedApp = () => {
     base44.auth.me().
     then((u) => {
       loadSettings(u?.email);
-      if (u) syncPendingFavorites(u.email).catch(() => {});
+      if (u) syncPendingFavorites(getAccountEmail(u)).catch(() => {});
     }).
     catch(() => {
       loadSettings();

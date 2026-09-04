@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { User, Bell, Moon, Sun, Globe, LogOut, Save, Languages, Info, Mail } from "lucide-react";
+import { User, Bell, Moon, Sun, Globe, LogOut, Save, Languages, Info, Mail, Heart, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,6 +8,8 @@ import { Switch } from "@/components/ui/switch";
 import { MobileSelect } from "@/components/ui/mobile-select";
 import SettingRow from "@/components/SettingRow";
 import EmailVerification from "@/components/EmailVerification";
+import { getAccountEmail, setAccountEmail, getDownloadedBookIds } from "@/lib/activeUser";
+import { getFavoriteIds } from "@/lib/offlineSync";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Trash2 } from "lucide-react";
 import MobileHeader from "@/components/MobileHeader";
@@ -32,6 +34,9 @@ export default function Settings() {
   const [notifications, setNotifications] = useState(true);
   const [language, setLanguage] = useState("العربية");
   const [fullName, setFullName] = useState("");
+  const [emailInput, setEmailInput] = useState("");
+  const [sendSignal, setSendSignal] = useState(0);
+  const [stats, setStats] = useState({ favs: 0, dls: 0 });
   const [appLang, setAppLang] = useState(() => ls.get("dev_app_lang", "ar"));
 
   useEffect(() => {
@@ -45,17 +50,34 @@ export default function Settings() {
     setUser(u);
     if (u) {
       setFullName(u.full_name || "");
+      setEmailInput(getAccountEmail(u));
+      refreshStats(getAccountEmail(u));
       setNotifications(u.notifications_enabled ?? true);
       setLanguage(u.preferred_language || "العربية");
     }
     setLoading(false);
   };
 
+  const refreshStats = async (email) => {
+    if (!email) return;
+    const favs = await getFavoriteIds(email).catch(() => []);
+    setStats({ favs: favs.length, dls: getDownloadedBookIds(email).length });
+  };
+
   const handleSaveProfile = async () => {
+    const em = emailInput.trim();
+    if (!em || !/^\S+@\S+\.\S+$/.test(em)) { toast.error(t.evInvalidEmail); return; }
     setSaving(true);
-    await base44.auth.updateMe({ full_name: fullName });
-    toast.success(t.saveChanges + " ✓");
-    setSaving(false);
+    try {
+      await base44.auth.updateMe({ full_name: fullName });
+      setAccountEmail(em);
+      setEmailInput(em);
+      setSendSignal(Date.now()); // sends the verification code email right away
+      await refreshStats(em);
+      toast.success(t.saveChanges + " ✓");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleToggleDark = (val) => {
@@ -102,15 +124,34 @@ export default function Settings() {
             </div>
             <div>
               <Label>{t.email}</Label>
-              <Input value={user?.email || ""} disabled className="mt-1.5 opacity-60" />
+              <Input value={emailInput} onChange={(e) => setEmailInput(e.target.value)} type="email" inputMode="email" className="mt-1.5" />
+              <p className="text-xs text-muted-foreground mt-1">{t.accHint}</p>
             </div>
             <Button onClick={handleSaveProfile} disabled={saving} className="gap-2 rounded-[4px_20px_4px_20px]">
-              <Save className="w-4 h-4" /> {t.saveChanges}
+              <Save className="w-4 h-4" /> {t.saveSendBtn}
             </Button>
 
             {/* Email Verification — merged into profile card */}
             <div className="border-t border-border my-5" />
-            <EmailVerification email={user?.email} />
+            <EmailVerification email={emailInput} sendSignal={sendSignal} />
+
+            {/* Everything tied to this email: favorites + offline downloads */}
+            <div className="grid grid-cols-2 gap-2 mt-4">
+              <div className="flex items-center gap-3 rounded-xl bg-muted/50 border border-border p-3">
+                <Heart className="w-4 h-4 text-primary shrink-0" />
+                <div>
+                  <p className="text-base font-bold leading-tight">{stats.favs}</p>
+                  <p className="text-xs text-muted-foreground">{t.accFavorites}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 rounded-xl bg-muted/50 border border-border p-3">
+                <Download className="w-4 h-4 text-primary shrink-0" />
+                <div>
+                  <p className="text-base font-bold leading-tight">{stats.dls}</p>
+                  <p className="text-xs text-muted-foreground">{t.accOfflineBooks}</p>
+                </div>
+              </div>
+            </div>
           </div>
         </motion.div>
 

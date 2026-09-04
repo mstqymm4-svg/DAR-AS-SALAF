@@ -7,6 +7,7 @@ import VideoCard from "@/components/VideoCard";
 import { SkeletonGrid } from "../components/Skeleton";
 import { useT } from "@/lib/i18n";
 import { getBooks, getVideos, getFavoriteIds, toggleFavorite } from "@/lib/offlineSync";
+import { getAccountEmail, getVideoFavIds, setVideoFavIds as saveVideoFavIds } from "@/lib/activeUser";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { useContentRefresh } from "@/hooks/useContentSync";
 
@@ -15,9 +16,7 @@ export default function Favorites() {
   const [books, setBooks] = useState([]);
   const [favoriteIds, setFavoriteIds] = useState([]);
   const [videos, setVideos] = useState([]);
-  const [videoFavIds, setVideoFavIds] = useState(() => {
-    try {return JSON.parse(localStorage.getItem("video_favorites") || "[]");} catch {return [];}
-  });
+  const [videoFavIds, setVideoFavIds] = useState([]);
   const [tab, setTab] = useState("books");
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
@@ -26,10 +25,10 @@ export default function Favorites() {
   const loadFavorites = async () => {
     const u = await base44.auth.me().catch(() => null);
     setUser(u);
-    setVideoFavIds(JSON.parse(localStorage.getItem("video_favorites") || "[]"));
+    setVideoFavIds(getVideoFavIds(getAccountEmail(u)));
     setVideos((await getVideos()) || []);
     if (!u) {setLoading(false);return;}
-    const ids = await getFavoriteIds(u.email);
+    const ids = await getFavoriteIds(getAccountEmail(u));
     setFavoriteIds(ids);
     if (ids.length > 0) {
       const allBooks = await getBooks();
@@ -45,7 +44,7 @@ export default function Favorites() {
 
   const handleToggleFavorite = async (bookId) => {
     if (!user) return;
-    await toggleFavorite(bookId, user.email);
+    await toggleFavorite(bookId, getAccountEmail(user));
     setFavoriteIds((prev) => prev.filter((id) => id !== bookId));
     setBooks((prev) => prev.filter((b) => b.id !== bookId));
   };
@@ -53,7 +52,7 @@ export default function Favorites() {
   const handleToggleVideoFav = (videoId) => {
     const next = videoFavIds.filter((id) => id !== videoId);
     setVideoFavIds(next);
-    localStorage.setItem("video_favorites", JSON.stringify(next));
+    saveVideoFavIds(getAccountEmail(user), next);
   };
 
   if (loading) {
