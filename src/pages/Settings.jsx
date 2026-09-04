@@ -275,7 +275,7 @@ export default function Settings() {
             <h2 className="text-base font-bold">{t.logout}</h2>
           </div>
           <p className="text-sm text-muted-foreground mb-4">{t.logoutSub}</p>
-          <Button variant="destructive" onClick={() => base44.auth.logout()} className="gap-2 rounded-[12px_4px_4px_4px]">
+          <Button variant="destructive" onClick={() => base44.auth.logout()} className="gap-2 rounded-[12px_12px_4px_4px]">
             <LogOut className="w-4 h-4" /> {t.logout}
           </Button>
         </motion.div>
