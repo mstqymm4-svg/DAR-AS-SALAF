@@ -275,7 +275,7 @@ export default function Settings() {
             <h2 className="text-base font-bold">{t.logout}</h2>
           </div>
           <p className="text-sm text-muted-foreground mb-4">{t.logoutSub}</p>
-          <Button variant="destructive" onClick={() => base44.auth.logout()} className="gap-2 rounded-[4px_20px_4px_16px]">
+          <Button variant="destructive" onClick={() => base44.auth.logout()} className="gap-2 rounded-[4px_20px_4px_20px]">
             <LogOut className="w-4 h-4" /> {t.logout}
           </Button>
         </motion.div>
@@ -291,7 +291,7 @@ export default function Settings() {
           <p className="text-sm text-muted-foreground mb-4">{t.deleteAccountSub}</p>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive" className="gap-2 rounded-xl">
+              <Button variant="destructive" className="gap-2 rounded-[4px_12px_4px_4px]">
                 <Trash2 className="w-4 h-4" /> {t.deleteAccount}
               </Button>
             </AlertDialogTrigger>
