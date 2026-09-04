@@ -131,8 +131,7 @@ export default function Settings() {
               <Save className="w-4 h-4" /> {t.saveSendBtn}
             </Button>
 
-            {/* Email Verification — merged into profile card */}
-            <div className="border-t border-border my-5" />
+            {/* Email verification — inline, code sent immediately on save */}
             <EmailVerification email={emailInput} sendSignal={sendSignal} />
 
             {/* Everything tied to this email: favorites + offline downloads */}

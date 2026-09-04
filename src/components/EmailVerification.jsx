@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Mail, ShieldCheck, Send, Loader2, CheckCircle2 } from "lucide-react";
+import { ShieldCheck, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -79,22 +79,12 @@ export default function EmailVerification({ email, sendSignal }) {
 
   return (
     <div>
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-          {verified ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <ShieldCheck className="w-4 h-4 text-primary" />}
-        </div>
-        <div>
-          <h2 className="text-base font-bold">{t.evTitle}</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">{t.evSub}</p>
-        </div>
-      </div>
-      <div className="flex items-center gap-2 mb-4 text-sm">
-        <Mail className="w-4 h-4 text-muted-foreground" />
-        <span className="font-medium truncate">{email}</span>
-        {verified && <span className="text-green-600 text-xs font-bold mr-auto">{t.evVerified} ✓</span>}
-      </div>
-      {!verified && (
-        <div className="space-y-3">
+      {verified ? (
+        <p className="flex items-center gap-1.5 text-xs text-green-600 font-bold">
+          <CheckCircle2 className="w-4 h-4 shrink-0" /> {t.evVerified} ✓
+        </p>
+      ) : sent ? (
+        <div className="space-y-2">
           <div className="flex gap-2">
             <Input
               value={code}
@@ -108,13 +98,14 @@ export default function EmailVerification({ email, sendSignal }) {
               {t.evVerify}
             </Button>
           </div>
-          <Button onClick={sendCode} disabled={sending} variant="outline" className="gap-2 w-full rounded-[4px_20px_4px_20px]">
-            {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-            {sent ? t.evResend : t.evSend}
-          </Button>
-          {sent && <p className="text-xs text-muted-foreground text-center">{t.evCheckSpam}</p>}
+          <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+            <span>{t.evCheckSpam}</span>
+            <button onClick={sendCode} disabled={sending} className="text-primary hover:underline font-bold shrink-0">
+              {sending ? "…" : t.evResend}
+            </button>
+          </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
