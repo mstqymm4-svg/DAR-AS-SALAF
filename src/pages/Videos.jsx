@@ -8,7 +8,7 @@ import { PageSpinner } from "@/components/Skeleton";
 import { useT } from "@/lib/i18n";
 import { base44 } from "@/api/base44Client";
 import { getVideos, getVideoChannels } from "@/lib/offlineSync";
-import { getAccountEmail, getVideoFavIds, setVideoFavIds } from "@/lib/activeUser";
+import { getAccountEmail, getVideoFavIds, setVideoFavIds, markVideoWatched } from "@/lib/activeUser";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { useContentRefresh } from "@/hooks/useContentSync";
 import SmartImage from "@/components/SmartImage";
@@ -67,6 +67,12 @@ export default function Videos() {
     setFavorites(next);
     setVideoFavIds(getAccountEmail(user), next);
     toast.success(favorites.includes(videoId) ? t.removeFav : t.addFav);
+  };
+
+  // Open a video in the player + record it in the user's watched history
+  const selectVideo = (v) => {
+    if (v?.id) markVideoWatched(getAccountEmail(user), v.id);
+    setPlayingVideo(v);
   };
 
   const handleShare = async (video) => {
@@ -143,7 +149,7 @@ export default function Videos() {
             <VideoCard key={v.id} video={v} index={i}
             isFavorite={favorites.includes(v.id)}
             onToggleFavorite={toggleFavorite}
-            onPlay={setPlayingVideo}
+            onPlay={selectVideo}
             onShare={handleShare} />
 
             )}
@@ -170,7 +176,7 @@ export default function Videos() {
             <VideoCard key={v.id} video={v} index={i}
             isFavorite={favorites.includes(v.id)}
             onToggleFavorite={toggleFavorite}
-            onPlay={setPlayingVideo}
+            onPlay={selectVideo}
             onShare={handleShare} />
 
             )}
@@ -185,7 +191,7 @@ export default function Videos() {
           video={playingVideo}
           onClose={() => setPlayingVideo(null)}
           playlist={recent}
-          onSelectVideo={setPlayingVideo}
+          onSelectVideo={selectVideo}
         />
       )}
     </div>);

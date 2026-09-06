@@ -64,3 +64,21 @@ export function setAvatarUrl(email, url) {
   if (!email || !url) return;
   try { localStorage.setItem(AVATAR_KEY(email), url); } catch {}
 }
+
+// ── Watched videos history (per account email) ──
+const WATCHED_KEY = (email) => `dau_watched_${email}`;
+
+export function getWatchedVideoIds(email) {
+  if (!email) return [];
+  try { return JSON.parse(localStorage.getItem(WATCHED_KEY(email))) || []; } catch { return []; }
+}
+
+export function markVideoWatched(email, videoId) {
+  if (!email || !videoId) return;
+  try {
+    const ids = getWatchedVideoIds(email);
+    if (!ids.includes(videoId)) {
+      localStorage.setItem(WATCHED_KEY(email), JSON.stringify([...ids, videoId]));
+    }
+  } catch {}
+}

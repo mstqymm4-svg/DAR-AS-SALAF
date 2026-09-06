@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Camera, Heart, Download, BookOpen, Loader2, Save, Activity, User } from "lucide-react";
+import { Camera, Heart, Download, BookOpen, Loader2, Save, Activity, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import EmailVerification from "@/components/EmailVerification";
 import SmartImage from "@/components/SmartImage";
 import { useT } from "@/lib/i18n";
 import { toast } from "sonner";
-import { getAccountEmail, setAccountEmail, getDownloadedBookIds, getAvatarUrl, setAvatarUrl } from "@/lib/activeUser";
+import { getAccountEmail, setAccountEmail, getDownloadedBookIds, getAvatarUrl, setAvatarUrl, getWatchedVideoIds } from "@/lib/activeUser";
 import { getFavoriteIds, getBook } from "@/lib/offlineSync";
 
 const initials = (name, email) => {
@@ -28,7 +28,7 @@ export default function ProfileCard() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [sendSignal, setSendSignal] = useState(0);
-  const [stats, setStats] = useState({ favs: 0, dls: 0, reading: 0 });
+  const [stats, setStats] = useState({ favs: 0, dls: 0, reading: 0, watched: 0 });
   const [recentReads, setRecentReads] = useState([]);
 
   useEffect(() => {
@@ -54,7 +54,7 @@ export default function ProfileCard() {
     try {
       reading = Object.keys(localStorage).filter((k) => k.startsWith("lastpage_")).length;
     } catch {}
-    setStats({ favs: favs.length, dls: getDownloadedBookIds(email).length, reading });
+    setStats({ favs: favs.length, dls: getDownloadedBookIds(email).length, reading, watched: getWatchedVideoIds(email).length });
   };
 
   const loadRecentReads = async () => {
@@ -132,8 +132,12 @@ export default function ProfileCard() {
       className="bg-card border border-border rounded-2xl overflow-hidden"
     >
       {/* Banner */}
-      <div className="h-20 bg-gradient-to-l from-primary/25 via-primary/10 to-accent/15 relative">
+      <div className="h-24 bg-gradient-to-l from-primary/30 via-primary/10 to-accent/15 relative overflow-hidden">
         <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_80%_20%,hsl(var(--accent)/0.4),transparent_60%)]" />
+        <div className="absolute -bottom-8 -start-8 w-32 h-32 rounded-full bg-primary/10" />
+        <div className="absolute top-3 end-10 w-14 h-14 rounded-full border-[3px] border-foreground/10" />
+        <div className="absolute top-6 start-16 w-2 h-2 rounded-full bg-accent/50" />
+        <div className="absolute bottom-4 end-1/3 w-1.5 h-1.5 rounded-full bg-primary/30" />
       </div>
 
       {/* Avatar + identity */}
@@ -188,10 +192,11 @@ export default function ProfileCard() {
         <h3 className="flex items-center gap-2 text-sm font-bold text-foreground mb-3">
           <Activity className="w-4 h-4 text-primary" /> {t.myActivity}
         </h3>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
           <StatChip icon={<Heart className="w-4 h-4" />} value={stats.favs} label={t.accFavorites} tone="accent" />
           <StatChip icon={<Download className="w-4 h-4" />} value={stats.dls} label={t.accOfflineBooks} tone="primary" />
-          <StatChip icon={<BookOpen className="w-4 h-4" />} value={stats.reading} label={t.readingNow} tone="muted" />
+          <StatChip icon={<BookOpen className="w-4 h-4" />} value={stats.reading} label={t.booksRead} tone="success" />
+          <StatChip icon={<Eye className="w-4 h-4" />} value={stats.watched} label={t.watchedVideos} tone="muted" />
         </div>
       </div>
 
@@ -248,16 +253,15 @@ export default function ProfileCard() {
 
 function StatChip({ icon, value, label, tone }) {
   const tones = {
-    accent: "bg-accent/10 text-accent",
-    primary: "bg-primary/10 text-primary",
-    muted: "bg-muted text-foreground",
+    accent: "text-accent bg-accent/10 border-accent/20",
+    primary: "text-primary bg-primary/10 border-primary/20",
+    success: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+    muted: "text-foreground bg-muted border-border",
   };
   return (
-    <div className={`rounded-xl p-3 flex flex-col items-center gap-1 border border-border/50 ${tones[tone] || tones.muted}`}>
-      <div className="flex items-center gap-1.5">
-        {icon}
-        <span className="text-xl font-black">{value}</span>
-      </div>
+    <div className={`rounded-2xl border p-3 flex flex-col items-center gap-1 ${tones[tone] || tones.muted}`}>
+      <div className="w-8 h-8 rounded-full bg-card/70 flex items-center justify-center">{icon}</div>
+      <span className="text-xl font-black leading-none">{value}</span>
       <span className="text-[10px] font-medium text-muted-foreground text-center leading-tight">{label}</span>
     </div>
   );

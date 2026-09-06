@@ -226,6 +226,8 @@ export const TRANSLATIONS = {
     nextVideo: "الفيديو التالي",
     prevVideo: "الفيديو السابق",
     playlist: "قائمة التشغيل",
+    booksRead: "كتب مقروءة",
+    watchedVideos: "فيديوهات مشاهدة",
     },
   en: {
     dir: "ltr",
@@ -450,6 +452,8 @@ export const TRANSLATIONS = {
     nextVideo: "Next video",
     prevVideo: "Previous video",
     playlist: "Playlist",
+    booksRead: "Books read",
+    watchedVideos: "Videos watched",
     },
   fr: {
     dir: "ltr",
@@ -674,6 +678,8 @@ export const TRANSLATIONS = {
     nextVideo: "Vidéo suivante",
     prevVideo: "Vidéo précédente",
     playlist: "Liste de lecture",
+    booksRead: "Livres lus",
+    watchedVideos: "Vidéos vues",
     },
   ur: {
     dir: "rtl",
@@ -898,6 +904,8 @@ export const TRANSLATIONS = {
     nextVideo: "اگلی ویڈیو",
     prevVideo: "پچھلی ویڈیو",
     playlist: "پلے لسٹ",
+    booksRead: "پڑھی گئی کتابیں",
+    watchedVideos: "دیکھی گئی ویڈیوز",
     },
   hi: {
     dir: "ltr",
@@ -1122,6 +1130,8 @@ export const TRANSLATIONS = {
     nextVideo: "अगला वीडियो",
     prevVideo: "पिछला वीडियो",
     playlist: "प्लेलिस्ट",
+    booksRead: "पढ़ी पुस्तकें",
+    watchedVideos: "देखे गए वीडियो",
     },
   tr,
 };

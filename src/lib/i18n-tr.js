@@ -222,4 +222,6 @@ export default {
   nextVideo: "Sonraki video",
   prevVideo: "Önceki video",
   playlist: "Oynatma listesi",
+  booksRead: "Okunan kitaplar",
+  watchedVideos: "İzlenen videolar",
 };
