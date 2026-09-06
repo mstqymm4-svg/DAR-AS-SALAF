@@ -1,257 +1,1386 @@
 import React, { useEffect, useState } from "react";
 
 /*
-========================================================
-DAR AL ULOOM — PROFESSIONAL SPLASH SCREEN
-========================================================
+=========================================================
+DAR AL ULOOM — FUTURE PREMIUM LOADER
+=========================================================
+
+Modern English-only loading experience.
+
+IMPORTANT:
+Use your CURRENT logo only.
+Change LOGO_URL if your logo has a different path.
+=========================================================
 */
 
-// الشعار الرسمي الحالي لدار العلوم (الصورة المرجعية الأصلية)
-const LOGO_URL =
-  "https://media.base44.com/images/public/69c8e483a69a0d215eee4ef7/679b37a0c_C06AC024-1230-4B65-91B9-B30DDE077171.png";
+const LOGO_URL = "/assets/dar-aluloom-logo.png";
 
-export default function DarAlUloomSplash({ onComplete }) {
-  const [phase, setPhase] = useState("enter");
-  const [logoLoaded, setLogoLoaded] = useState(false);
+export default function LogoLoader({
+  isLoading = true,
+  onComplete,
+}) {
+  const [visible, setVisible] = useState(isLoading);
+  const [closing, setClosing] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  /*
+  -------------------------------------------------------
+  Fake visual progress
+  -------------------------------------------------------
+  This is only for the visual loading animation.
+  It does NOT control the actual application loading.
+  -------------------------------------------------------
+  */
 
   useEffect(() => {
-    // تحميل الشعار قبل بدء الحركة حتى لا يظهر مكان فارغ
-    const logo = new Image();
-    logo.onload = () => setLogoLoaded(true);
-    logo.onerror = () => setLogoLoaded(true);
-    logo.src = LOGO_URL;
+    if (!isLoading) {
+      setClosing(true);
 
-    const timer1 = setTimeout(() => setPhase("focus"), 650);
-    const timer2 = setTimeout(() => setPhase("exit"), 1900);
-    const timer3 = setTimeout(() => {
-      if (typeof onComplete === "function") onComplete();
-    }, 2450);
+      const timer = setTimeout(() => {
+        setVisible(false);
 
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      clearTimeout(timer3);
+        if (typeof onComplete === "function") {
+          onComplete();
+        }
+      }, 700);
+
+      return () => clearTimeout(timer);
+    }
+
+    setVisible(true);
+    setClosing(false);
+    setProgress(0);
+
+    const start = performance.now();
+    const duration = 1900;
+
+    let frame;
+
+    const animate = (time) => {
+      const elapsed = time - start;
+      const value = Math.min(
+        92,
+        Math.round((elapsed / duration) * 92)
+      );
+
+      setProgress(value);
+
+      if (value < 92) {
+        frame = requestAnimationFrame(animate);
+      }
     };
-  }, [onComplete]);
+
+    frame = requestAnimationFrame(animate);
+
+    return () => cancelAnimationFrame(frame);
+  }, [isLoading, onComplete]);
+
+  if (!visible) {
+    return null;
+  }
 
   return (
     <div
-      className={`
-        fixed
-        inset-0
-        z-[999999]
-        flex
-        items-center
-        justify-center
-        overflow-hidden
-        bg-[#F8FAFC]
-        transition-all
-        duration-[550ms]
-        ease-[cubic-bezier(.22,1,.36,1)]
-        ${phase === "exit" ? "scale-[1.035] opacity-0" : "scale-100 opacity-100"}
-      `}
-      dir="rtl"
+      className={`dalx-loader ${
+        closing ? "dalx-loader-closing" : ""
+      }`}
     >
-      {/* BACKGROUND */}
-      <div className="absolute inset-0 pointer-events-none">
-        {/* الضوء المركزي */}
-        <div
-          className={`
-            absolute
-            left-1/2
-            top-1/2
-            h-[430px]
-            w-[430px]
-            -translate-x-1/2
-            -translate-y-1/2
-            rounded-full
-            bg-[#A5F3FC]/25
-            blur-[100px]
-            transition-all
-            duration-[1200ms]
-            ${phase === "focus" ? "scale-125 opacity-100" : "scale-75 opacity-50"}
-          `}
-        />
-        {/* ضوء علوي */}
-        <div
-          className="absolute -left-24 -top-24 h-[280px] w-[280px] rounded-full bg-[#0891B2]/10 blur-[90px]"
-        />
-        {/* ضوء سفلي */}
-        <div
-          className="absolute -bottom-32 -right-24 h-[320px] w-[320px] rounded-full bg-[#155E75]/10 blur-[100px]"
-        />
-        {/* دوائر زخرفية */}
-        <div className="animate-ring-one absolute left-1/2 top-1/2 h-[270px] w-[270px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#0891B2]/10" />
-        <div className="animate-ring-two absolute left-1/2 top-1/2 h-[340px] w-[340px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#155E75]/5" />
+
+      {/* =================================================
+          BACKGROUND
+      ================================================= */}
+
+      <div className="dalx-background">
+
+        {/* Main atmospheric light */}
+        <div className="dalx-atmosphere" />
+
+        {/* Floating lights */}
+        <div className="dalx-orb dalx-orb-a" />
+        <div className="dalx-orb dalx-orb-b" />
+        <div className="dalx-orb dalx-orb-c" />
+
+        {/* Moving light */}
+        <div className="dalx-sweep" />
+
+        {/* Fine grid */}
+        <div className="dalx-grid" />
+
+        {/* Vignette */}
+        <div className="dalx-vignette" />
+
       </div>
 
-      {/* MAIN CONTENT */}
-      <div
-        className={`
-          relative
-          z-10
-          flex
-          flex-col
-          items-center
-          justify-center
-          transition-all
-          duration-[700ms]
-          ease-[cubic-bezier(.22,1,.36,1)]
-          ${
-            phase === "enter"
-              ? "translate-y-5 scale-[0.92] opacity-0"
-              : phase === "focus"
-              ? "translate-y-0 scale-100 opacity-100"
-              : "translate-y-[-10px] scale-[1.03] opacity-0"
-          }
-        `}
-      >
-        {/* LOGO */}
-        <div className="relative flex items-center justify-center">
-          {/* هالة الشعار */}
-          <div
-            className={`
-              absolute
-              h-[230px]
-              w-[230px]
-              rounded-full
-              bg-[#A5F3FC]/30
-              blur-[55px]
-              transition-all
-              duration-[900ms]
-              ${phase === "focus" ? "scale-110 opacity-100" : "scale-50 opacity-0"}
-            `}
-          />
-          {/* الحلقة */}
-          <div
-            className={`
-              absolute
-              h-[205px]
-              w-[205px]
-              rounded-full
-              border
-              border-[#0891B2]/15
-              transition-all
-              duration-[900ms]
-              ${phase === "focus" ? "scale-100 opacity-100" : "scale-50 opacity-0"}
-            `}
-          />
-          {/* الشعار */}
-          <div
-            className={`
-              relative
-              flex
-              h-[165px]
-              w-[165px]
-              items-center
-              justify-center
-              transition-all
-              duration-[900ms]
-              ease-[cubic-bezier(.16,1,.3,1)]
-              ${
-                phase === "enter"
-                  ? "scale-[0.55] rotate-[-8deg] opacity-0"
-                  : phase === "focus"
-                  ? "scale-100 rotate-0 opacity-100"
-                  : "scale-[1.04] rotate-0 opacity-0"
-              }
-            `}
-          >
-            {logoLoaded && (
-              <img
-                src={LOGO_URL}
-                alt="دار العلوم"
-                draggable="false"
-                className="relative z-20 max-h-full max-w-full object-contain select-none drop-shadow-[0_18px_35px_rgba(15,23,42,0.14)]"
-              />
-            )}
+
+      {/* =================================================
+          TOP NAVIGATION STYLE BRAND
+      ================================================= */}
+
+      <header className="dalx-header">
+
+        <div className="dalx-brand-mini">
+
+          <span className="dalx-brand-dot" />
+
+          <span className="dalx-brand-mini-text">
+            DAR AL ULOOM
+          </span>
+
+        </div>
+
+        <div className="dalx-version">
+          EXPERIENCE
+        </div>
+
+      </header>
+
+
+      {/* =================================================
+          CENTER EXPERIENCE
+      ================================================= */}
+
+      <main className="dalx-main">
+
+        {/* -------------------------------------------------
+            Logo
+        ------------------------------------------------- */}
+
+        <div className="dalx-logo-area">
+
+          {/* outer glow */}
+          <div className="dalx-logo-glow" />
+
+          {/* orbit */}
+          <div className="dalx-orbit dalx-orbit-one">
+            <span />
           </div>
+
+          <div className="dalx-orbit dalx-orbit-two">
+            <span />
+          </div>
+
+          {/* logo */}
+          <div className="dalx-logo-container">
+
+            <img
+              src={LOGO_URL}
+              alt="Dar Al Uloom"
+              className="dalx-logo"
+              draggable="false"
+            />
+
+          </div>
+
         </div>
 
-        {/* APP NAME */}
-        <div
-          className={`
-            mt-8
-            text-center
-            transition-all
-            duration-[700ms]
-            delay-[180ms]
-            ${
-              phase === "enter"
-                ? "translate-y-5 opacity-0"
-                : phase === "focus"
-                ? "translate-y-0 opacity-100"
-                : "translate-y-[-5px] opacity-0"
-            }
-          `}
-        >
-          <h1 className="text-[30px] font-bold leading-none tracking-[-0.02em] text-[#0F172A]">
-            دار العلوم
+
+        {/* -------------------------------------------------
+            Brand
+        ------------------------------------------------- */}
+
+        <div className="dalx-brand-content">
+
+          <div className="dalx-eyebrow">
+            KNOWLEDGE · LEARNING · EXCELLENCE
+          </div>
+
+          <h1 className="dalx-title">
+            DAR AL ULOOM
           </h1>
-          <p className="mt-3 text-[14px] font-medium tracking-[0.08em] text-[#155E75]">
-            للعلم والمعرفة
+
+          <p className="dalx-description">
+            Your journey to knowledge begins here.
           </p>
+
         </div>
 
-        {/* LOADING LINE */}
-        <div
-          className={`
-            mt-10
-            h-[3px]
-            w-[82px]
-            overflow-hidden
-            rounded-full
-            bg-[#E2E8F0]
-            transition-all
-            duration-500
-            ${phase === "focus" ? "opacity-100" : "opacity-0"}
-          `}
-        >
-          <div className="animate-loading-line h-full w-[42px] rounded-full bg-[#155E75]" />
-        </div>
-      </div>
 
-      {/* FOOTER */}
-      <div
-        className={`
-          absolute
-          bottom-7
-          left-0
-          right-0
-          text-center
-          transition-all
-          duration-500
-          ${phase === "focus" ? "translate-y-0 opacity-60" : "translate-y-2 opacity-0"}
-        `}
-      >
-        <span className="text-[11px] font-medium text-[#64748B]">
-          أهلاً بك في دار العلوم
+        {/* -------------------------------------------------
+            Loading
+        ------------------------------------------------- */}
+
+        <div className="dalx-loading-area">
+
+          <div className="dalx-loading-top">
+
+            <span>
+              {progress >= 90
+                ? "Almost ready"
+                : "Preparing your experience"}
+            </span>
+
+            <span className="dalx-percent">
+              {progress}%
+            </span>
+
+          </div>
+
+          <div className="dalx-progress">
+
+            <div
+              className="dalx-progress-fill"
+              style={{
+                width: `${progress}%`,
+              }}
+            />
+
+            <div className="dalx-progress-shine" />
+
+          </div>
+
+        </div>
+
+      </main>
+
+
+      {/* =================================================
+          FOOTER
+      ================================================= */}
+
+      <footer className="dalx-footer">
+
+        <div className="dalx-footer-line" />
+
+        <span>
+          BUILT FOR KNOWLEDGE
         </span>
-      </div>
 
-      {/* ANIMATIONS */}
+        <div className="dalx-footer-line" />
+
+      </footer>
+
+
+      {/* =================================================
+          EXIT TRANSITION
+      ================================================= */}
+
+      <div className="dalx-exit-panel dalx-exit-top" />
+      <div className="dalx-exit-panel dalx-exit-bottom" />
+
+
+      {/* =================================================
+          CSS
+      ================================================= */}
+
       <style>{`
-        @keyframes loadingLine {
-          0% { transform: translateX(150%); }
-          100% { transform: translateX(-180%); }
+
+        /* =================================================
+           ROOT
+        ================================================= */
+
+        .dalx-loader {
+          position: fixed;
+          inset: 0;
+          z-index: 999999999;
+
+          width: 100%;
+          height: 100%;
+
+          overflow: hidden;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          background: #F8FAFC;
+
+          color: #0F172A;
+
+          opacity: 1;
+
+          transform: scale(1);
+
+          transition:
+            opacity 650ms cubic-bezier(.76,0,.24,1),
+            transform 650ms cubic-bezier(.76,0,.24,1);
         }
-        @keyframes ringOne {
-          0% { transform: translate(-50%, -50%) scale(.92); opacity: .25; }
-          50% { transform: translate(-50%, -50%) scale(1.02); opacity: .55; }
-          100% { transform: translate(-50%, -50%) scale(.92); opacity: .25; }
+
+
+        .dalx-loader-closing {
+          opacity: 0;
+          transform: scale(1.025);
         }
-        @keyframes ringTwo {
-          0% { transform: translate(-50%, -50%) scale(.95); opacity: .15; }
-          50% { transform: translate(-50%, -50%) scale(1.05); opacity: .3; }
-          100% { transform: translate(-50%, -50%) scale(.95); opacity: .15; }
+
+
+        /* =================================================
+           BACKGROUND
+        ================================================= */
+
+        .dalx-background {
+          position: absolute;
+          inset: 0;
+
+          overflow: hidden;
+
+          pointer-events: none;
         }
-        .animate-loading-line { animation: loadingLine 1.05s cubic-bezier(.4,0,.2,1) infinite; }
-        .animate-ring-one { animation: ringOne 3.2s ease-in-out infinite; }
-        .animate-ring-two { animation: ringTwo 4s ease-in-out infinite; }
+
+
+        .dalx-atmosphere {
+          position: absolute;
+
+          width: 520px;
+          height: 520px;
+
+          left: 50%;
+          top: 45%;
+
+          transform:
+            translate(-50%, -50%);
+
+          border-radius: 50%;
+
+          background:
+            rgba(165, 243, 252, .20);
+
+          filter: blur(120px);
+
+          animation:
+            dalxAtmosphere
+            5s
+            ease-in-out
+            infinite;
+        }
+
+
+        /* =================================================
+           FLOATING ORBS
+        ================================================= */
+
+        .dalx-orb {
+          position: absolute;
+
+          border-radius: 50%;
+
+          filter: blur(90px);
+        }
+
+
+        .dalx-orb-a {
+          width: 280px;
+          height: 280px;
+
+          top: -100px;
+          left: -80px;
+
+          background:
+            rgba(8,145,178,.06);
+
+          animation:
+            dalxFloatA
+            9s
+            ease-in-out
+            infinite;
+        }
+
+
+        .dalx-orb-b {
+          width: 350px;
+          height: 350px;
+
+          right: -130px;
+          bottom: -130px;
+
+          background:
+            rgba(21,94,117,.06);
+
+          animation:
+            dalxFloatB
+            10s
+            ease-in-out
+            infinite;
+        }
+
+
+        .dalx-orb-c {
+          width: 180px;
+          height: 180px;
+
+          right: 20%;
+          top: 8%;
+
+          background:
+            rgba(165,243,252,.09);
+
+          animation:
+            dalxFloatC
+            7s
+            ease-in-out
+            infinite;
+        }
+
+
+        /* =================================================
+           LIGHT SWEEP
+        ================================================= */
+
+        .dalx-sweep {
+          position: absolute;
+
+          width: 180%;
+          height: 1px;
+
+          left: -40%;
+          top: 50%;
+
+          background:
+            linear-gradient(
+              90deg,
+              transparent,
+              rgba(8,145,178,.16),
+              transparent
+            );
+
+          transform:
+            rotate(-22deg)
+            translateX(-30%);
+
+          animation:
+            dalxSweep
+            4s
+            ease-in-out
+            infinite;
+        }
+
+
+        /* =================================================
+           GRID
+        ================================================= */
+
+        .dalx-grid {
+          position: absolute;
+          inset: 0;
+
+          opacity: .22;
+
+          background-image:
+            linear-gradient(
+              rgba(15,23,42,.025) 1px,
+              transparent 1px
+            ),
+            linear-gradient(
+              90deg,
+              rgba(15,23,42,.025) 1px,
+              transparent 1px
+            );
+
+          background-size:
+            48px 48px;
+
+          mask-image:
+            radial-gradient(
+              ellipse at center,
+              black 0%,
+              transparent 70%
+            );
+        }
+
+
+        /* =================================================
+           VIGNETTE
+        ================================================= */
+
+        .dalx-vignette {
+          position: absolute;
+          inset: 0;
+
+          background:
+            radial-gradient(
+              ellipse at center,
+              transparent 35%,
+              rgba(15,23,42,.025) 100%
+            );
+        }
+
+
+        /* =================================================
+           HEADER
+        ================================================= */
+
+        .dalx-header {
+          position: absolute;
+
+          top: 30px;
+          left: 32px;
+          right: 32px;
+
+          display: flex;
+
+          align-items: center;
+          justify-content: space-between;
+
+          opacity: 0;
+
+          animation:
+            dalxHeader
+            650ms
+            650ms
+            cubic-bezier(.16,1,.3,1)
+            forwards;
+        }
+
+
+        .dalx-brand-mini {
+          display: flex;
+
+          align-items: center;
+
+          gap: 9px;
+        }
+
+
+        .dalx-brand-dot {
+          width: 6px;
+          height: 6px;
+
+          border-radius: 50%;
+
+          background: #0891B2;
+
+          box-shadow:
+            0 0 0 5px
+            rgba(8,145,178,.08);
+        }
+
+
+        .dalx-brand-mini-text {
+          color: #334155;
+
+          font-size: 9px;
+
+          font-weight: 700;
+
+          letter-spacing: 2.3px;
+        }
+
+
+        .dalx-version {
+          color: #94A3B8;
+
+          font-size: 8px;
+
+          font-weight: 600;
+
+          letter-spacing: 1.7px;
+        }
+
+
+        /* =================================================
+           MAIN
+        ================================================= */
+
+        .dalx-main {
+          position: relative;
+
+          z-index: 10;
+
+          width: min(90%, 430px);
+
+          display: flex;
+          flex-direction: column;
+
+          align-items: center;
+
+          justify-content: center;
+        }
+
+
+        /* =================================================
+           LOGO AREA
+        ================================================= */
+
+        .dalx-logo-area {
+          position: relative;
+
+          width: 210px;
+          height: 210px;
+
+          display: flex;
+
+          align-items: center;
+          justify-content: center;
+
+          animation:
+            dalxStage
+            1000ms
+            cubic-bezier(.16,1,.3,1)
+            both;
+        }
+
+
+        .dalx-logo-glow {
+          position: absolute;
+
+          width: 145px;
+          height: 145px;
+
+          border-radius: 50%;
+
+          background:
+            rgba(165,243,252,.32);
+
+          filter: blur(55px);
+
+          animation:
+            dalxGlow
+            3.2s
+            ease-in-out
+            infinite;
+        }
+
+
+        /* =================================================
+           ORBITS
+        ================================================= */
+
+        .dalx-orbit {
+          position: absolute;
+
+          border-radius: 50%;
+
+          border:
+            1px solid
+            rgba(8,145,178,.09);
+        }
+
+
+        .dalx-orbit-one {
+          width: 185px;
+          height: 185px;
+
+          animation:
+            dalxOrbit
+            6s
+            linear
+            infinite;
+        }
+
+
+        .dalx-orbit-two {
+          width: 155px;
+          height: 155px;
+
+          border-color:
+            rgba(21,94,117,.06);
+
+          animation:
+            dalxOrbitReverse
+            8s
+            linear
+            infinite;
+        }
+
+
+        .dalx-orbit span {
+          position: absolute;
+
+          width: 5px;
+          height: 5px;
+
+          border-radius: 50%;
+
+          background: #0891B2;
+
+          box-shadow:
+            0 0 12px
+            rgba(8,145,178,.45);
+
+          top: -2px;
+          left: 50%;
+        }
+
+
+        /* =================================================
+           LOGO
+        ================================================= */
+
+        .dalx-logo-container {
+          position: relative;
+
+          z-index: 5;
+
+          width: 155px;
+          height: 155px;
+
+          display: flex;
+
+          align-items: center;
+          justify-content: center;
+
+          animation:
+            dalxLogo
+            1000ms
+            100ms
+            cubic-bezier(.16,1,.3,1)
+            both;
+        }
+
+
+        .dalx-logo {
+          width: 100%;
+          height: 100%;
+
+          object-fit: contain;
+
+          user-select: none;
+
+          -webkit-user-drag: none;
+
+          filter:
+            drop-shadow(
+              0 20px 40px
+              rgba(15,23,42,.12)
+            );
+        }
+
+
+        /* =================================================
+           BRAND CONTENT
+        ================================================= */
+
+        .dalx-brand-content {
+          margin-top: 24px;
+
+          text-align: center;
+
+          opacity: 0;
+
+          animation:
+            dalxBrand
+            750ms
+            350ms
+            cubic-bezier(.16,1,.3,1)
+            forwards;
+        }
+
+
+        .dalx-eyebrow {
+          color: #0891B2;
+
+          font-size: 8px;
+
+          font-weight: 700;
+
+          letter-spacing: 2px;
+
+          margin-bottom: 10px;
+        }
+
+
+        .dalx-title {
+          margin: 0;
+
+          color: #0F172A;
+
+          font-size: 30px;
+
+          font-weight: 800;
+
+          letter-spacing: 2px;
+
+          line-height: 1.1;
+        }
+
+
+        .dalx-description {
+          margin:
+            11px
+            0
+            0;
+
+          color: #64748B;
+
+          font-size: 12px;
+
+          font-weight: 400;
+
+          letter-spacing: .15px;
+        }
+
+
+        /* =================================================
+           LOADING
+        ================================================= */
+
+        .dalx-loading-area {
+          width: 100%;
+
+          max-width: 270px;
+
+          margin-top: 35px;
+
+          opacity: 0;
+
+          animation:
+            dalxLoading
+            600ms
+            650ms
+            cubic-bezier(.16,1,.3,1)
+            forwards;
+        }
+
+
+        .dalx-loading-top {
+          display: flex;
+
+          justify-content: space-between;
+
+          align-items: center;
+
+          margin-bottom: 9px;
+
+          color: #94A3B8;
+
+          font-size: 9px;
+
+          font-weight: 500;
+
+          letter-spacing: .2px;
+        }
+
+
+        .dalx-percent {
+          color: #155E75;
+
+          font-weight: 700;
+
+          font-variant-numeric:
+            tabular-nums;
+        }
+
+
+        .dalx-progress {
+          position: relative;
+
+          width: 100%;
+
+          height: 3px;
+
+          overflow: hidden;
+
+          border-radius: 99px;
+
+          background: #E2E8F0;
+        }
+
+
+        .dalx-progress-fill {
+          position: absolute;
+
+          top: 0;
+          left: 0;
+
+          height: 100%;
+
+          border-radius: 99px;
+
+          background:
+            linear-gradient(
+              90deg,
+              #155E75,
+              #0891B2
+            );
+
+          transition:
+            width 180ms ease-out;
+        }
+
+
+        .dalx-progress-shine {
+          position: absolute;
+
+          top: 0;
+
+          width: 50px;
+          height: 100%;
+
+          background:
+            linear-gradient(
+              90deg,
+              transparent,
+              rgba(255,255,255,.75),
+              transparent
+            );
+
+          animation:
+            dalxShine
+            1.6s
+            ease-in-out
+            infinite;
+        }
+
+
+        /* =================================================
+           FOOTER
+        ================================================= */
+
+        .dalx-footer {
+          position: absolute;
+
+          left: 0;
+          right: 0;
+          bottom: 30px;
+
+          z-index: 10;
+
+          display: flex;
+
+          align-items: center;
+
+          justify-content: center;
+
+          gap: 10px;
+
+          color: #94A3B8;
+
+          font-size: 7px;
+
+          font-weight: 600;
+
+          letter-spacing: 1.8px;
+
+          opacity: 0;
+
+          animation:
+            dalxFooter
+            600ms
+            850ms
+            ease
+            forwards;
+        }
+
+
+        .dalx-footer-line {
+          width: 20px;
+          height: 1px;
+
+          background: #CBD5E1;
+        }
+
+
+        /* =================================================
+           EXIT
+        ================================================= */
+
+        .dalx-exit-panel {
+          position: absolute;
+
+          z-index: 100;
+
+          left: 0;
+          right: 0;
+
+          height: 50%;
+
+          background: #155E75;
+
+          transition:
+            transform 700ms
+            cubic-bezier(.76,0,.24,1);
+        }
+
+
+        .dalx-exit-top {
+          top: 0;
+
+          transform:
+            translateY(-100%);
+        }
+
+
+        .dalx-exit-bottom {
+          bottom: 0;
+
+          transform:
+            translateY(100%);
+        }
+
+
+        .dalx-loader-closing
+        .dalx-exit-top {
+          transform:
+            translateY(0);
+        }
+
+
+        .dalx-loader-closing
+        .dalx-exit-bottom {
+          transform:
+            translateY(0);
+        }
+
+
+        /* =================================================
+           ANIMATIONS
+        ================================================= */
+
+        @keyframes dalxStage {
+
+          0% {
+            opacity: 0;
+
+            transform:
+              translateY(25px)
+              scale(.82);
+          }
+
+          60% {
+            opacity: 1;
+
+            transform:
+              translateY(-4px)
+              scale(1.025);
+          }
+
+          100% {
+            opacity: 1;
+
+            transform:
+              translateY(0)
+              scale(1);
+          }
+        }
+
+
+        @keyframes dalxLogo {
+
+          0% {
+            opacity: 0;
+
+            transform:
+              scale(.55)
+              rotate(-5deg);
+
+            filter:
+              blur(10px);
+          }
+
+          60% {
+            opacity: 1;
+
+            transform:
+              scale(1.04)
+              rotate(0);
+
+            filter:
+              blur(0);
+          }
+
+          100% {
+            opacity: 1;
+
+            transform:
+              scale(1)
+              rotate(0);
+
+            filter:
+              blur(0);
+          }
+        }
+
+
+        @keyframes dalxGlow {
+
+          0%,
+          100% {
+            opacity: .22;
+
+            transform:
+              scale(.8);
+          }
+
+          50% {
+            opacity: .65;
+
+            transform:
+              scale(1.12);
+          }
+        }
+
+
+        @keyframes dalxOrbit {
+
+          from {
+            transform:
+              rotate(0deg);
+          }
+
+          to {
+            transform:
+              rotate(360deg);
+          }
+        }
+
+
+        @keyframes dalxOrbitReverse {
+
+          from {
+            transform:
+              rotate(360deg);
+          }
+
+          to {
+            transform:
+              rotate(0deg);
+          }
+        }
+
+
+        @keyframes dalxBrand {
+
+          from {
+            opacity: 0;
+
+            transform:
+              translateY(15px);
+          }
+
+          to {
+            opacity: 1;
+
+            transform:
+              translateY(0);
+          }
+        }
+
+
+        @keyframes dalxLoading {
+
+          from {
+            opacity: 0;
+
+            transform:
+              translateY(8px);
+          }
+
+          to {
+            opacity: 1;
+
+            transform:
+              translateY(0);
+          }
+        }
+
+
+        @keyframes dalxHeader {
+
+          from {
+            opacity: 0;
+
+            transform:
+              translateY(-8px);
+          }
+
+          to {
+            opacity: .8;
+
+            transform:
+              translateY(0);
+          }
+        }
+
+
+        @keyframes dalxFooter {
+
+          from {
+            opacity: 0;
+
+            transform:
+              translateY(7px);
+          }
+
+          to {
+            opacity: .65;
+
+            transform:
+              translateY(0);
+          }
+        }
+
+
+        @keyframes dalxProgress {
+
+          from {
+            transform:
+              translateX(-100%);
+          }
+
+          to {
+            transform:
+              translateX(100%);
+          }
+        }
+
+
+        @keyframes dalxShine {
+
+          0% {
+            left: -60px;
+          }
+
+          100% {
+            left: 100%;
+          }
+        }
+
+
+        @keyframes dalxAtmosphere {
+
+          0%,
+          100% {
+            transform:
+              translate(-50%, -50%)
+              scale(.8);
+
+            opacity: .35;
+          }
+
+          50% {
+            transform:
+              translate(-50%, -50%)
+              scale(1.1);
+
+            opacity: .7;
+          }
+        }
+
+
+        @keyframes dalxFloatA {
+
+          0%,
+          100% {
+            transform:
+              translate(0,0);
+          }
+
+          50% {
+            transform:
+              translate(50px,40px);
+          }
+        }
+
+
+        @keyframes dalxFloatB {
+
+          0%,
+          100% {
+            transform:
+              translate(0,0);
+          }
+
+          50% {
+            transform:
+              translate(-45px,-35px);
+          }
+        }
+
+
+        @keyframes dalxFloatC {
+
+          0%,
+          100% {
+            transform:
+              translate(0,0);
+          }
+
+          50% {
+            transform:
+              translate(-25px,35px);
+          }
+        }
+
+
+        @keyframes dalxSweep {
+
+          0% {
+            opacity: 0;
+
+            transform:
+              rotate(-22deg)
+              translateX(-40%);
+          }
+
+          35% {
+            opacity: 1;
+          }
+
+          70% {
+            opacity: .35;
+          }
+
+          100% {
+            opacity: 0;
+
+            transform:
+              rotate(-22deg)
+              translateX(40%);
+          }
+        }
+
+
+        /* =================================================
+           MOBILE
+        ================================================= */
+
+        @media (max-width: 480px) {
+
+          .dalx-header {
+            top: 24px;
+
+            left: 22px;
+            right: 22px;
+          }
+
+          .dalx-logo-area {
+            width: 190px;
+            height: 190px;
+          }
+
+          .dalx-logo-container {
+            width: 145px;
+            height: 145px;
+          }
+
+          .dalx-orbit-one {
+            width: 170px;
+            height: 170px;
+          }
+
+          .dalx-orbit-two {
+            width: 145px;
+            height: 145px;
+          }
+
+          .dalx-title {
+            font-size: 27px;
+          }
+
+          .dalx-description {
+            font-size: 11px;
+          }
+
+          .dalx-loading-area {
+            max-width: 240px;
+          }
+        }
+
+
+        /* =================================================
+           REDUCED MOTION
+        ================================================= */
+
         @media (prefers-reduced-motion: reduce) {
-          .animate-loading-line, .animate-ring-one, .animate-ring-two { animation: none !important; }
+
+          .dalx-loader *,
+          .dalx-background * {
+            animation: none !important;
+            transition: none !important;
+          }
+
         }
+
       `}</style>
+
     </div>
   );
 }
