@@ -67,7 +67,7 @@ export default function Contact() {
           </div>
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{t.contactTitle}</h1>
-            <p className="text-xs text-muted-foreground mt-0.5">{contactIntro}</p>
+            <p className="text-xs text-muted-foreground mt-0.5 hidden">{contactIntro}</p>
           </div>
         </div>
 
