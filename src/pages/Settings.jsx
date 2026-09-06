@@ -291,7 +291,7 @@ export default function Settings() {
           <p className="text-sm text-muted-foreground mb-4">{t.deleteAccountSub}</p>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive" className="gap-2 rounded-[4px_12px_4px_4px]">
+              <Button variant="destructive" className="gap-2 rounded-[4px_20px_4px_20px]">
                 <Trash2 className="w-4 h-4" /> {t.deleteAccount}
               </Button>
             </AlertDialogTrigger>
