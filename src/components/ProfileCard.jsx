@@ -162,7 +162,7 @@ export default function ProfileCard() {
             </button>
           </div>
           <div className="pb-1 text-end">
-            <p className="font-bold text-foreground truncate max-w-[180px] mb-1 mt-16">{fullName || t.profile}</p>
+            <p className="font-bold text-foreground truncate max-w-[180px] mt-10">{fullName || t.profile}</p>
             <p className="text-xs text-muted-foreground truncate max-w-[180px]">{emailInput}</p>
           </div>
         </div>
