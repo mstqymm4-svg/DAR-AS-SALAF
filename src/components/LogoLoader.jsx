@@ -1,253 +1,349 @@
-import { motion } from "framer-motion";
-import { getSetting } from "@/lib/settingsStore";
+import React, { useEffect, useState } from "react";
 
-/**
- * Dar Al-Uloom — Premium 3D Motion Logo Loader
- * 
- * Static center: mosque arch + pillars + crescent + pixel trail
- * Orbiting: outer D-frame detaches, orbits in 3D with depth
- * (passes behind/in front), then merges back. Continuous luxury loop.
- * 
- * Colors match original logo: royal blue, cyan, metallic silver.
- */
-export default function LogoLoader({ size = 100, showName = true }) {
-  const appName = getSetting("app_name") || "دار العلوم";
+const LOGO_URL = "/assets/dar-aluloom-logo.png";
 
-  // ── Timing: medium, luxurious, smooth ease-in/out ──
-  const dur = 3.6;
-  const ease = [0.45, 0, 0.55, 1];
-  const orbit = { duration: dur, repeat: Infinity, ease, times: [0, 0.12, 0.5, 0.88, 1] };
+export default function LogoLoader({ isLoading = true }) {
+  const [visible, setVisible] = useState(isLoading);
+  const [closing, setClosing] = useState(false);
 
-  // Logo palette
-  const royalBlue = "#0055ff";
-  const brightCyan = "#00d4ff";
-  const silverLight = "#e0e0e0";
-  const silverDark = "#b0b0b0";
+  useEffect(() => {
+    if (isLoading) {
+      setVisible(true);
+      setClosing(false);
+    } else {
+      setClosing(true);
+
+      const timer = setTimeout(() => {
+        setVisible(false);
+      }, 600);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading]);
+
+  if (!visible) return null;
 
   return (
-    <div className="flex flex-col items-center justify-center gap-7" style={{ perspective: "1400px" }}>
-      <div style={{ width: size, height: size, position: "relative", transformStyle: "preserve-3d" }}>
+    <>
+      <div
+        className={`dar-loader ${closing ? "dar-loader-close" : ""}`}
+        dir="rtl"
+      >
+        <div className="dar-loader-bg dar-loader-bg-1" />
+        <div className="dar-loader-bg dar-loader-bg-2" />
 
-        {/* ═══════════════ STATIC CENTER: Mosque + Pixel Trail ═══════════════ */}
-        <svg viewBox="0 0 120 120" className="absolute inset-0 w-full h-full" style={{ transformStyle: "preserve-3d" }}>
-          <defs>
-            {/* Silver gradient for mosque silhouette */}
-            <linearGradient id="dal-mosque-grad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={silverLight} />
-              <stop offset="60%" stopColor="#c8c8d0" />
-              <stop offset="100%" stopColor={silverDark} />
-            </linearGradient>
-            {/* Blue gradient for arch interior */}
-            <linearGradient id="dal-arch-inner" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={royalBlue} stopOpacity="0.9" />
-              <stop offset="100%" stopColor="#0033aa" stopOpacity="0.7" />
-            </linearGradient>
-            {/* Cyan glow for crescent */}
-            <radialGradient id="dal-crescent-glow" cx="0.5" cy="0.5" r="0.5">
-              <stop offset="0%" stopColor={brightCyan} stopOpacity="0.8" />
-              <stop offset="100%" stopColor={brightCyan} stopOpacity="0" />
-            </radialGradient>
-          </defs>
+        <div className="dar-loader-content">
 
-          {/* ── Pixel trail (left side) ── */}
-          {[
-            { x: 8, y: 50, s: 2.5 },
-            { x: 10, y: 42, s: 2 },
-            { x: 7, y: 58, s: 3 },
-            { x: 12, y: 34, s: 1.5 },
-            { x: 6, y: 66, s: 2 },
-            { x: 11, y: 26, s: 1.5 },
-            { x: 9, y: 72, s: 1.5 },
-            { x: 13, y: 20, s: 1 },
-          ].map((p, i) => (
-            <rect
-              key={i}
-              x={p.x}
-              y={p.y}
-              width={p.s}
-              height={p.s}
-              rx="0.4"
-              fill={brightCyan}
-              opacity={0.4 + i * 0.06}
+          <div className="dar-logo-wrapper">
+            <div className="dar-logo-light" />
+
+            <img
+              src={LOGO_URL}
+              alt="دار العلوم"
+              className="dar-logo"
+              draggable="false"
             />
-          ))}
+          </div>
 
-          {/* ── Mosque silhouette ── */}
-          {/* Base platform */}
-          <rect x="34" y="92" width="52" height="5" rx="1" fill="url(#dal-mosque-grad)" />
+          <div className="dar-brand">
+            <div className="dar-title">
+              دار العلوم
+            </div>
 
-          {/* Main body */}
-          <rect x="40" y="62" width="40" height="30" fill="url(#dal-mosque-grad)" />
+            <div className="dar-line" />
 
-          {/* Central pointed arch with interior */}
-          <path
-            d="M 52 92 L 52 76 Q 52 64 60 64 Q 68 64 68 76 L 68 92 Z"
-            fill="url(#dal-arch-inner)"
-            stroke="url(#dal-mosque-grad)"
-            strokeWidth="1.5"
-          />
+            <div className="dar-subtitle">
+              للعلم والمعرفة
+            </div>
+          </div>
 
-          {/* Pillars inside arch */}
-          <line x1="56" y1="70" x2="56" y2="88" stroke={silverLight} strokeWidth="1.2" opacity="0.7" />
-          <line x1="60" y1="68" x2="60" y2="88" stroke={silverLight} strokeWidth="1.2" opacity="0.7" />
-          <line x1="64" y1="70" x2="64" y2="88" stroke={silverLight} strokeWidth="1.2" opacity="0.7" />
+          <div className="dar-loading">
+            <div className="dar-loading-bar" />
+          </div>
 
-          {/* Dome base */}
-          <rect x="48" y="56" width="24" height="7" rx="1" fill="url(#dal-mosque-grad)" />
+        </div>
 
-          {/* Dome (pointed) */}
-          <path
-            d="M 48 56 Q 48 40 60 36 Q 72 40 72 56 Z"
-            fill="url(#dal-mosque-grad)"
-          />
-
-          {/* Crescent moon on top */}
-          <circle cx="60" cy="28" r="6" fill="url(#dal-crescent-glow)" />
-          <path
-            d="M 63 24 A 5 5 0 1 1 57 30 A 4 4 0 1 0 63 24 Z"
-            fill={silverLight}
-          />
-
-          {/* Side minarets */}
-          <rect x="34" y="64" width="4" height="28" rx="1" fill="url(#dal-mosque-grad)" />
-          <circle cx="36" cy="62" r="2.5" fill="url(#dal-mosque-grad)" />
-          <rect x="82" y="64" width="4" height="28" rx="1" fill="url(#dal-mosque-grad)" />
-          <circle cx="84" cy="62" r="2.5" fill="url(#dal-mosque-grad)" />
-
-          {/* Lens flare at crescent apex */}
-          <circle cx="60" cy="22" r="1.5" fill={brightCyan} opacity="0.9" />
-          <circle cx="60" cy="22" r="3" fill={brightCyan} opacity="0.3" />
-        </svg>
-
-        {/* ═══════════════ ORBITING D-FRAME ═══════════════ */}
-        {/* Layer 1: Orbital Y-rotation — creates the "around" motion */}
-        <motion.div
-          style={{ position: "absolute", inset: 0, transformStyle: "preserve-3d", willChange: "transform" }}
-          animate={{ rotateY: [0, 0, 180, 360, 360] }}
-          transition={orbit}
-        >
-          {/* Layer 2: Z-depth + scale — creates 3D "in front / behind" illusion */}
-          <motion.div
-            style={{ position: "absolute", inset: 0, transformStyle: "preserve-3d", willChange: "transform, opacity, filter" }}
-            animate={{
-              z: [0, 10, -25, 10, 0],
-              scale: [1, 0.92, 0.78, 0.92, 1],
-              opacity: [1, 0.95, 0.5, 0.95, 1],
-              filter: ["blur(0px)", "blur(0.3px)", "blur(1.2px)", "blur(0.3px)", "blur(0px)"],
-            }}
-            transition={orbit}
-          >
-            {/* Layer 3: Counter-rotate so D always faces viewer */}
-            <motion.div
-              style={{ position: "absolute", inset: 0, transformStyle: "preserve-3d", willChange: "transform" }}
-              animate={{ rotateY: [0, 0, -180, -360, -360] }}
-              transition={orbit}
-            >
-              {/* Layer 4: Subtle tilt for liveliness */}
-              <motion.div
-                style={{ position: "absolute", inset: 0, transformStyle: "preserve-3d", willChange: "transform" }}
-                animate={{
-                  rotateX: [0, 2, 0, -2, 0],
-                  rotateZ: [0, 1.5, 0, -1.5, 0],
-                  y: [0, -2, 0, 2, 0],
-                }}
-                transition={orbit}
-              >
-                <svg viewBox="0 0 120 120" className="absolute inset-0 w-full h-full">
-                  <defs>
-                    {/* Metallic blue gradient for D-frame */}
-                    <linearGradient id="dal-dframe-grad" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor={brightCyan} />
-                      <stop offset="35%" stopColor={royalBlue} />
-                      <stop offset="70%" stopColor="#0044cc" />
-                      <stop offset="100%" stopColor="#003399" />
-                    </linearGradient>
-                    {/* Silver bevel highlight */}
-                    <linearGradient id="dal-dframe-bevel" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor={silverLight} stopOpacity="0.8" />
-                      <stop offset="50%" stopColor={silverLight} stopOpacity="0.2" />
-                      <stop offset="100%" stopColor={silverDark} stopOpacity="0.6" />
-                    </linearGradient>
-                    {/* Glow filter */}
-                    <filter id="dal-dframe-glow" x="-20%" y="-20%" width="140%" height="140%">
-                      <feGaussianBlur stdDeviation="1.5" result="blur" />
-                      <feMerge>
-                        <feMergeNode in="blur" />
-                        <feMergeNode in="SourceGraphic" />
-                      </feMerge>
-                    </filter>
-                  </defs>
-
-                  {/* D-frame: thick metallic arch */}
-                  <path
-                    d="M 16 8 L 16 112 L 64 112 C 102 112 114 88 114 60 C 114 32 102 8 64 8 Z"
-                    fill="none"
-                    stroke="url(#dal-dframe-grad)"
-                    strokeWidth="7"
-                    strokeLinejoin="round"
-                    strokeLinecap="round"
-                    filter="url(#dal-dframe-glow)"
-                  />
-                  {/* Bevel highlight on inner edge */}
-                  <path
-                    d="M 22 14 L 22 106 L 63 106 C 95 106 106 86 106 60 C 106 34 95 14 63 14 Z"
-                    fill="none"
-                    stroke="url(#dal-dframe-bevel)"
-                    strokeWidth="1"
-                    strokeLinejoin="round"
-                    opacity="0.5"
-                  />
-                  {/* Light bloom on upper-right curve */}
-                  <circle cx="105" cy="28" r="4" fill={brightCyan} opacity="0.25" />
-                </svg>
-              </motion.div>
-            </motion.div>
-          </motion.div>
-        </motion.div>
-
-        {/* ═══════════════ Ground shadow ═══════════════ */}
-        <motion.div
-          className="absolute left-1/2 -translate-x-1/2 rounded-full blur-md"
-          style={{
-            bottom: -8,
-            width: size * 0.6,
-            height: 6,
-            background: `radial-gradient(circle, ${royalBlue}40, transparent)`,
-            willChange: "transform, opacity",
-          }}
-          animate={{
-            scale: [1, 0.85, 0.6, 0.85, 1],
-            opacity: [0.3, 0.22, 0.1, 0.22, 0.3],
-          }}
-          transition={orbit}
-        />
+        <div className="dar-footer">
+          DAR AL ULOOM
+        </div>
       </div>
 
-      {/* ═══════════════ App name ═══════════════ */}
-      {showName && (
-        <div className="flex flex-col items-center gap-1.5">
-          <motion.p
-            className="font-bold text-xl tracking-[0.18em]"
-            style={{
-              fontFamily: "var(--font-heading)",
-              background: `linear-gradient(135deg, ${royalBlue}, ${brightCyan})`,
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-            }}
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
-          >
-            {appName}
-          </motion.p>
-          <motion.div
-            className="h-[2px] rounded-full"
-            style={{ background: `linear-gradient(90deg, transparent, ${royalBlue}, ${brightCyan}, ${royalBlue}, transparent)` }}
-            animate={{ width: ["15%", "55%", "15%"], opacity: [0.3, 0.9, 0.3] }}
-            transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
-          />
-        </div>
-      )}
-    </div>
+      <style>{`
+        .dar-loader {
+          position: fixed;
+          inset: 0;
+          z-index: 999999;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #F8FAFC;
+          opacity: 1;
+          transform: scale(1);
+          transition:
+            opacity 600ms cubic-bezier(0.76, 0, 0.24, 1),
+            transform 600ms cubic-bezier(0.76, 0, 0.24, 1);
+        }
+
+        .dar-loader-close {
+          opacity: 0;
+          transform: scale(1.025);
+        }
+
+        .dar-loader-content {
+          position: relative;
+          z-index: 5;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .dar-loader-bg {
+          position: absolute;
+          border-radius: 9999px;
+          pointer-events: none;
+          filter: blur(90px);
+        }
+
+        .dar-loader-bg-1 {
+          width: 420px;
+          height: 420px;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%, -50%);
+          background: rgba(165, 243, 252, 0.22);
+          animation: darBgPulse 4s ease-in-out infinite;
+        }
+
+        .dar-loader-bg-2 {
+          width: 300px;
+          height: 300px;
+          right: -100px;
+          bottom: -100px;
+          background: rgba(21, 94, 117, 0.08);
+          animation: darBgFloat 5s ease-in-out infinite;
+        }
+
+        .dar-logo-wrapper {
+          position: relative;
+          width: 170px;
+          height: 170px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          animation: darLogoEnter 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .dar-logo-light {
+          position: absolute;
+          width: 130px;
+          height: 130px;
+          border-radius: 50%;
+          background: rgba(165, 243, 252, 0.28);
+          filter: blur(45px);
+          animation: darLogoGlow 2.5s ease-in-out infinite;
+        }
+
+        .dar-logo {
+          position: relative;
+          z-index: 2;
+          width: 150px;
+          height: 150px;
+          object-fit: contain;
+          user-select: none;
+          -webkit-user-drag: none;
+          filter: drop-shadow(
+            0 18px 35px rgba(15, 23, 42, 0.10)
+          );
+        }
+
+        .dar-brand {
+          margin-top: 26px;
+          text-align: center;
+          animation: darBrandEnter 700ms 250ms
+            cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .dar-title {
+          color: #0F172A;
+          font-size: 30px;
+          font-weight: 700;
+          line-height: 1.2;
+          letter-spacing: -0.5px;
+        }
+
+        .dar-line {
+          width: 24px;
+          height: 2px;
+          margin: 12px auto 0;
+          border-radius: 999px;
+          background: #0891B2;
+          opacity: 0.75;
+        }
+
+        .dar-subtitle {
+          margin-top: 10px;
+          color: #155E75;
+          font-size: 13px;
+          font-weight: 500;
+          letter-spacing: 1px;
+        }
+
+        .dar-loading {
+          position: relative;
+          width: 56px;
+          height: 2px;
+          margin-top: 34px;
+          overflow: hidden;
+          border-radius: 999px;
+          background: #E2E8F0;
+          animation: darLoadingAppear 500ms 650ms both;
+        }
+
+        .dar-loading-bar {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 22px;
+          height: 100%;
+          border-radius: 999px;
+          background: #155E75;
+          animation: darLoadingMove 950ms
+            cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        .dar-footer {
+          position: absolute;
+          z-index: 5;
+          bottom: 28px;
+          left: 0;
+          right: 0;
+          text-align: center;
+          color: #64748B;
+          font-size: 10px;
+          font-weight: 500;
+          letter-spacing: 1.5px;
+          opacity: 0;
+          animation: darFooterEnter 600ms 700ms both;
+        }
+
+        @keyframes darLogoEnter {
+          0% {
+            opacity: 0;
+            transform: translateY(22px) scale(0.82);
+            filter: blur(7px);
+          }
+
+          60% {
+            opacity: 1;
+            transform: translateY(-3px) scale(1.03);
+            filter: blur(0);
+          }
+
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            filter: blur(0);
+          }
+        }
+
+        @keyframes darLogoGlow {
+          0% {
+            opacity: 0.2;
+            transform: scale(0.75);
+          }
+
+          50% {
+            opacity: 0.65;
+            transform: scale(1.08);
+          }
+
+          100% {
+            opacity: 0.3;
+            transform: scale(0.9);
+          }
+        }
+
+        @keyframes darBrandEnter {
+          0% {
+            opacity: 0;
+            transform: translateY(14px);
+          }
+
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes darLoadingAppear {
+          0% {
+            opacity: 0;
+          }
+
+          100% {
+            opacity: 1;
+          }
+        }
+
+        @keyframes darLoadingMove {
+          0% {
+            transform: translateX(65px);
+          }
+
+          100% {
+            transform: translateX(-70px);
+          }
+        }
+
+        @keyframes darFooterEnter {
+          0% {
+            opacity: 0;
+            transform: translateY(6px);
+          }
+
+          100% {
+            opacity: 0.55;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes darBgPulse {
+          0% {
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0.4;
+          }
+
+          50% {
+            transform: translate(-50%, -50%) scale(1.08);
+            opacity: 0.7;
+          }
+
+          100% {
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0.4;
+          }
+        }
+
+        @keyframes darBgFloat {
+          0% {
+            transform: translate(0, 0);
+          }
+
+          50% {
+            transform: translate(-30px, -25px);
+          }
+
+          100% {
+            transform: translate(0, 0);
+          }
+
+          .dar-loader-bg {
+            animation: none !important;
+          }
+        }
+      `}</style>
+    </>
   );
 }
