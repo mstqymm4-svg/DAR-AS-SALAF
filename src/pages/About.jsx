@@ -72,7 +72,7 @@ export default function About() {
         </div>
 
         {/* Features */}
-        <h2 className="text-lg font-bold mt-10 mb-4 flex items-center gap-2">
+        <h2 className="text-lg font-bold mt-10 mb-4 flex items-center gap-2 hidden">
           <Sparkles className="w-5 h-5 text-primary" /> {t.aboutFeatures}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -86,12 +86,12 @@ export default function About() {
         </div>
 
         {/* Values */}
-        <h2 className="text-lg font-bold mt-10 mb-4 flex items-center gap-2">
+        <h2 className="text-lg font-bold mt-10 mb-4 flex items-center gap-2 hidden">
           <ShieldCheck className="w-5 h-5 text-primary" /> {t.aboutValues}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {values.map((v, i) =>
-          <div key={i} className="bg-card border border-border rounded-2xl p-5 text-center">
+          <div key={i} className="bg-card border border-border rounded-2xl p-5 text-center hidden">
               <v.icon className="w-8 h-8 text-accent mx-auto mb-2" />
               <h3 className="font-bold text-sm text-foreground">{v.title}</h3>
               <p className="text-xs text-muted-foreground mt-1">{v.desc}</p>
