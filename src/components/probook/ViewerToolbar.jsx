@@ -1,93 +1,117 @@
 import {
   ChevronLeft, ChevronRight, Bookmark, BookmarkCheck,
   ZoomIn, ZoomOut, Moon, Sun, List, Maximize, ChevronDown,
-  Search, ListOrdered,
+  Search, ListOrdered, Palette,
 } from "lucide-react";
 import { useT } from "@/lib/i18n";
 
 /**
  * Bottom toolbar for the ProBookViewer.
- * Contains: zoom, page nav, TOC, search, bookmark, go-to, dark mode, fullscreen.
+ * Zoom, page nav, TOC, search, bookmark, go-to, reading theme
+ * (light → dark → sepia), fullscreen. The reading-progress bar is
+ * tappable to jump anywhere in the book.
  */
 export default function ViewerToolbar({
   currentPage,
   totalPages,
   zoom,
-  darkMode,
+  theme,
   bookmarks,
   hasOutline,
   onNext,
   onPrev,
   onZoomIn,
   onZoomOut,
-  onToggleDark,
+  onCycleTheme,
   onToggleBookmark,
   onToggleToc,
   onToggleSearch,
   onToggleGoTo,
+  onSeekProgress,
   onToggleFullscreen,
   onHide,
 }) {
   const t = useT();
+  const dark = theme === "dark";
+  const pct = totalPages ? Math.round((currentPage / totalPages) * 100) : 0;
+
+  const themeIcon =
+    theme === "dark" ? <Moon className="w-4 h-4" /> :
+    theme === "sepia" ? <Palette className="w-4 h-4" /> :
+    <Sun className="w-4 h-4" />;
+  const themeName =
+    theme === "dark" ? t.tbDark : theme === "sepia" ? t.themeSepia : t.tbLight;
+
   return (
-    <div className={`shrink-0 border-t ${darkMode ? "border-gray-700 bg-gray-800" : "border-border bg-card"}`}>
+    <div className={`shrink-0 border-t ${dark ? "border-gray-700 bg-gray-800" : "border-border bg-card"}`}>
       <div dir="ltr" className="flex items-center justify-center px-2 py-1.5 gap-0.5 sm:gap-1 overflow-x-auto scrollbar-hide">
-        <ToolBtn onClick={onZoomOut} dark={darkMode} title={t.tbZoomOut}>
+        <ToolBtn onClick={onZoomOut} dark={dark} title={t.tbZoomOut}>
           <ZoomOut className="w-4 h-4" />
         </ToolBtn>
-        <span className={`text-xs font-mono w-12 text-center shrink-0 ${darkMode ? "text-gray-300" : "text-foreground"}`}>
+        <span className={`text-xs font-mono w-12 text-center shrink-0 ${dark ? "text-gray-300" : "text-foreground"}`}>
           {Math.round(zoom * 100)}%
         </span>
-        <ToolBtn onClick={onZoomIn} dark={darkMode} title={t.tbZoomIn}>
+        <ToolBtn onClick={onZoomIn} dark={dark} title={t.tbZoomIn}>
           <ZoomIn className="w-4 h-4" />
         </ToolBtn>
 
-        <Divider dark={darkMode} />
+        <Divider dark={dark} />
 
-        <ToolBtn onClick={onPrev} dark={darkMode} title={t.tbPrev} disabled={currentPage <= 1}>
+        <ToolBtn onClick={onPrev} dark={dark} title={t.tbPrev} disabled={currentPage <= 1}>
           <ChevronLeft className="w-4 h-4" />
         </ToolBtn>
-        <span className={`text-xs font-mono font-bold px-2 shrink-0 ${darkMode ? "text-gray-300" : "text-foreground"}`}>
-          {currentPage} / {totalPages}
+        <span className={`text-xs font-mono font-bold px-2 shrink-0 whitespace-nowrap ${dark ? "text-gray-300" : "text-foreground"}`}>
+          {currentPage} / {totalPages} · {pct}%
         </span>
-        <ToolBtn onClick={onNext} dark={darkMode} title={t.tbNext} disabled={currentPage >= totalPages}>
+        <ToolBtn onClick={onNext} dark={dark} title={t.tbNext} disabled={currentPage >= totalPages}>
           <ChevronRight className="w-4 h-4" />
         </ToolBtn>
 
-        <Divider dark={darkMode} />
+        <Divider dark={dark} />
 
         {hasOutline && (
-          <ToolBtn onClick={onToggleToc} dark={darkMode} title={t.idxTitle}>
+          <ToolBtn onClick={onToggleToc} dark={dark} title={t.idxTitle}>
             <List className="w-4 h-4" />
           </ToolBtn>
         )}
-        <ToolBtn onClick={onToggleSearch} dark={darkMode} title={t.tbSearch}>
+        <ToolBtn onClick={onToggleSearch} dark={dark} title={t.tbSearch}>
           <Search className="w-4 h-4" />
         </ToolBtn>
-        <ToolBtn onClick={onToggleBookmark} dark={darkMode} title={t.tbBookmark} active={bookmarks.includes(currentPage)}>
+        <ToolBtn onClick={onToggleBookmark} dark={dark} title={t.tbBookmark} active={bookmarks.includes(currentPage)}>
           {bookmarks.includes(currentPage) ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
         </ToolBtn>
-        <ToolBtn onClick={onToggleGoTo} dark={darkMode} title={t.tbGoTo}>
+        <ToolBtn onClick={onToggleGoTo} dark={dark} title={t.tbGoTo}>
           <ListOrdered className="w-4 h-4" />
         </ToolBtn>
-        <ToolBtn onClick={onToggleDark} dark={darkMode} title={darkMode ? t.tbLight : t.tbDark}>
-          {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+        <ToolBtn onClick={onCycleTheme} dark={dark} title={`${t.tbTheme}: ${themeName}`} active={theme !== "light"}>
+          {themeIcon}
         </ToolBtn>
-        <ToolBtn onClick={onToggleFullscreen} dark={darkMode} title={t.tbFullscreen}>
+        <ToolBtn onClick={onToggleFullscreen} dark={dark} title={t.tbFullscreen}>
           <Maximize className="w-4 h-4" />
         </ToolBtn>
-        <Divider dark={darkMode} />
-        <ToolBtn onClick={onHide} dark={darkMode} title={t.tbHide}>
+        <Divider dark={dark} />
+        <ToolBtn onClick={onHide} dark={dark} title={t.tbHide}>
           <ChevronDown className="w-4 h-4" />
         </ToolBtn>
       </div>
 
-      {/* Progress bar */}
-      <div className={`h-1 ${darkMode ? "bg-gray-700" : "bg-muted"}`}>
+      {/* Tappable reading-progress bar */}
+      <div
+        dir="ltr"
+        className={`h-1.5 cursor-pointer group relative ${dark ? "bg-gray-700" : "bg-muted"}`}
+        onClick={(e) => {
+          if (!onSeekProgress) return;
+          const rect = e.currentTarget.getBoundingClientRect();
+          const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+          onSeekProgress(ratio);
+        }}
+      >
         <div
-          className="h-full bg-primary transition-all duration-300"
-          style={{ width: `${totalPages ? (currentPage / totalPages) * 100 : 0}%` }}
-        />
+          className="h-full bg-primary transition-all duration-300 relative"
+          style={{ width: `${pct}%` }}
+        >
+          <div className="absolute -end-1 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+        </div>
       </div>
     </div>
   );

@@ -180,7 +180,14 @@ export default function Videos() {
       </div>
 
       {/* Player Modal */}
-      {playingVideo && <VideoPlayer video={playingVideo} onClose={() => setPlayingVideo(null)} />}
+      {playingVideo && (
+        <VideoPlayer
+          video={playingVideo}
+          onClose={() => setPlayingVideo(null)}
+          playlist={recent}
+          onSelectVideo={setPlayingVideo}
+        />
+      )}
     </div>);
 
 }

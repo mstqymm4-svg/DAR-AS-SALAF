@@ -1,14 +1,16 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { BookOpen, Home, Heart, Settings, Code, Video, Info, MessageCircle } from "lucide-react";
+import { BookOpen, Home, Heart, Settings, Code, Video, Info, MessageCircle, User } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { useT } from "@/lib/i18n";
 import { getSetting, subscribeToSettings } from "@/lib/settingsStore";
+import { getAccountEmail, getAvatarUrl } from "@/lib/activeUser";
 
 export default function Layout() {
   const location = useLocation();
   const [user, setUser] = useState(null);
+  const [avatarUrl, setAvatarUrl] = useState("");
   const t = useT();
 
   const [showDevNav, setShowDevNav] = useState(() => getSetting("show_dev_nav") !== "false");
@@ -24,8 +26,10 @@ export default function Layout() {
       setAppSubtitleOverride(s.app_subtitle || "");
     });
     const handler = () => setShowDevNav(getSetting("show_dev_nav") !== "false");
+    const avatarHandler = () => setAvatarUrl(getAvatarUrl(getAccountEmail(null)));
     window.addEventListener("storage", handler);
-    return () => {unsub();window.removeEventListener("storage", handler);};
+    window.addEventListener("dau-avatar-change", avatarHandler);
+    return () => {unsub();window.removeEventListener("storage", handler);window.removeEventListener("dau-avatar-change", avatarHandler);};
   }, []);
 
   const navItems = [
@@ -38,7 +42,10 @@ export default function Layout() {
 
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    base44.auth.me().then((u) => {
+      setUser(u);
+      if (u) setAvatarUrl(getAvatarUrl(getAccountEmail(u)));
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -87,6 +94,13 @@ export default function Layout() {
 
               })}
             </nav>
+            <Link to="/settings" aria-label={t.navSettings} className="shrink-0 p-1.5 rounded-full hover:bg-muted transition-colors">
+              <div className="w-9 h-9 rounded-full overflow-hidden bg-primary/10 border border-primary/20 flex items-center justify-center">
+                {avatarUrl ?
+                <img src={avatarUrl} alt={t.profile} className="w-full h-full object-cover" /> :
+                <User className="w-4 h-4 text-primary" />}
+              </div>
+            </Link>
             <Link to="/books" className="md:hidden p-2.5 rounded-xl hover:bg-muted transition-colors active:scale-95">
               <BookOpen className="w-5 h-5 text-muted-foreground" />
             </Link>

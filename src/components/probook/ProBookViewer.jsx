@@ -17,7 +17,12 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [zoom, setZoom] = useState(1);
-  const [darkMode, setDarkMode] = useState(false);
+  const [theme, setTheme] = useState(() => {
+    try {
+      const v = localStorage.getItem("dau_reader_theme");
+      return ["light", "dark", "sepia"].includes(v) ? v : "light";
+    } catch { return "light"; }
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
@@ -92,6 +97,7 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
   useEffect(() => {
     if (totalPages > 0 && currentPage > 0) {
       localStorage.setItem(`lastpage_${bookId}`, String(currentPage));
+      localStorage.setItem(`lastts_${bookId}`, String(Date.now()));
     }
   }, [currentPage, totalPages, bookId]);
 
@@ -99,6 +105,11 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
   useEffect(() => {
     try { localStorage.setItem(BM_PREFIX + bookId, JSON.stringify(bookmarks)); } catch {}
   }, [bookmarks, bookId]);
+
+  // ── Persist reading theme ──
+  useEffect(() => {
+    try { localStorage.setItem("dau_reader_theme", theme); } catch {}
+  }, [theme]);
 
   // ── Navigation helpers ──
   const goToPage = useCallback((p) => {
@@ -249,7 +260,7 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
         totalPages={totalPages}
         currentPage={currentPage}
         zoom={zoom}
-        darkMode={darkMode}
+        theme={theme}
         onCurrentPageChange={onStreamPageChange}
         scrollToPageRef={scrollToPageRef}
       />
@@ -258,7 +269,7 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
       <TocPanel
         show={showToc}
         isRTL={isRTL}
-        darkMode={darkMode}
+        darkMode={theme === "dark"}
         outline={outline}
         totalPages={totalPages}
         onClose={() => setShowToc(false)}
@@ -290,18 +301,19 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
           currentPage={currentPage}
           totalPages={totalPages}
           zoom={zoom}
-          darkMode={darkMode}
+          theme={theme}
           bookmarks={bookmarks}
           hasOutline={outline.length > 0}
           onNext={nextPage}
           onPrev={prevPage}
           onZoomIn={zoomIn}
           onZoomOut={zoomOut}
-          onToggleDark={() => setDarkMode(d => !d)}
+          onCycleTheme={() => setTheme(th => (th === "light" ? "dark" : th === "dark" ? "sepia" : "light"))}
           onToggleBookmark={toggleBookmark}
           onToggleToc={() => setShowToc(s => !s)}
           onToggleSearch={() => setShowSearch(s => !s)}
           onToggleGoTo={openGoTo}
+          onSeekProgress={(f) => goToPage(Math.max(1, Math.round(f * totalPages)))}
           onToggleFullscreen={toggleFullscreen}
           onHide={() => setShowToolbar(false)}
         />

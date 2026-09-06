@@ -1,9 +1,15 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Maximize, Minimize, Play, Pause, RotateCcw, Volume2, VolumeX, Share2, Rewind, FastForward, Repeat } from "lucide-react";
+import {
+  X, Maximize, Minimize, Play, Pause, RotateCcw, Volume2, VolumeX,
+  Share2, Rewind, FastForward, Repeat, SkipBack, SkipForward,
+  ListVideo, Sun,
+} from "lucide-react";
 import { extractYoutubeId } from "@/components/dev/DevVideos";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
+import { usePlayerGestures } from "@/hooks/usePlayerGestures";
+import PlaylistPanel from "@/components/video/PlaylistPanel";
 
 function formatTime(seconds) {
   if (!seconds || isNaN(seconds)) return "0:00";
@@ -14,11 +20,12 @@ function formatTime(seconds) {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-export default function VideoPlayer({ video, onClose }) {
+export default function VideoPlayer({ video, onClose, playlist = [], onSelectVideo }) {
   const t = useT();
   const containerRef = useRef(null);
   const playerInstanceRef = useRef(null);
   const hideTimerRef = useRef(null);
+  const barRef = useRef(null);
   const [player, setPlayer] = useState(null);
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -26,6 +33,7 @@ export default function VideoPlayer({ video, onClose }) {
   const [muted, setMuted] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const [showPlaylist, setShowPlaylist] = useState(false);
   const [ready, setReady] = useState(false);
   const [restoreTime, setRestoreTime] = useState(0);
   const [rate, setRate] = useState(1);
@@ -33,6 +41,15 @@ export default function VideoPlayer({ video, onClose }) {
   const loopRef = useRef(false);
 
   const videoId = extractYoutubeId(video?.youtube_url);
+
+  // ── Playlist navigation (used by buttons, auto-advance and the panel) ──
+  const plIdx = playlist.findIndex((v) => v.id === video.id);
+  const nextItem = plIdx >= 0 && plIdx < playlist.length - 1 ? playlist[plIdx + 1] : null;
+  const prevItem = plIdx > 0 ? playlist[plIdx - 1] : null;
+  const nextItemRef = useRef(null);
+  const onSelectVideoRef = useRef(null);
+  nextItemRef.current = nextItem;
+  onSelectVideoRef.current = onSelectVideo;
 
   // Restore last position
   useEffect(() => {
@@ -68,9 +85,14 @@ export default function VideoPlayer({ video, onClose }) {
             setPlaying(e.data === window.YT.PlayerState.PLAYING);
             if (e.data === window.YT.PlayerState.PLAYING) {
               setDuration(e.target.getDuration());
-            } else if (e.data === window.YT.PlayerState.ENDED && loopRef.current && e.target) {
-              e.target.seekTo(0, true);
-              e.target.playVideo();
+            } else if (e.data === window.YT.PlayerState.ENDED) {
+              if (loopRef.current) {
+                e.target.seekTo(0, true);
+                e.target.playVideo();
+              } else if (nextItemRef.current && onSelectVideoRef.current) {
+                // Auto-advance to the next video in the playlist
+                onSelectVideoRef.current(nextItemRef.current);
+              }
             }
           },
         },
@@ -104,13 +126,12 @@ export default function VideoPlayer({ video, onClose }) {
     if (!player) return;
     const interval = setInterval(() => {
       try {
-        const t = player.getCurrentTime() || 0;
-        setCurrentTime(t);
+        const cur = player.getCurrentTime() || 0;
+        setCurrentTime(cur);
         const d = player.getDuration();
         if (d) setDuration(d);
-        // Save position every 5 seconds
-        if (videoId && t > 0) {
-          localStorage.setItem(`video_pos_${videoId}`, String(Math.floor(t)));
+        if (videoId && cur > 0) {
+          localStorage.setItem(`video_pos_${videoId}`, String(Math.floor(cur)));
         }
       } catch(e) {}
     }, 300);
@@ -153,6 +174,13 @@ export default function VideoPlayer({ video, onClose }) {
     return () => window.removeEventListener("keydown", handler);
   }, [player, playing, onClose, muted]);
 
+  // ── Touch gestures (double-tap skip, drag seek, brightness & volume) ──
+  const getCurrentTime = useCallback(() => {
+    try { return player?.getCurrentTime?.() || 0; } catch { return 0; }
+  }, [player]);
+  const { onTouchStart, onTouchMove, onTouchEnd, seekPreview, adjust, ripple, brightness } =
+    usePlayerGestures({ player, duration, getCurrentTime });
+
   const togglePlay = () => {
     if (!player) return;
     if (playing) player.pauseVideo();
@@ -185,9 +213,12 @@ export default function VideoPlayer({ video, onClose }) {
     loopRef.current = v;
   };
 
-  const handleSeek = (e) => {
-    if (!player) return;
-    const time = Number(e.target.value);
+  // Draggable progress bar
+  const seekFromClientX = (clientX) => {
+    if (!player || !duration || !barRef.current) return;
+    const rect = barRef.current.getBoundingClientRect();
+    const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    const time = ratio * duration;
     player.seekTo(time, true);
     setCurrentTime(time);
   };
@@ -231,8 +262,6 @@ export default function VideoPlayer({ video, onClose }) {
     };
   }, []);
 
-
-
   if (!videoId) {
     return (
       <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/95" dir="rtl">
@@ -255,13 +284,70 @@ export default function VideoPlayer({ video, onClose }) {
       onClick={showControlsTemp}
     >
       <div className="flex-1 relative flex items-center justify-center">
-        <div id="yt-player-container" className="w-full h-full pointer-events-none" />
+        {/* YouTube iframe with gesture-controlled brightness */}
+        <div className="w-full h-full" style={{ filter: `brightness(${brightness})` }}>
+          <div id="yt-player-container" className="w-full h-full pointer-events-none" />
+        </div>
 
         {!ready && (
           <div className="absolute inset-0 flex items-center justify-center bg-black">
             <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin" />
           </div>
         )}
+
+        {/* Gesture capture layer (under the control overlays) */}
+        <div
+          className="absolute inset-0 z-[5]"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        />
+
+        {/* Double-tap ripple feedback */}
+        <AnimatePresence>
+          {ripple && (
+            <motion.div
+              key={ripple.key}
+              initial={{ opacity: 0.4, scale: 0.5 }}
+              animate={{ opacity: 0, scale: 1.5 }}
+              transition={{ duration: 0.5 }}
+              className={`absolute top-1/2 -translate-y-1/2 w-32 h-32 rounded-full bg-white/20 pointer-events-none z-[15] flex items-center justify-center text-white font-bold text-lg ${
+                ripple.side === "left" ? "start-[10%]" : "end-[10%]"
+              }`}
+            >
+              {ripple.side === "left" ? "-10s" : "+10s"}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Seek / volume / brightness indicator */}
+        {(seekPreview || adjust) && (
+          <div
+            dir="ltr"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[15] px-5 py-2.5 rounded-2xl bg-black/75 text-white text-sm font-bold flex items-center gap-2 pointer-events-none"
+          >
+            {seekPreview && (
+              <>
+                {seekPreview.delta < 0 ? <Rewind className="w-4 h-4" /> : <FastForward className="w-4 h-4" />}
+                {formatTime(seekPreview.time)}
+                <span className="text-white/60 text-xs">
+                  ({seekPreview.delta >= 0 ? "+" : ""}{Math.round(seekPreview.delta)}s)
+                </span>
+              </>
+            )}
+            {adjust?.type === "volume" && (<><Volume2 className="w-4 h-4" />{adjust.value}%</>)}
+            {adjust?.type === "brightness" && (<><Sun className="w-4 h-4" />{adjust.value}%</>)}
+          </div>
+        )}
+
+        {/* Playlist panel */}
+        <PlaylistPanel
+          show={showPlaylist}
+          videos={playlist}
+          currentIndex={plIdx}
+          onSelect={(v) => onSelectVideo?.(v)}
+          onClose={() => setShowPlaylist(false)}
+        />
 
         {/* Top bar */}
         <AnimatePresence>
@@ -312,58 +398,97 @@ export default function VideoPlayer({ video, onClose }) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
-              className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent px-4 pt-12 pb-4 pointer-events-none z-10"
+              className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent px-4 pt-14 pb-3 pointer-events-none z-10"
             >
-              {/* Progress bar */}
-              <div className="flex items-center gap-2 mb-3 pointer-events-auto" onClick={(e) => e.stopPropagation()}>
-                <span className="text-xs text-white font-mono w-12 text-center">{formatTime(currentTime)}</span>
-                <input
-                  type="range"
-                  min="0"
-                  max={duration || 0}
-                  value={currentTime}
-                  onChange={handleSeek}
-                  className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
-                  style={{
-                    background: `linear-gradient(to right, hsl(var(--primary)) ${progressPct}%, rgba(255,255,255,0.2) ${progressPct}%)`,
-                  }}
-                />
-                <span className="text-xs text-white font-mono w-12 text-center">{formatTime(duration)}</span>
+              {/* Draggable progress bar */}
+              <div className="flex items-center gap-3 mb-2 pointer-events-auto">
+                <span className="text-[11px] text-white font-mono w-12 text-center shrink-0">{formatTime(currentTime)}</span>
+                <div
+                  ref={barRef}
+                  dir="ltr"
+                  className="relative flex-1 h-7 flex items-center cursor-pointer touch-none group"
+                  onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); seekFromClientX(e.clientX); }}
+                  onPointerMove={(e) => { if (e.buttons === 1) seekFromClientX(e.clientX); }}
+                >
+                  <div className="relative w-full h-1.5 rounded-full bg-white/20">
+                    <div className="absolute inset-y-0 left-0 rounded-full bg-primary" style={{ width: `${progressPct}%` }} />
+                    <div
+                      className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-white shadow-md transition-transform group-hover:scale-125"
+                      style={{ left: `${progressPct}%` }}
+                    />
+                  </div>
+                </div>
+                <span className="text-[11px] text-white/80 font-mono w-12 text-center shrink-0">{formatTime(duration)}</span>
               </div>
 
               {/* Control buttons */}
-              <div className="flex items-center justify-between pointer-events-auto" onClick={(e) => e.stopPropagation()}>
-                <div className="flex items-center gap-2">
-                  <button onClick={togglePlay} className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors">
+              <div className="flex items-center justify-between gap-1 pointer-events-auto overflow-x-auto scrollbar-hide" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center gap-1 shrink-0">
+                  <CtrlBtn onClick={togglePlay} primary title={t.play}>
                     {playing ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
-                  </button>
-                  <button onClick={handleRestart} className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors" title={t.restartPlayback}>
+                  </CtrlBtn>
+                  <CtrlBtn onClick={() => prevItem && onSelectVideo?.(prevItem)} disabled={!prevItem} title={t.prevVideo}>
+                    <SkipBack className="w-5 h-5" />
+                  </CtrlBtn>
+                  <CtrlBtn onClick={() => nextItem && onSelectVideo?.(nextItem)} disabled={!nextItem} title={t.nextVideo}>
+                    <SkipForward className="w-5 h-5" />
+                  </CtrlBtn>
+                </div>
+                <div className="flex-1 min-w-0 px-2 hidden sm:block text-center">
+                  <p className="text-xs text-white/60 truncate">{video.title}</p>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <CtrlBtn onClick={handleRestart} title={t.restartPlayback}>
                     <RotateCcw className="w-5 h-5" />
-                  </button>
-                  <button onClick={() => skip(-10)} className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors" title="-10s">
+                  </CtrlBtn>
+                  <CtrlBtn onClick={() => skip(-10)} title="-10s">
                     <Rewind className="w-5 h-5" />
-                  </button>
-                  <button onClick={() => skip(10)} className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors" title="+10s">
+                  </CtrlBtn>
+                  <CtrlBtn onClick={() => skip(10)} title="+10s">
                     <FastForward className="w-5 h-5" />
-                  </button>
-                  <button onClick={cycleSpeed} className="h-10 px-2.5 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-xs font-bold transition-colors" title={t.speedLabel || "Speed"}>
+                  </CtrlBtn>
+                  <button
+                    onClick={cycleSpeed}
+                    title={t.speedLabel || "Speed"}
+                    className="h-10 px-2.5 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-xs font-bold transition-colors shrink-0"
+                  >
                     {rate}x
                   </button>
-                  <button onClick={toggleLoop} className={`w-10 h-10 rounded-full flex items-center justify-center text-white transition-colors ${loop ? "bg-primary/80" : "bg-white/10 hover:bg-white/20"}`} title={t.loopBtn}>
+                  <CtrlBtn onClick={toggleLoop} active={loop} title={t.loopBtn}>
                     <Repeat className="w-5 h-5" />
-                  </button>
-                  <button onClick={toggleMute} className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors">
+                  </CtrlBtn>
+                  {playlist.length > 0 && (
+                    <CtrlBtn onClick={() => setShowPlaylist(s => !s)} active={showPlaylist} title={t.playlist}>
+                      <ListVideo className="w-5 h-5" />
+                    </CtrlBtn>
+                  )}
+                  <CtrlBtn onClick={toggleMute}>
                     {muted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-                  </button>
+                  </CtrlBtn>
+                  <CtrlBtn onClick={toggleFullscreen} title={t.tbFullscreen || "Fullscreen"}>
+                    {fullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+                  </CtrlBtn>
                 </div>
-                <button onClick={toggleFullscreen} className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors">
-                  {fullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
-                </button>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
     </div>
+  );
+}
+
+function CtrlBtn({ children, onClick, disabled, title, active, primary }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+      className={`w-10 h-10 rounded-full flex items-center justify-center text-white transition-all shrink-0 disabled:opacity-30 disabled:cursor-default active:scale-95 ${
+        primary ? "bg-primary/90 hover:bg-primary" : active ? "bg-primary/80" : "bg-white/10 hover:bg-white/20"
+      }`}
+    >
+      {children}
+    </button>
   );
 }

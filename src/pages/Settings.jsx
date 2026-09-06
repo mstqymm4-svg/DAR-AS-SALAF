@@ -1,15 +1,13 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { User, Bell, Moon, Sun, Globe, LogOut, Save, Languages, Info, Mail, Heart, Download } from "lucide-react";
+import { Bell, Moon, Sun, Globe, LogOut, Save, Languages, Info, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { MobileSelect } from "@/components/ui/mobile-select";
 import SettingRow from "@/components/SettingRow";
-import EmailVerification from "@/components/EmailVerification";
-import { getAccountEmail, setAccountEmail, getDownloadedBookIds } from "@/lib/activeUser";
-import { getFavoriteIds } from "@/lib/offlineSync";
+import ProfileCard from "@/components/ProfileCard";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Trash2 } from "lucide-react";
 import MobileHeader from "@/components/MobileHeader";
@@ -27,16 +25,11 @@ const ls = {
 
 export default function Settings() {
   const t = useT();
-  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [darkMode, setDarkMode] = useState(() => getThemeState().isDark);
   const [notifications, setNotifications] = useState(true);
   const [language, setLanguage] = useState("العربية");
-  const [fullName, setFullName] = useState("");
-  const [emailInput, setEmailInput] = useState("");
-  const [sendSignal, setSendSignal] = useState(0);
-  const [stats, setStats] = useState({ favs: 0, dls: 0 });
   const [appLang, setAppLang] = useState(() => ls.get("dev_app_lang", "ar"));
 
   useEffect(() => {
@@ -47,37 +40,11 @@ export default function Settings() {
 
   const loadUser = async () => {
     const u = await base44.auth.me().catch(() => null);
-    setUser(u);
     if (u) {
-      setFullName(u.full_name || "");
-      setEmailInput(getAccountEmail(u));
-      refreshStats(getAccountEmail(u));
       setNotifications(u.notifications_enabled ?? true);
       setLanguage(u.preferred_language || "العربية");
     }
     setLoading(false);
-  };
-
-  const refreshStats = async (email) => {
-    if (!email) return;
-    const favs = await getFavoriteIds(email).catch(() => []);
-    setStats({ favs: favs.length, dls: getDownloadedBookIds(email).length });
-  };
-
-  const handleSaveProfile = async () => {
-    const em = emailInput.trim();
-    if (!em || !/^\S+@\S+\.\S+$/.test(em)) {toast.error(t.evInvalidEmail);return;}
-    setSaving(true);
-    try {
-      await base44.auth.updateMe({ full_name: fullName });
-      setAccountEmail(em);
-      setEmailInput(em);
-      setSendSignal(Date.now()); // sends the verification code email right away
-      await refreshStats(em);
-      toast.success(t.saveChanges + " ✓");
-    } finally {
-      setSaving(false);
-    }
   };
 
   const handleToggleDark = (val) => {
@@ -110,49 +77,7 @@ export default function Settings() {
 
       <div className="space-y-6">
         {/* Profile */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="bg-card border border-border rounded-2xl p-6">
-          <div className="flex items-center gap-3 mb-5">
-            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-              <User className="w-4 h-4 text-primary" />
-            </div>
-            <h2 className="text-base font-bold">{t.profile}</h2>
-          </div>
-          <div className="space-y-4">
-            <div>
-              <Label>{t.fullName}</Label>
-              <Input value={fullName} onChange={(e) => setFullName(e.target.value)} className="mt-1.5" />
-            </div>
-            <div>
-              <Label>{t.email}</Label>
-              <Input value={emailInput} onChange={(e) => setEmailInput(e.target.value)} type="email" inputMode="email" className="mt-1.5" />
-              <p className="text-xs text-muted-foreground mt-1">{t.accHint}</p>
-            </div>
-            <Button onClick={handleSaveProfile} disabled={saving} className="gap-2 rounded-[4px_20px_4px_20px]">
-              <Save className="w-4 h-4" /> {t.saveSendBtn}
-            </Button>
-
-            {/* Email verification — inline, code sent immediately on save */}
-            <EmailVerification email={emailInput} sendSignal={sendSignal} />
-
-            {/* Everything tied to this email: favorites + offline downloads */}
-            
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            
-          </div>
-        </motion.div>
+        <ProfileCard />
 
         {/* Appearance */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className="bg-card border border-border rounded-2xl p-6">

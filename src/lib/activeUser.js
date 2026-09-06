@@ -51,3 +51,16 @@ export function setVideoFavIds(email, ids) {
   if (!email) return;
   try { localStorage.setItem(VF_KEY(email), JSON.stringify(ids)); } catch {}
 }
+
+// ── Profile avatar (per account email) ──
+const AVATAR_KEY = (email) => `dau_avatar_${email}`;
+
+export function getAvatarUrl(email) {
+  if (!email) return "";
+  try { return localStorage.getItem(AVATAR_KEY(email)) || ""; } catch { return ""; }
+}
+
+export function setAvatarUrl(email, url) {
+  if (!email || !url) return;
+  try { localStorage.setItem(AVATAR_KEY(email), url); } catch {}
+}

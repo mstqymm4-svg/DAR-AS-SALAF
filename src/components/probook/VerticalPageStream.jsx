@@ -10,15 +10,15 @@ import PdfPageRenderer from "./PdfPageRenderer";
  * Reading direction is always LTR (English style): scroll down to advance.
  */
 const DEFAULT_RATIO = 0.707; // A4 portrait fallback
-const RENDER_BUFFER = 2; // render currentPage ± 2
-const PREFETCH = 5; // measure aspect ratios within ±5
+const RENDER_BUFFER = 3; // render currentPage ± 3 (smoother scrolling)
+const PREFETCH = 8; // measure aspect ratios within ±8
 
 export default function VerticalPageStream({
   pdf,
   totalPages,
   currentPage,
   zoom,
-  darkMode,
+  theme,
   onCurrentPageChange,
   scrollToPageRef,
 }) {
@@ -91,10 +91,16 @@ export default function VerticalPageStream({
   }, [pdf, currentPage, totalPages]);
 
   const slotWidth = width > 0 ? width - 16 : 0;
-  const darkFilter = darkMode ? "invert(0.92) hue-rotate(180deg)" : "none";
+  // Reading themes: dark inverts the page, sepia gives a warm "paper" tone
+  const pageFilter =
+    theme === "dark"
+      ? "invert(0.92) hue-rotate(180deg)"
+      : theme === "sepia"
+      ? "sepia(0.45) saturate(1.15) contrast(1.02) brightness(0.97)"
+      : "none";
 
   return (
-    <div ref={scrollRef} className="flex-1 overflow-auto bg-muted/30" onContextMenu={(e) => e.preventDefault()}>
+    <div ref={scrollRef} className="flex-1 overflow-auto overscroll-contain bg-muted/30" onContextMenu={(e) => e.preventDefault()}>
       <div dir="ltr" className="flex flex-col items-start gap-3 py-3 px-2">
         {Array.from({ length: totalPages }, (_, idx) => {
           const p = idx + 1;
@@ -109,7 +115,7 @@ export default function VerticalPageStream({
               style={{
                 width: slotWidth > 0 ? slotWidth * zoom : "100%",
                 height: h,
-                filter: darkFilter,
+                filter: pageFilter,
               }}
             >
               {shouldRender && pdf ? (
