@@ -63,7 +63,7 @@ export default function Contact() {
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-            <MessageCircle className="w-6 h-6 text-primary mb-12" />
+            <MessageCircle className="w-6 h-6 text-primary mb-10" />
           </div>
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{t.contactTitle}</h1>
