@@ -1,5 +1,5 @@
 import { useState } from "react";
-import SplashScreen from "@/components/splash/SplashScreen";
+import DarAlUloomSplash from "@/components/splash/DarAlUloomSplash";
 import { Button } from "@/components/ui/button";
 
 // Preview page so you can test the Splash animation repeatedly before approving.
@@ -10,7 +10,7 @@ export default function SplashPreview() {
   return (
     <div className="relative min-h-screen bg-white">
       {!stopped && (
-        <SplashScreen
+        <DarAlUloomSplash
           key={key}
           onComplete={() => setKey((k) => k + 1)} // auto-replay for testing
         />

@@ -38,7 +38,7 @@ const Videos = lazy(() => import('./pages/Videos'));
 const About = lazy(() => import('./pages/About'));
 const Contact = lazy(() => import('./pages/Contact'));
 const SplashPreview = lazy(() => import('./pages/SplashPreview'));
-import SplashScreen from './components/splash/SplashScreen';
+import DarAlUloomSplash from './components/splash/DarAlUloomSplash';
 
 const PageLoader = () =>
 <div className="flex items-center justify-center min-h-[60vh] opacity-100">
@@ -90,7 +90,7 @@ const AuthenticatedApp = () => {
 
   if (!splashDone) {
     return (
-      <SplashScreen
+      <DarAlUloomSplash
         onComplete={() => {
           try { sessionStorage.setItem('dar_splash_shown', '1'); } catch {}
           setSplashDone(true);
