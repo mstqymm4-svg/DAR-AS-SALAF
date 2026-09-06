@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DarAlUloomSplash from "@/components/splash/DarAlUloomSplash";
 import { Button } from "@/components/ui/button";
 
@@ -6,12 +6,21 @@ import { Button } from "@/components/ui/button";
 export default function SplashPreview() {
   const [key, setKey] = useState(0);
   const [stopped, setStopped] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Simulate app loading so the splash builds progress, completes and auto-replays.
+  useEffect(() => {
+    setLoading(true);
+    const timer = setTimeout(() => setLoading(false), 2600);
+    return () => clearTimeout(timer);
+  }, [key]);
 
   return (
     <div className="relative min-h-screen bg-white">
       {!stopped && (
         <DarAlUloomSplash
           key={key}
+          isLoading={loading}
           onComplete={() => setKey((k) => k + 1)} // auto-replay for testing
         />
       )}

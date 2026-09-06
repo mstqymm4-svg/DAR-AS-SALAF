@@ -41,8 +41,8 @@ const SplashPreview = lazy(() => import('./pages/SplashPreview'));
 import DarAlUloomSplash from './components/splash/DarAlUloomSplash';
 
 const PageLoader = () =>
-<div className="flex items-center justify-center min-h-[60vh] opacity-100">
-    <LogoLoader size={72} />
+<div className="flex items-center justify-center min-h-[60vh]">
+    <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
   </div>;
 
 
@@ -71,14 +71,6 @@ const AuthenticatedApp = () => {
     return cleanup;
   }, []);
 
-  if (isLoadingPublicSettings || isLoadingAuth) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center bg-background">
-        <LogoLoader size={100} />
-      </div>);
-
-  }
-
   if (authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
@@ -91,11 +83,20 @@ const AuthenticatedApp = () => {
   if (!splashDone) {
     return (
       <DarAlUloomSplash
+        isLoading={isLoadingPublicSettings || isLoadingAuth}
         onComplete={() => {
           try { sessionStorage.setItem('dar_splash_shown', '1'); } catch {}
           setSplashDone(true);
         }}
       />
+    );
+  }
+
+  if (isLoadingPublicSettings || isLoadingAuth) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-background">
+        <LogoLoader size={100} />
+      </div>
     );
   }
 

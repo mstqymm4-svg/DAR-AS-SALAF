@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 
-const LOGO_URL = "/assets/dar-aluloom-logo.png";
+const LOGO_URL =
+  "https://media.base44.com/images/public/69c8e483a69a0d215eee4ef7/679b37a0c_C06AC024-1230-4B65-91B9-B30DDE077171.png";
 
 export default function LogoLoader({ isLoading = true }) {
   const [visible, setVisible] = useState(isLoading);
@@ -338,7 +339,9 @@ export default function LogoLoader({ isLoading = true }) {
           100% {
             transform: translate(0, 0);
           }
+        }
 
+        @media (prefers-reduced-motion: reduce) {
           .dar-loader-bg {
             animation: none !important;
           }
