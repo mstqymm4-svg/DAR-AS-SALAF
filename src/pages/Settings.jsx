@@ -8,7 +8,6 @@ import { Switch } from "@/components/ui/switch";
 import { MobileSelect } from "@/components/ui/mobile-select";
 import SettingRow from "@/components/SettingRow";
 import ProfileCard from "@/components/ProfileCard";
-import AccountSyncCard from "@/components/AccountSyncCard";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Trash2 } from "lucide-react";
 import MobileHeader from "@/components/MobileHeader";
@@ -79,9 +78,6 @@ export default function Settings() {
       <div className="space-y-6">
         {/* Profile */}
         <ProfileCard />
-
-        {/* Cloud backup tied to the account email */}
-        <AccountSyncCard />
 
         {/* Appearance */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className="bg-card border border-border rounded-2xl p-6">
