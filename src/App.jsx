@@ -14,6 +14,7 @@ import { base44 } from '@/api/base44Client';
 import { syncPendingFavorites } from '@/lib/offlineSync';
 import { getAccountEmail } from '@/lib/activeUser';
 import { startContentSyncEngine } from '@/lib/contentSyncEngine';
+import { startAccountSyncEngine } from '@/lib/accountSync';
 import LogoLoader from './components/LogoLoader';
 import SyncStatusBadge from './components/SyncStatusBadge';
 import InstallPrompt from './components/InstallPrompt';
@@ -68,6 +69,13 @@ const AuthenticatedApp = () => {
   // — syncs on app open, every 5 min, on "online", and on tab focus
   useEffect(() => {
     const cleanup = startContentSyncEngine();
+    return cleanup;
+  }, []);
+
+  // Cloud account backup — restores the user's data (avatar, favorites,
+  // reading progress, watched videos) automatically after a fresh install
+  useEffect(() => {
+    const cleanup = startAccountSyncEngine();
     return cleanup;
   }, []);
 

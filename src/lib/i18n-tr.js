@@ -224,4 +224,11 @@ export default {
   playlist: "Oynatma listesi",
   booksRead: "Okunan kitaplar",
   watchedVideos: "İzlenen videolar",
+  syncTitle: "Bulut Yedekleme",
+  syncSub: "Fotoğrafınız, favorileriniz, okuma ilerlemeniz, yer imleriniz ve video geçmişiniz e-postanızla birlikte saklanır ve uygulamayı yeniden yüklediğinizde otomatik geri yüklenir.",
+  syncNowBtn: "Verilerimi şimdi yedekle",
+  syncLastAt: "Son yedekleme",
+  syncOk: "Verileriniz başarıyla kaydedildi",
+  syncFail: "Veriler kaydedilemedi — bağlantınızı kontrol edin",
+  evResendIn: "{s} sn içinde yeniden gönder",
 };
