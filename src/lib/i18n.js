@@ -1186,13 +1186,15 @@ const ls = {
 };
 
 // Language metadata: dir, BCP-47 locale, font family
+// The app layout direction is fixed to RTL for every language — only the
+// text content and font change when the language changes.
 const LANG_META = {
   ar: { dir: "rtl", langCode: "ar", fontFamily: "'Tajawal', sans-serif" },
   ur: { dir: "rtl", langCode: "ur", fontFamily: "'Noto Nastaliq Urdu', serif" },
-  en: { dir: "ltr", langCode: "en", fontFamily: "'Inter', sans-serif" },
-  fr: { dir: "ltr", langCode: "fr", fontFamily: "'Inter', sans-serif" },
-  tr: { dir: "ltr", langCode: "tr", fontFamily: "'Inter', sans-serif" },
-  hi: { dir: "ltr", langCode: "hi", fontFamily: "'Noto Sans Devanagari', sans-serif" },
+  en: { dir: "rtl", langCode: "en", fontFamily: "'Inter', sans-serif" },
+  fr: { dir: "rtl", langCode: "fr", fontFamily: "'Inter', sans-serif" },
+  tr: { dir: "rtl", langCode: "tr", fontFamily: "'Inter', sans-serif" },
+  hi: { dir: "rtl", langCode: "hi", fontFamily: "'Noto Sans Devanagari', sans-serif" },
 };
 
 export function useT() {
