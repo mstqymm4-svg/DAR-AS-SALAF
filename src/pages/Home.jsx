@@ -124,23 +124,23 @@ export default function Home() {
       {/* Featured Books */}
       {featuredBooks.length > 0 &&
         <section className="mb-12">
-          <div className="flex items-center justify-between mb-5 hidden">
-            <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-              <span className="w-8 h-8 rounded-lg bg-accent/15 flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-accent" />
-              </span>
-              {t.featuredBooks}
-            </h2>
-            <Link to="/books" className="text-sm text-primary font-bold hover:underline flex items-center gap-1 hover:gap-2 transition-all">
-              {t.viewAll}
-              <ArrowLeft className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 hidden">
-            {featuredBooks.map((book, i) =>
-            <BookCard key={book.id} book={book} index={i} isFavorite={favorites.includes(book.id)} onToggleFavorite={user ? handleToggleFavorite : null} />
-            )}
-          </div>
+          
+
+
+
+
+
+
+
+
+
+
+          
+          
+
+
+
+          
         </section>
         }
 
