@@ -83,6 +83,7 @@ export default function EmailVerification({ email, sendSignal }) {
       localStorage.removeItem(CODE_KEY(email));
       setVerified(true);
       setCode("");
+      try { window.dispatchEvent(new Event("dau-email-verified")); } catch {}
       toast.success(t.evSuccess);
     } catch {
       toast.error(t.evError);

@@ -231,4 +231,6 @@ export default {
   syncOk: "Verileriniz başarıyla kaydedildi",
   syncFail: "Veriler kaydedilemedi — bağlantınızı kontrol edin",
   evResendIn: "{s} sn içinde yeniden gönder",
+  verifiedBadge: "Doğrulanmış e-posta",
+  lockedEmailHint: "E-postanız doğrulandı ve kilitlendi — değiştirilemez",
 };

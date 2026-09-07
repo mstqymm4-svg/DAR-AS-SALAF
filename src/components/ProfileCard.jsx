@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Camera, Heart, Download, BookOpen, Loader2, Save, Activity, Eye } from "lucide-react";
+import { Camera, Heart, Download, BookOpen, Loader2, Save, Activity, Eye, Lock, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -30,10 +30,26 @@ export default function ProfileCard() {
   const [sendSignal, setSendSignal] = useState(0);
   const [stats, setStats] = useState({ favs: 0, dls: 0, reading: 0, watched: 0 });
   const [recentReads, setRecentReads] = useState([]);
+  const [verified, setVerified] = useState(false);
 
   useEffect(() => {
     load();
   }, []);
+
+  // Verified emails are locked — re-check whenever the email changes or a
+  // verification just succeeded elsewhere in the card
+  useEffect(() => {
+    const em = getAccountEmail(user) || emailInput.trim();
+    try { setVerified(!!em && localStorage.getItem(`email_verified_${em}`) === "1"); } catch { setVerified(false); }
+  }, [emailInput]);
+
+  useEffect(() => {
+    const onVerified = () => {
+      try { setVerified(localStorage.getItem(`email_verified_${emailInput}`) === "1"); } catch {}
+    };
+    window.addEventListener("dau-email-verified", onVerified);
+    return () => window.removeEventListener("dau-email-verified", onVerified);
+  }, [emailInput]);
 
   const load = async () => {
     const u = await base44.auth.me().catch(() => null);
@@ -116,7 +132,7 @@ export default function ProfileCard() {
       }
       setAccountEmail(em);
       setEmailInput(em);
-      setSendSignal(Date.now()); // sends the verification code email right away
+      if (!verified) setSendSignal(Date.now()); // sends the verification code email right away
       await refreshStats(em);
       toast.success(t.saveChanges + " ✓");
     } finally {
@@ -144,12 +160,14 @@ export default function ProfileCard() {
       <div className="px-6 -mt-10">
         <div className="flex items-end justify-between">
           <div className="relative">
-            <div className="w-20 h-20 rounded-full ring-4 ring-card bg-primary/10 overflow-hidden flex items-center justify-center shadow-lg">
-              {avatar ? (
-                <img src={avatar} alt={t.profile} className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-2xl font-black text-primary">{initials(fullName, emailInput)}</span>
-              )}
+            <div className="p-[3px] rounded-full bg-gradient-to-br from-primary via-accent to-primary shadow-lg">
+              <div className="w-20 h-20 rounded-full ring-2 ring-card bg-primary/10 overflow-hidden flex items-center justify-center">
+                {avatar ? (
+                  <img src={avatar} alt={t.profile} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-2xl font-black text-primary">{initials(fullName, emailInput)}</span>
+                )}
+              </div>
             </div>
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarPick} />
             <button
@@ -175,12 +193,31 @@ export default function ProfileCard() {
           <Input value={fullName} onChange={(e) => setFullName(e.target.value)} className="mt-1.5" />
         </div>
         <div>
-          <Label>{t.email}</Label>
-          <Input value={emailInput} onChange={(e) => setEmailInput(e.target.value)} type="email" inputMode="email" className="mt-1.5" />
-          <p className="text-xs text-muted-foreground mt-1">{t.accHint}</p>
+          <div className="flex items-center justify-between">
+            <Label>{t.email}</Label>
+            {verified && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                <ShieldCheck className="w-3.5 h-3.5" /> {t.verifiedBadge}
+              </span>
+            )}
+          </div>
+          <div className="relative mt-1.5">
+            <Input
+              value={emailInput}
+              onChange={(e) => setEmailInput(e.target.value)}
+              type="email"
+              inputMode="email"
+              disabled={verified}
+              className="pe-10"
+            />
+            {verified && (
+              <Lock className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500 pointer-events-none" />
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">{verified ? t.lockedEmailHint : t.accHint}</p>
         </div>
         <Button onClick={handleSaveProfile} disabled={saving} className="gap-2 rounded-[4px_20px_4px_20px]">
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} {t.saveSendBtn}
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} {verified ? t.saveChanges : t.saveSendBtn}
         </Button>
 
         {/* Email verification — inline, code sent immediately on save */}

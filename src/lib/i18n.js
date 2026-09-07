@@ -235,6 +235,8 @@ export const TRANSLATIONS = {
     syncOk: "تم حفظ بياناتك بنجاح",
     syncFail: "فشل حفظ البيانات — تحقق من اتصالك",
     evResendIn: "إعادة الإرسال بعد {s} ثانية",
+    verifiedBadge: "بريد موثّق",
+    lockedEmailHint: "بريدك موثّق ومقفل ولا يمكن تغييره",
     },
   en: {
     dir: "ltr",
@@ -468,6 +470,8 @@ export const TRANSLATIONS = {
     syncOk: "Your data was saved successfully",
     syncFail: "Failed to save data — check your connection",
     evResendIn: "Resend in {s}s",
+    verifiedBadge: "Verified",
+    lockedEmailHint: "Your email is verified and locked — it can't be changed",
     },
   fr: {
     dir: "ltr",
@@ -701,6 +705,8 @@ export const TRANSLATIONS = {
     syncOk: "Vos données ont été enregistrées",
     syncFail: "Échec de l'enregistrement — vérifiez votre connexion",
     evResendIn: "Renvoyer dans {s}s",
+    verifiedBadge: "E-mail vérifié",
+    lockedEmailHint: "Votre e-mail est vérifié et verrouillé — il ne peut pas être modifié",
     },
   ur: {
     dir: "rtl",
@@ -934,6 +940,8 @@ export const TRANSLATIONS = {
     syncOk: "آپ کا ڈیٹا کامیابی سے محفوظ ہو گیا",
     syncFail: "ڈیٹا محفوظ کرنے میں ناکام — اپنا کنکشن چیک کریں",
     evResendIn: "{s} سیکنڈ میں دوبارہ بھیجیں",
+    verifiedBadge: "تصدیق شدہ ای میل",
+    lockedEmailHint: "آپ کا ای میل تصدیق شدہ اور مقفل ہے — اسے تبدیل نہیں کیا جا سکتا",
     },
   hi: {
     dir: "ltr",
@@ -1167,6 +1175,8 @@ export const TRANSLATIONS = {
     syncOk: "आपका डेटा सफलतापूर्वक सहेजा गया",
     syncFail: "डेटा सहेने में विफल — अपना कनेक्शन जांचें",
     evResendIn: "{s}s में फिर से भेजें",
+    verifiedBadge: "सत्यापित ईमेल",
+    lockedEmailHint: "आपका ईमेल सत्यापित और लॉक है — इसे बदला नहीं जा सकता",
     },
   tr,
 };
