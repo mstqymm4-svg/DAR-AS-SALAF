@@ -101,7 +101,7 @@ export default function Layout() {
                 <User className="w-4 h-4 text-primary" />}
               </div>
             </Link>
-            <Link to="/books" className="md:hidden p-2.5 rounded-xl hover:bg-muted transition-colors active:scale-95">
+            <Link to="/books" className="md:hidden p-2.5 rounded-xl hover:bg-muted transition-colors active:scale-95 hidden">
               <BookOpen className="w-5 h-5 text-muted-foreground" />
             </Link>
           </div>
