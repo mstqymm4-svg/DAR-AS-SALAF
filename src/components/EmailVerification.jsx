@@ -93,21 +93,21 @@ export default function EmailVerification({ email, sendSignal }) {
   };
 
   if (verified) {
-    return (
-      <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 260, damping: 20 }}
-        className="flex items-center gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 p-3.5 hidden">
-        
-        <div className="w-9 h-9 rounded-full bg-emerald-500/15 flex items-center justify-center shrink-0">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-        </div>
-        <div className="min-w-0">
-          <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400">{t.evVerified}</p>
-          <p className="text-xs text-muted-foreground truncate">{email}</p>
-        </div>
-      </motion.div>);
+    return null;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   }
 
