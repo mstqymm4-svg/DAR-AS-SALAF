@@ -34,9 +34,9 @@ export default function Home() {
     const u = await base44.auth.me().catch(() => null);
     setUser(u);
     const [featured, recent] = await Promise.all([
-      getFeaturedBooks(),
-      getRecentBooks(),
-    ]);
+    getFeaturedBooks(),
+    getRecentBooks()]
+    );
     setFeaturedBooks(featured);
     setRecentBooks(recent);
     if (u) {
@@ -63,7 +63,7 @@ export default function Home() {
     if (!user) return;
     const added = await toggleFavorite(bookId, getAccountEmail(user));
     setFavorites((prev) =>
-      added ? [...prev, bookId] : prev.filter((id) => id !== bookId)
+    added ? [...prev, bookId] : prev.filter((id) => id !== bookId)
     );
   };
 
@@ -71,41 +71,41 @@ export default function Home() {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <SkeletonGrid count={6} />
-      </div>
-    );
+      </div>);
+
   }
 
   return (
-    <PullToRefresh onRefresh={async () => { await forceSyncNow(); loadData(); }}>
+    <PullToRefresh onRefresh={async () => {await forceSyncNow();loadData();}}>
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Offline indicator */}
-      {!isOnline && (
+      {!isOnline &&
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-700 dark:text-orange-400 text-xs font-medium mb-4 mt-2"
-        >
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-700 dark:text-orange-400 text-xs font-medium mb-4 mt-2">
+          
           <WifiOff className="w-4 h-4" />
           {t.offlineMode}
         </motion.div>
-      )}
+        }
 
       {/* Hero */}
       <HeroBanner />
 
       {/* YouTube Banner */}
       {youtubeUrl &&
-      <motion.section
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="mb-10 -mt-4">
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mb-10 -mt-4">
         
           <a
-          href={youtubeUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-l from-red-600/15 via-red-500/8 to-transparent border border-red-200/50 dark:border-red-500/20 hover:border-red-400/60 hover:shadow-xl hover:shadow-red-500/10 transition-all group overflow-hidden relative">
+            href={youtubeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-l from-red-600/15 via-red-500/8 to-transparent border border-red-200/50 dark:border-red-500/20 hover:border-red-400/60 hover:shadow-xl hover:shadow-red-500/10 transition-all group overflow-hidden relative">
           
             <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-red-500/30 group-hover:scale-110 group-hover:rotate-3 transition-transform bg-gradient-to-br from-[#e21246] to-[#b00d3a]">
               <Youtube className="w-7 h-7 text-white" />
@@ -119,12 +119,12 @@ export default function Home() {
             </div>
           </a>
         </motion.section>
-      }
+        }
 
       {/* Featured Books */}
       {featuredBooks.length > 0 &&
-      <section className="mb-12">
-          <div className="flex items-center justify-between mb-5">
+        <section className="mb-12">
+          <div className="flex items-center justify-between mb-5 hidden">
             <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
               <span className="w-8 h-8 rounded-lg bg-accent/15 flex items-center justify-center">
                 <Sparkles className="w-4 h-4 text-accent" />
@@ -136,13 +136,13 @@ export default function Home() {
               <ArrowLeft className="w-3.5 h-3.5" />
             </Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 hidden">
             {featuredBooks.map((book, i) =>
-          <BookCard key={book.id} book={book} index={i} isFavorite={favorites.includes(book.id)} onToggleFavorite={user ? handleToggleFavorite : null} />
-          )}
+            <BookCard key={book.id} book={book} index={i} isFavorite={favorites.includes(book.id)} onToggleFavorite={user ? handleToggleFavorite : null} />
+            )}
           </div>
         </section>
-      }
+        }
 
       {/* Recent Books */}
       <section className="mb-12">
@@ -160,20 +160,20 @@ export default function Home() {
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {recentBooks.map((book, i) =>
-          <BookCard key={book.id} book={book} index={i} isFavorite={favorites.includes(book.id)} onToggleFavorite={user ? handleToggleFavorite : null} />
-          )}
+            <BookCard key={book.id} book={book} index={i} isFavorite={favorites.includes(book.id)} onToggleFavorite={user ? handleToggleFavorite : null} />
+            )}
         </div>
       </section>
 
       {recentBooks.length === 0 && featuredBooks.length === 0 &&
-      <div className="text-center py-20">
+        <div className="text-center py-20">
           <div className="w-20 h-20 rounded-3xl bg-muted flex items-center justify-center mx-auto mb-4">
             <BookOpen className="w-10 h-10 text-muted-foreground/30" />
           </div>
           <h3 className="text-lg font-bold text-foreground mb-2">{t.emptyLib}</h3>
           <p className="text-sm text-muted-foreground">{t.emptyLibSub}</p>
         </div>
-      }
+        }
 
       {/* Video Channels */}
       <HomeChannels />
