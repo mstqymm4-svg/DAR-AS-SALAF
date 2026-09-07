@@ -4,6 +4,7 @@ import { ArrowRight, BookOpen } from "lucide-react";
 import ProBookViewer from "@/components/probook/ProBookViewer";
 import { useT } from "@/lib/i18n";
 import { getBook } from "@/lib/offlineSync";
+import PageLogoLoader from "@/components/PageLogoLoader";
 
 export default function ReadBook() {
   const { id } = useParams();
@@ -25,9 +26,7 @@ export default function ReadBook() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-      </div>
+      <PageLogoLoader />
     );
   }
 
