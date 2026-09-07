@@ -47,8 +47,8 @@ export async function loadPdfDocument(url, metadata = {}) {
   // Load from URL (online)
   const loadingTask = pdfjsLib.getDocument({
     url,
-    rangeChunkSize: 262144,
-    disableAutoFetch: false,
+    rangeChunkSize: 131072,
+    disableAutoFetch: true, // fetch only the ranges needed for the first pages
     disableStream: false,
     useSystemFonts: true,
     disableFontFace: false,
@@ -60,10 +60,13 @@ export async function loadPdfDocument(url, metadata = {}) {
   _docCache.set(url, pdf);
 
   // Auto-cache PDF in background for offline reading (no duplicate download — uses pdfjs internal data)
+  // Deferred so it never competes with rendering the first pages
   if (metadata.bookId) {
-    pdf.getData().then(data => {
-      cachePdf(url, data.buffer, metadata.bookId, metadata.title || "").catch(() => {});
-    }).catch(() => {});
+    setTimeout(() => {
+      pdf.getData().then(data => {
+        cachePdf(url, data.buffer, metadata.bookId, metadata.title || "").catch(() => {});
+      }).catch(() => {});
+    }, 4000);
   }
 
   return pdf;

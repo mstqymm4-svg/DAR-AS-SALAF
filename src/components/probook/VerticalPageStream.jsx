@@ -10,8 +10,8 @@ import PdfPageRenderer from "./PdfPageRenderer";
  * Reading direction is always LTR (English style): scroll down to advance.
  */
 const DEFAULT_RATIO = 0.707; // A4 portrait fallback
-const RENDER_BUFFER = 3; // render currentPage ± 3 (smoother scrolling)
-const PREFETCH = 8; // measure aspect ratios within ±8
+const RENDER_BUFFER = 1; // render currentPage ± 1 (fast open, light memory)
+const PREFETCH = 4; // measure aspect ratios within ±4
 
 export default function VerticalPageStream({
   pdf,

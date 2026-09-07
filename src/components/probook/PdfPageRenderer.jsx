@@ -51,7 +51,7 @@ export default function PdfPageRenderer({
           ) * 0.95;
         }
 
-        const dpr = 2;
+        const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
         const renderScale = fitScale * zoom * dpr;
         const cssScale = fitScale * zoom;
 
@@ -83,7 +83,7 @@ export default function PdfPageRenderer({
       }
     };
 
-    const timer = setTimeout(render, 30);
+    const timer = setTimeout(render, 0);
     return () => {
       cancelled = true;
       clearTimeout(timer);
