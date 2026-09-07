@@ -20,13 +20,13 @@ export default function EmailVerification({ email, sendSignal }) {
   const [sent, setSent] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [verified, setVerified] = useState(() => {
-    try { return localStorage.getItem(VERIFIED_KEY(email)) === "1"; } catch { return false; }
+    try {return localStorage.getItem(VERIFIED_KEY(email)) === "1";} catch {return false;}
   });
 
   // Reset state when the email changes
   useEffect(() => {
     if (!email) return;
-    setVerified(() => { try { return localStorage.getItem(VERIFIED_KEY(email)) === "1"; } catch { return false; } });
+    setVerified(() => {try {return localStorage.getItem(VERIFIED_KEY(email)) === "1";} catch {return false;}});
     setSent(false);
     setCode("");
     setCountdown(0);
@@ -57,7 +57,7 @@ export default function EmailVerification({ email, sendSignal }) {
       await base44.integrations.Core.SendEmail({
         to: email,
         subject: t.evMailSubject,
-        body: t.evMailBody.replace("{code}", gen),
+        body: t.evMailBody.replace("{code}", gen)
       });
       setSent(true);
       setCountdown(RESEND_SECONDS);
@@ -75,15 +75,15 @@ export default function EmailVerification({ email, sendSignal }) {
     setVerifying(true);
     try {
       const raw = localStorage.getItem(CODE_KEY(email));
-      if (!raw) { toast.error(t.evSendFirst); return; }
+      if (!raw) {toast.error(t.evSendFirst);return;}
       const entry = JSON.parse(raw);
-      if (Date.now() > entry.exp) { toast.error(t.evExpired); return; }
-      if (entry.code !== v) { toast.error(t.evWrongCode); return; }
+      if (Date.now() > entry.exp) {toast.error(t.evExpired);return;}
+      if (entry.code !== v) {toast.error(t.evWrongCode);return;}
       localStorage.setItem(VERIFIED_KEY(email), "1");
       localStorage.removeItem(CODE_KEY(email));
       setVerified(true);
       setCode("");
-      try { window.dispatchEvent(new Event("dau-email-verified")); } catch {}
+      try {window.dispatchEvent(new Event("dau-email-verified"));} catch {}
       toast.success(t.evSuccess);
     } catch {
       toast.error(t.evError);
@@ -98,8 +98,8 @@ export default function EmailVerification({ email, sendSignal }) {
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 20 }}
-        className="flex items-center gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 p-3.5"
-      >
+        className="flex items-center gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 p-3.5 hidden">
+        
         <div className="w-9 h-9 rounded-full bg-emerald-500/15 flex items-center justify-center shrink-0">
           <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
         </div>
@@ -107,8 +107,8 @@ export default function EmailVerification({ email, sendSignal }) {
           <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400">{t.evVerified}</p>
           <p className="text-xs text-muted-foreground truncate">{email}</p>
         </div>
-      </motion.div>
-    );
+      </motion.div>);
+
   }
 
   if (!sent) return null;
@@ -128,9 +128,9 @@ export default function EmailVerification({ email, sendSignal }) {
       <div dir="ltr" className="flex justify-center">
         <InputOTP maxLength={6} value={code} onChange={setCode} onComplete={(v) => verify(v)} disabled={verifying}>
           <InputOTPGroup>
-            {[0, 1, 2, 3, 4, 5].map((i) => (
-              <InputOTPSlot key={i} index={i} className="h-11 w-10 text-lg font-bold" />
-            ))}
+            {[0, 1, 2, 3, 4, 5].map((i) =>
+            <InputOTPSlot key={i} index={i} className="h-11 w-10 text-lg font-bold" />
+            )}
           </InputOTPGroup>
         </InputOTP>
       </div>
@@ -138,22 +138,22 @@ export default function EmailVerification({ email, sendSignal }) {
       <Button
         onClick={() => verify()}
         disabled={verifying || code.length !== 6}
-        className="gap-2 w-full rounded-[4px_20px_4px_20px]"
-      >
+        className="gap-2 w-full rounded-[4px_20px_4px_20px]">
+        
         {verifying ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
         {t.evVerify}
       </Button>
 
       <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
         <span>{t.evCheckSpam}</span>
-        {countdown > 0 ? (
-          <span className="font-bold text-foreground/70">· {t.evResendIn.replace("{s}", countdown)}</span>
-        ) : (
-          <button onClick={sendCode} disabled={sending} className="text-primary hover:underline font-bold">
+        {countdown > 0 ?
+        <span className="font-bold text-foreground/70">· {t.evResendIn.replace("{s}", countdown)}</span> :
+
+        <button onClick={sendCode} disabled={sending} className="text-primary hover:underline font-bold">
             · {sending ? "…" : t.evResend}
           </button>
-        )}
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 }

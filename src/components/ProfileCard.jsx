@@ -40,12 +40,12 @@ export default function ProfileCard() {
   // verification just succeeded elsewhere in the card
   useEffect(() => {
     const em = getAccountEmail(user) || emailInput.trim();
-    try { setVerified(!!em && localStorage.getItem(`email_verified_${em}`) === "1"); } catch { setVerified(false); }
+    try {setVerified(!!em && localStorage.getItem(`email_verified_${em}`) === "1");} catch {setVerified(false);}
   }, [emailInput]);
 
   useEffect(() => {
     const onVerified = () => {
-      try { setVerified(localStorage.getItem(`email_verified_${emailInput}`) === "1"); } catch {}
+      try {setVerified(localStorage.getItem(`email_verified_${emailInput}`) === "1");} catch {}
     };
     window.addEventListener("dau-email-verified", onVerified);
     return () => window.removeEventListener("dau-email-verified", onVerified);
@@ -75,23 +75,23 @@ export default function ProfileCard() {
 
   const loadRecentReads = async () => {
     try {
-      const entries = Object.keys(localStorage)
-        .filter((k) => k.startsWith("lastpage_"))
-        .map((k) => {
-          const id = k.slice("lastpage_".length);
-          return {
-            id,
-            page: Number(localStorage.getItem(k)) || 1,
-            ts: Number(localStorage.getItem(`lastts_${id}`)) || 0,
-          };
-        })
-        .sort((a, b) => b.ts - a.ts)
-        .slice(0, 3);
+      const entries = Object.keys(localStorage).
+      filter((k) => k.startsWith("lastpage_")).
+      map((k) => {
+        const id = k.slice("lastpage_".length);
+        return {
+          id,
+          page: Number(localStorage.getItem(k)) || 1,
+          ts: Number(localStorage.getItem(`lastts_${id}`)) || 0
+        };
+      }).
+      sort((a, b) => b.ts - a.ts).
+      slice(0, 3);
       const books = await Promise.all(entries.map((e) => getBook(e.id).catch(() => null)));
       setRecentReads(
-        entries
-          .map((e, i) => ({ ...e, book: books[i] }))
-          .filter((r) => r.book)
+        entries.
+        map((e, i) => ({ ...e, book: books[i] })).
+        filter((r) => r.book)
       );
     } catch {}
   };
@@ -145,8 +145,8 @@ export default function ProfileCard() {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="bg-card border border-border rounded-2xl overflow-hidden"
-    >
+      className="bg-card border border-border rounded-2xl overflow-hidden">
+      
       {/* Banner */}
       <div className="h-24 bg-gradient-to-l from-primary/30 via-primary/10 to-accent/15 relative overflow-hidden">
         <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_80%_20%,hsl(var(--accent)/0.4),transparent_60%)]" />
@@ -162,11 +162,11 @@ export default function ProfileCard() {
           <div className="relative">
             <div className="p-[3px] rounded-full bg-gradient-to-br from-primary via-accent to-primary shadow-lg">
               <div className="w-20 h-20 rounded-full ring-2 ring-card bg-primary/10 overflow-hidden flex items-center justify-center">
-                {avatar ? (
-                  <img src={avatar} alt={t.profile} className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-2xl font-black text-primary">{initials(fullName, emailInput)}</span>
-                )}
+                {avatar ?
+                <img src={avatar} alt={t.profile} className="w-full h-full object-cover" /> :
+
+                <span className="text-2xl font-black text-primary">{initials(fullName, emailInput)}</span>
+                }
               </div>
             </div>
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarPick} />
@@ -174,8 +174,8 @@ export default function ProfileCard() {
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
               title={t.changePhoto}
-              className="absolute bottom-0 -end-1 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-60"
-            >
+              className="absolute bottom-0 -end-1 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-60">
+              
               {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
             </button>
           </div>
@@ -195,11 +195,11 @@ export default function ProfileCard() {
         <div>
           <div className="flex items-center justify-between">
             <Label>{t.email}</Label>
-            {verified && (
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+            {verified &&
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 hidden">
                 <ShieldCheck className="w-3.5 h-3.5" /> {t.verifiedBadge}
               </span>
-            )}
+            }
           </div>
           <div className="relative mt-1.5">
             <Input
@@ -208,11 +208,11 @@ export default function ProfileCard() {
               type="email"
               inputMode="email"
               disabled={verified}
-              className="pe-10"
-            />
-            {verified && (
-              <Lock className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500 pointer-events-none" />
-            )}
+              className="pe-10" />
+            
+            {verified &&
+            <Lock className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500 pointer-events-none" />
+            }
           </div>
           <p className="text-xs text-muted-foreground mt-1">{verified ? t.lockedEmailHint : t.accHint}</p>
         </div>
@@ -238,35 +238,35 @@ export default function ProfileCard() {
       </div>
 
       {/* Recent reads */}
-      {recentReads.length > 0 && (
-        <div className="px-6 pt-5 pb-6">
+      {recentReads.length > 0 &&
+      <div className="px-6 pt-5 pb-6">
           <h3 className="flex items-center gap-2 text-sm font-bold text-foreground mb-3">
             <BookOpen className="w-4 h-4 text-primary" /> {t.lastRead}
           </h3>
           <div className="space-y-2">
             {recentReads.map((r) => {
-              const pct = r.book.pages_count
-                ? Math.min(100, Math.round((r.page / r.book.pages_count) * 100))
-                : null;
-              return (
-                <Link
-                  key={r.id}
-                  to={`/read/${r.id}`}
-                  className="flex items-center gap-3 p-2.5 rounded-xl border border-border hover:border-primary/40 hover:shadow-md hover:shadow-primary/5 hover:-translate-y-0.5 transition-all bg-background/50"
-                >
+            const pct = r.book.pages_count ?
+            Math.min(100, Math.round(r.page / r.book.pages_count * 100)) :
+            null;
+            return (
+              <Link
+                key={r.id}
+                to={`/read/${r.id}`}
+                className="flex items-center gap-3 p-2.5 rounded-xl border border-border hover:border-primary/40 hover:shadow-md hover:shadow-primary/5 hover:-translate-y-0.5 transition-all bg-background/50">
+                
                   <div className="w-11 h-14 rounded-lg overflow-hidden bg-muted shrink-0">
-                    {r.book.cover_image ? (
-                      <SmartImage
-                        src={r.book.cover_image}
-                        alt={r.book.title}
-                        className="w-full h-full object-cover"
-                        fallback={() => <BookOpen className="w-5 h-5 text-muted-foreground" />}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
+                    {r.book.cover_image ?
+                  <SmartImage
+                    src={r.book.cover_image}
+                    alt={r.book.title}
+                    className="w-full h-full object-cover"
+                    fallback={() => <BookOpen className="w-5 h-5 text-muted-foreground" />} /> :
+
+
+                  <div className="w-full h-full flex items-center justify-center">
                         <BookOpen className="w-5 h-5 text-muted-foreground/40" />
                       </div>
-                    )}
+                  }
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-foreground truncate">{r.book.title}</p>
@@ -277,15 +277,15 @@ export default function ProfileCard() {
                       <div className="h-full bg-primary/70 rounded-full" style={{ width: `${pct ?? Math.min(100, r.page)}%` }} />
                     </div>
                   </div>
-                </Link>
-              );
-            })}
+                </Link>);
+
+          })}
           </div>
         </div>
-      )}
+      }
       {recentReads.length === 0 && <div className="pb-6" />}
-    </motion.div>
-  );
+    </motion.div>);
+
 }
 
 function StatChip({ icon, value, label, tone }) {
@@ -293,13 +293,13 @@ function StatChip({ icon, value, label, tone }) {
     accent: "text-accent bg-accent/10 border-accent/20",
     primary: "text-primary bg-primary/10 border-primary/20",
     success: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-    muted: "text-foreground bg-muted border-border",
+    muted: "text-foreground bg-muted border-border"
   };
   return (
     <div className={`rounded-2xl border p-3 flex flex-col items-center gap-1 ${tones[tone] || tones.muted}`}>
       <div className="w-8 h-8 rounded-full bg-card/70 flex items-center justify-center">{icon}</div>
       <span className="text-xl font-black leading-none">{value}</span>
       <span className="text-[10px] font-medium text-muted-foreground text-center leading-tight">{label}</span>
-    </div>
-  );
+    </div>);
+
 }
