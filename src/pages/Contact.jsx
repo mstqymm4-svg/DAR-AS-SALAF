@@ -123,12 +123,12 @@ export default function Contact() {
           </form>
         }
 
-        <div className="flex items-center justify-between mt-8 pt-6 border-t border-border hidden">
-          <p className="text-xs text-muted-foreground">{t.contactReplySoon}</p>
-          <Link to="/" className="text-sm text-primary font-medium hover:underline flex items-center gap-1">
-            {t.backToHome} <ArrowLeft className="w-3.5 h-3.5" />
-          </Link>
-        </div>
+        
+
+
+
+
+        
       </motion.div>
     </div>);
 
