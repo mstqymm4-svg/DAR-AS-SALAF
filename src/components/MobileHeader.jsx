@@ -9,8 +9,8 @@ export default function MobileHeader({ title, onBack }) {
   const navigate = useNavigate();
 
   const handleBack = () => {
-    if (onBack) onBack();
-    else navigate(-1);
+    if (onBack) onBack();else
+    navigate(-1);
   };
 
   return (
@@ -19,14 +19,14 @@ export default function MobileHeader({ title, onBack }) {
         <button
           onClick={handleBack}
           className="flex items-center justify-center w-11 h-11 rounded-xl hover:bg-muted active:scale-95 transition-all"
-          aria-label="رجوع"
-        >
-          <ChevronRight className="w-6 h-6 text-foreground" />
+          aria-label="رجوع">
+          
+          <ChevronRight className="w-6 h-6 text-foreground hidden" />
         </button>
-        {title && (
-          <h2 className="text-base font-bold text-foreground truncate flex-1">{title}</h2>
-        )}
+        {title &&
+        <h2 className="text-base font-bold text-foreground truncate flex-1">{title}</h2>
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 }
