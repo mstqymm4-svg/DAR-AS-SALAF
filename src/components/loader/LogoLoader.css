@@ -102,6 +102,12 @@
   animation-delay: 790ms;
   animation-duration: 1250ms;
 }
+.dau-arch .dau-arch-inlay { animation-delay: 1000ms; }
+
+.dau-halo {
+  opacity: 0;
+  animation: dauFade 900ms 900ms ease-out both;
+}
 .dau-arch-step {
   opacity: 0;
   animation: dauFade 420ms 1500ms ease-out both;
