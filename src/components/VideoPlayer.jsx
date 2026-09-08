@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 import { usePlayerGestures } from "@/hooks/usePlayerGestures";
 import PlaylistPanel from "@/components/video/PlaylistPanel";
+import OfflineVideoNotice from "@/components/video/OfflineVideoNotice";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
 function formatTime(seconds) {
   if (!seconds || isNaN(seconds)) return "0:00";
@@ -22,6 +24,7 @@ function formatTime(seconds) {
 
 export default function VideoPlayer({ video, onClose, playlist = [], onSelectVideo }) {
   const t = useT();
+  const { isOnline } = useOnlineStatus();
   const containerRef = useRef(null);
   const playerInstanceRef = useRef(null);
   const hideTimerRef = useRef(null);
@@ -261,6 +264,10 @@ export default function VideoPlayer({ video, onClose, playlist = [], onSelectVid
       clearTimeout(hideTimerRef.current);
     };
   }, []);
+
+  if (!isOnline) {
+    return <OfflineVideoNotice video={video} onClose={onClose} />;
+  }
 
   if (!videoId) {
     return (
