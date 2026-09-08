@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import PageLogoLoader from "@/components/PageLogoLoader";
+
 
 export function SkeletonCard() {
   return (
@@ -33,5 +33,10 @@ export function SkeletonGrid({ count = 8, cols = "grid-cols-2 sm:grid-cols-3 lg:
 }
 
 export function PageSpinner() {
-  return <PageLogoLoader />;
+  return (
+    <div className="p-4 space-y-6 opacity-60">
+      <div className="h-6 w-40 bg-muted rounded animate-pulse" />
+      <SkeletonGrid count={6} />
+    </div>
+  );
 }

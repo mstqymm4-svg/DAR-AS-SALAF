@@ -18,7 +18,7 @@ import { startAccountSyncEngine } from '@/lib/accountSync';
 import LogoLoader from './components/LogoLoader';
 import SyncStatusBadge from './components/SyncStatusBadge';
 import InstallPrompt from './components/InstallPrompt';
-import PageLogoLoader from './components/PageLogoLoader';
+import { PageSpinner } from './components/Skeleton';
 
 // Apply theme immediately from localStorage before any renders
 try {
@@ -42,7 +42,11 @@ const Contact = lazy(() => import('./pages/Contact'));
 const SplashPreview = lazy(() => import('./pages/SplashPreview'));
 import DarAlUloomSplash from './components/splash/DarAlUloomSplash';
 
-const PageLoader = () => <div className="min-h-[60vh] w-full bg-background" />;
+const PageLoader = () => (
+  <div className="min-h-[60vh] w-full max-w-6xl mx-auto px-4 pt-6">
+    <PageSpinner />
+  </div>
+);
 
 
 const AuthenticatedApp = () => {
