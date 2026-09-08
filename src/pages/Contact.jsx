@@ -35,11 +35,7 @@ export default function Contact() {
     setSending(true);
     try {
       const { base44 } = await import("@/api/base44Client");
-      await base44.integrations.Core.SendEmail({
-        to: contactEmail,
-        subject: `${name} — ${email}`,
-        body: message,
-      });
+      await base44.functions.invoke("sendContactMessage", { name, email, message });
       toast.success(t.contactSent);
       setName(""); setEmail(""); setMessage("");
     } catch (err) {
