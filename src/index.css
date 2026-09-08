@@ -216,4 +216,45 @@
     -webkit-tap-highlight-color: transparent;
     user-select: none;
   }
+
+  /* ── Global UI polish: typography scale ── */
+  h1 {
+    @apply text-2xl sm:text-3xl font-bold tracking-tight leading-snug;
+  }
+  h2 {
+    @apply text-xl sm:text-2xl font-bold tracking-tight leading-snug;
+  }
+  h3 {
+    @apply text-base sm:text-lg font-semibold leading-snug;
+  }
+  p {
+    @apply leading-relaxed;
+  }
+
+  /* ── Global UI polish: page rhythm ── */
+  main > * + * {
+    margin-block-start: 1.5rem;
+  }
+
+  /* ── Global UI polish: unified card surfaces ── */
+  main .bg-card,
+  main [class*="rounded-2xl"].bg-card,
+  main [class*="rounded-xl"].bg-card {
+    box-shadow: 0 1px 2px hsl(var(--foreground) / 0.04), 0 6px 20px -12px hsl(var(--foreground) / 0.12);
+    transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+  }
+
+  @media (hover: hover) {
+    main a .bg-card:hover,
+    main .bg-card:hover {
+      box-shadow: 0 2px 4px hsl(var(--foreground) / 0.06), 0 16px 32px -16px hsl(var(--primary) / 0.28);
+      border-color: hsl(var(--primary) / 0.35);
+      transform: translateY(-3px);
+    }
+  }
+
+  /* Softer, warmer separators for a calmer layout */
+  main hr {
+    border-color: hsl(var(--border) / 0.7);
+  }
 }
