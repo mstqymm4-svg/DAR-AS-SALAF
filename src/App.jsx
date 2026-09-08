@@ -42,7 +42,7 @@ const Contact = lazy(() => import('./pages/Contact'));
 const SplashPreview = lazy(() => import('./pages/SplashPreview'));
 import DarAlUloomSplash from './components/splash/DarAlUloomSplash';
 
-const PageLoader = () => <PageLogoLoader />;
+const PageLoader = () => <div className="min-h-[60vh] w-full bg-background" />;
 
 
 const AuthenticatedApp = () => {
