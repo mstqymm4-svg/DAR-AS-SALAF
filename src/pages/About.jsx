@@ -72,9 +72,9 @@ export default function About() {
         </div>
 
         {/* Features */}
-        <h2 className="text-lg font-bold mt-10 mb-4 flex items-center gap-2 hidden">
-          <Sparkles className="w-5 h-5 text-primary hidden" /> {t.aboutFeatures}
-        </h2>
+        
+
+        
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {features.map((f, i) =>
           <div key={i} className="bg-card border border-border rounded-2xl p-5 hidden">
@@ -86,9 +86,9 @@ export default function About() {
         </div>
 
         {/* Values */}
-        <h2 className="text-lg font-bold mt-10 mb-4 flex items-center gap-2 hidden">
-          <ShieldCheck className="w-5 h-5 text-primary hidden" /> {t.aboutValues}
-        </h2>
+        
+
+        
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {values.map((v, i) =>
           <div key={i} className="bg-card border border-border rounded-2xl p-5 text-center hidden">
@@ -100,14 +100,14 @@ export default function About() {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between mt-8 pt-6 border-t border-border hidden">
-          <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-            <Heart className="w-3.5 h-3.5 text-red-500" /> {t.madeWithCare}
-          </p>
-          <Link to="/" className="text-sm text-primary font-medium hover:underline flex items-center gap-1">
-            {t.backToHome} <ArrowLeft className="w-3.5 h-3.5" />
-          </Link>
-        </div>
+        
+
+
+
+
+
+
+        
       </motion.div>
     </div>);
 
