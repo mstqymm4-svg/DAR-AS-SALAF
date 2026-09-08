@@ -15,7 +15,7 @@ export default function MobileHeader({ title, onBack }) {
 
   return (
     <div className="md:hidden safe-area-top -mt-2 mb-2">
-      <div className="flex items-center gap-1 h-12">
+      <div className="flex items-center gap-1 h-12 hidden">
         <button
           onClick={handleBack}
           className="flex items-center justify-center w-11 h-11 rounded-xl hover:bg-muted active:scale-95 transition-all"
