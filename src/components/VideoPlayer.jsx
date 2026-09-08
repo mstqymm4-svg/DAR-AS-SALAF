@@ -363,17 +363,19 @@ export default function VideoPlayer({ video, onClose, playlist = [], onSelectVid
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/80 to-transparent p-4 flex items-start justify-between gap-4 pointer-events-none z-10"
+              className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/85 via-black/40 to-transparent px-4 pt-4 pb-10 flex items-start justify-between gap-4 pointer-events-none z-10"
             >
               <div className="flex-1 min-w-0 text-white pointer-events-auto">
-                <h2 className="text-base sm:text-lg font-bold truncate">{video.title}</h2>
-                {video.channel_name && <p className="text-xs text-white/70">{video.channel_name}</p>}
+                <h2 className="text-base sm:text-lg font-bold truncate drop-shadow-sm">{video.title}</h2>
+                {video.channel_name && (
+                  <p className="text-[11px] text-white/70 mt-0.5 truncate">{video.channel_name}</p>
+                )}
               </div>
               <div className="flex items-center gap-2 pointer-events-auto">
-                <button onClick={handleShare} className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors">
+                <button onClick={handleShare} className="w-11 h-11 rounded-full bg-white/10 backdrop-blur-md ring-1 ring-white/15 hover:bg-white/20 active:scale-95 flex items-center justify-center text-white transition-all">
                   <Share2 className="w-5 h-5" />
                 </button>
-                <button onClick={onClose} className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors">
+                <button onClick={onClose} className="w-11 h-11 rounded-full bg-white/10 backdrop-blur-md ring-1 ring-white/15 hover:bg-white/20 active:scale-95 flex items-center justify-center text-white transition-all">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -391,8 +393,8 @@ export default function VideoPlayer({ video, onClose, playlist = [], onSelectVid
               onClick={(e) => { e.stopPropagation(); togglePlay(); }}
               className="absolute inset-0 flex items-center justify-center z-10"
             >
-              <div className="w-16 h-16 rounded-full bg-primary/90 flex items-center justify-center shadow-2xl">
-                <Play className="w-7 h-7 text-white fill-white mr-1" />
+              <div className="w-20 h-20 rounded-full bg-primary/90 backdrop-blur-sm ring-4 ring-white/15 flex items-center justify-center shadow-2xl">
+                <Play className="w-8 h-8 text-white fill-white mr-1" />
               </div>
             </motion.button>
           )}
@@ -417,10 +419,10 @@ export default function VideoPlayer({ video, onClose, playlist = [], onSelectVid
                   onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); seekFromClientX(e.clientX); }}
                   onPointerMove={(e) => { if (e.buttons === 1) seekFromClientX(e.clientX); }}
                 >
-                  <div className="relative w-full h-1.5 rounded-full bg-white/20">
-                    <div className="absolute inset-y-0 left-0 rounded-full bg-primary" style={{ width: `${progressPct}%` }} />
+                  <div className="relative w-full h-1.5 rounded-full bg-white/20 transition-all group-hover:h-2.5">
+                    <div className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-primary to-accent" style={{ width: `${progressPct}%` }} />
                     <div
-                      className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-white shadow-md transition-transform group-hover:scale-125"
+                      className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,0.5)] transition-transform group-hover:scale-125"
                       style={{ left: `${progressPct}%` }}
                     />
                   </div>
@@ -457,7 +459,7 @@ export default function VideoPlayer({ video, onClose, playlist = [], onSelectVid
                   <button
                     onClick={cycleSpeed}
                     title={t.speedLabel || "Speed"}
-                    className="h-10 px-2.5 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-xs font-bold transition-colors shrink-0"
+                    className="h-11 px-3 rounded-full bg-white/10 backdrop-blur-md ring-1 ring-white/10 hover:bg-white/20 active:scale-95 flex items-center justify-center text-white text-xs font-bold transition-all shrink-0"
                   >
                     {rate}x
                   </button>
@@ -491,8 +493,12 @@ function CtrlBtn({ children, onClick, disabled, title, active, primary }) {
       onClick={onClick}
       disabled={disabled}
       title={title}
-      className={`w-10 h-10 rounded-full flex items-center justify-center text-white transition-all shrink-0 disabled:opacity-30 disabled:cursor-default active:scale-95 ${
-        primary ? "bg-primary/90 hover:bg-primary" : active ? "bg-primary/80" : "bg-white/10 hover:bg-white/20"
+      className={`w-11 h-11 rounded-full flex items-center justify-center text-white transition-all shrink-0 disabled:opacity-30 disabled:cursor-default active:scale-95 backdrop-blur-md ring-1 ${
+        primary
+          ? "bg-primary hover:bg-primary/90 ring-white/20 shadow-lg shadow-primary/30"
+          : active
+          ? "bg-primary/80 ring-white/20"
+          : "bg-white/10 hover:bg-white/20 ring-white/10"
       }`}
     >
       {children}
