@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Camera, Heart, Download, BookOpen, Loader2, Save, Activity, Eye, Lock, ShieldCheck } from "lucide-react";
-import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import EmailVerification from "@/components/EmailVerification";
-import SmartImage from "@/components/SmartImage";
+import ProfileStatChip from "@/components/profile/ProfileStatChip";
+import RecentReadsList from "@/components/profile/RecentReadsList";
+import ProfileQuickLinks from "@/components/profile/ProfileQuickLinks";
 import { useT } from "@/lib/i18n";
 import { toast } from "sonner";
 import { getAccountEmail, setAccountEmail, getDownloadedBookIds, getAvatarUrl, setAvatarUrl, getWatchedVideoIds } from "@/lib/activeUser";
@@ -148,7 +149,7 @@ export default function ProfileCard() {
       className="bg-card border border-border rounded-2xl overflow-hidden">
       
       {/* Banner */}
-      <div className="h-24 bg-gradient-to-l from-primary/30 via-primary/10 to-accent/15 relative overflow-hidden">
+      <div className="h-32 bg-gradient-to-l from-primary/35 via-primary/15 to-accent/20 relative overflow-hidden">
         <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_80%_20%,hsl(var(--accent)/0.4),transparent_60%)]" />
         <div className="absolute -bottom-8 -start-8 w-32 h-32 rounded-full bg-primary/10" />
         <div className="absolute top-3 end-10 w-14 h-14 rounded-full border-[3px] border-foreground/10" />
@@ -182,6 +183,11 @@ export default function ProfileCard() {
           <div className="pb-1 text-end">
             <p className="font-bold text-foreground truncate max-w-[180px]">{fullName || t.profile}</p>
             <p className="text-xs text-muted-foreground truncate max-w-[180px]">{emailInput}</p>
+            {verified &&
+            <span className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
+                <ShieldCheck className="w-3 h-3" /> {t.verifiedBadge}
+              </span>
+            }
           </div>
         </div>
       </div>
@@ -195,11 +201,7 @@ export default function ProfileCard() {
         <div>
           <div className="flex items-center justify-between">
             <Label>{t.email}</Label>
-            {verified &&
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 hidden">
-                <ShieldCheck className="w-3.5 h-3.5" /> {t.verifiedBadge}
-              </span>
-            }
+
           </div>
           <div className="relative mt-1.5">
             <Input
@@ -230,11 +232,16 @@ export default function ProfileCard() {
           <Activity className="w-4 h-4 text-primary" /> {t.myActivity}
         </h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          <StatChip icon={<Heart className="w-4 h-4" />} value={stats.favs} label={t.accFavorites} tone="accent" />
-          <StatChip icon={<Download className="w-4 h-4" />} value={stats.dls} label={t.accOfflineBooks} tone="primary" />
-          <StatChip icon={<BookOpen className="w-4 h-4" />} value={stats.reading} label={t.booksRead} tone="success" />
-          <StatChip icon={<Eye className="w-4 h-4" />} value={stats.watched} label={t.watchedVideos} tone="muted" />
+          <ProfileStatChip icon={<Heart className="w-4 h-4" />} value={stats.favs} label={t.accFavorites} tone="accent" delay={0} />
+          <ProfileStatChip icon={<Download className="w-4 h-4" />} value={stats.dls} label={t.accOfflineBooks} tone="primary" delay={0.05} />
+          <ProfileStatChip icon={<BookOpen className="w-4 h-4" />} value={stats.reading} label={t.booksRead} tone="success" delay={0.1} />
+          <ProfileStatChip icon={<Eye className="w-4 h-4" />} value={stats.watched} label={t.watchedVideos} tone="muted" delay={0.15} />
         </div>
+      </div>
+
+      {/* Quick links */}
+      <div className="px-6 pt-4">
+        <ProfileQuickLinks />
       </div>
 
       {/* Recent reads */}
@@ -243,63 +250,10 @@ export default function ProfileCard() {
           <h3 className="flex items-center gap-2 text-sm font-bold text-foreground mb-3">
             <BookOpen className="w-4 h-4 text-primary" /> {t.lastRead}
           </h3>
-          <div className="space-y-2">
-            {recentReads.map((r) => {
-            const pct = r.book.pages_count ?
-            Math.min(100, Math.round(r.page / r.book.pages_count * 100)) :
-            null;
-            return (
-              <Link
-                key={r.id}
-                to={`/read/${r.id}`}
-                className="flex items-center gap-3 p-2.5 rounded-xl border border-border hover:border-primary/40 hover:shadow-md hover:shadow-primary/5 hover:-translate-y-0.5 transition-all bg-background/50">
-                
-                  <div className="w-11 h-14 rounded-lg overflow-hidden bg-muted shrink-0">
-                    {r.book.cover_image ?
-                  <SmartImage
-                    src={r.book.cover_image}
-                    alt={r.book.title}
-                    className="w-full h-full object-cover"
-                    fallback={() => <BookOpen className="w-5 h-5 text-muted-foreground" />} /> :
-
-
-                  <div className="w-full h-full flex items-center justify-center">
-                        <BookOpen className="w-5 h-5 text-muted-foreground/40" />
-                      </div>
-                  }
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-foreground truncate">{r.book.title}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {t.pageNo} {r.page}{pct !== null ? ` · ${pct}%` : ""}
-                    </p>
-                    <div className="h-1 rounded-full bg-muted mt-1.5 overflow-hidden">
-                      <div className="h-full bg-primary/70 rounded-full" style={{ width: `${pct ?? Math.min(100, r.page)}%` }} />
-                    </div>
-                  </div>
-                </Link>);
-
-          })}
-          </div>
+          <RecentReadsList items={recentReads} />
         </div>
       }
       {recentReads.length === 0 && <div className="pb-6" />}
     </motion.div>);
-
-}
-
-function StatChip({ icon, value, label, tone }) {
-  const tones = {
-    accent: "text-accent bg-accent/10 border-accent/20",
-    primary: "text-primary bg-primary/10 border-primary/20",
-    success: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-    muted: "text-foreground bg-muted border-border"
-  };
-  return (
-    <div className={`rounded-2xl border p-3 flex flex-col items-center gap-1 ${tones[tone] || tones.muted}`}>
-      <div className="w-8 h-8 rounded-full bg-card/70 flex items-center justify-center">{icon}</div>
-      <span className="text-xl font-black leading-none">{value}</span>
-      <span className="text-[10px] font-medium text-muted-foreground text-center leading-tight">{label}</span>
-    </div>);
 
 }
