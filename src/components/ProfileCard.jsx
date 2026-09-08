@@ -183,11 +183,11 @@ export default function ProfileCard() {
           <div className="pb-1 text-end">
             <p className="font-bold text-foreground truncate max-w-[180px]">{fullName || t.profile}</p>
             <p className="text-xs text-muted-foreground truncate max-w-[180px]">{emailInput}</p>
-            {verified &&
-            <span className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 hidden">
-                <ShieldCheck className="w-3 h-3" /> {t.verifiedBadge}
-              </span>
-            }
+            
+
+
+
+            
           </div>
         </div>
       </div>
