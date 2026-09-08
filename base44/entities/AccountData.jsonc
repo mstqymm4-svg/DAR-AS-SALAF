@@ -25,13 +25,13 @@
       "data.account_email": "{{user.email}}"
     },
     "read": {
-      "data.account_email": "{{user.email}}"
+      "created_by_id": "{{user.id}}"
     },
     "update": {
-      "data.account_email": "{{user.email}}"
+      "created_by_id": "{{user.id}}"
     },
     "delete": {
-      "data.account_email": "{{user.email}}"
+      "created_by_id": "{{user.id}}"
     }
   }
 }
