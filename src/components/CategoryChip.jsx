@@ -1,4 +1,6 @@
 import { motion } from "framer-motion";
+import { useT } from "@/lib/i18n";
+import { catLabel } from "@/lib/i18n-terms";
 
 const DEFAULT_CATS = [
 { name: "القرآن وعلومه", emoji: "📖", color: "emerald" },
@@ -41,9 +43,22 @@ export const categories = [
 
 
 export default function CategoryChip({ category, isActive, onClick }) {
+  const t = useT();
   const colorClass = COLOR_MAP[category.color] || COLOR_MAP.gray;
 
-  return null;
+  return (
+    <motion.button
+      whileTap={{ scale: 0.95 }}
+      onClick={() => onClick?.(category.name)}
+      className={`shrink-0 inline-flex items-center gap-1.5 ps-3 pe-3.5 py-2 rounded-full border text-xs font-bold whitespace-nowrap transition-all ${
+      isActive ?
+      "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/25" :
+      `bg-card text-muted-foreground border-border ${colorClass}`}`
+      }>
+
+      <span className="text-sm leading-none">{category.emoji}</span>
+      {catLabel(category.name, t.langCode)}
+    </motion.button>);
 
 
 

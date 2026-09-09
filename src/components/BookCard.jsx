@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Heart, Star, BookOpen, BookMarked } from "lucide-react";
 import { motion } from "framer-motion";
 import { useT } from "@/lib/i18n";
+import { catLabel } from "@/lib/i18n-terms";
 import SmartImage from "./SmartImage";
 
 const categoryColors = {
@@ -83,7 +84,7 @@ export default function BookCard({ book, isFavorite, onToggleFavorite, index = 0
         {/* Content */}
         <div className="py-4 px-4">
           <span className="inline-block text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold mb-2">
-            {book.category}
+            {catLabel(book.category, t.langCode)}
           </span>
           <h3
             className="font-bold text-foreground text-sm leading-relaxed line-clamp-2 mb-1 group-hover:text-primary transition-colors"

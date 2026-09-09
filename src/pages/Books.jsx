@@ -8,6 +8,7 @@ import CategoryChip, { categories } from "../components/CategoryChip";
 import { SkeletonGrid } from "../components/Skeleton";
 import { Input } from "@/components/ui/input";
 import { useT } from "@/lib/i18n";
+import { bookLangLabel } from "@/lib/i18n-terms";
 import { getBooks, getFavoriteIds, toggleFavorite } from "@/lib/offlineSync";
 import { getAccountEmail } from "@/lib/activeUser";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
@@ -131,7 +132,7 @@ export default function Books() {
         <p className="text-sm text-muted-foreground">{filteredBooks.length} {t.booksCount}</p>
         {preferredLanguage !== "الكل" &&
           <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">{t.lang}: {preferredLanguage}</span>
+            <span className="text-xs text-muted-foreground">{t.lang}: {bookLangLabel(preferredLanguage, t.langCode)}</span>
             <button onClick={() => setPreferredLanguage("الكل")} className="text-xs text-primary hover:underline">
               {t.showAll}
             </button>

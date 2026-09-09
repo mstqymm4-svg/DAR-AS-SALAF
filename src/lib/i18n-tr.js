@@ -84,6 +84,7 @@ export default {
   play: "Oynat",
   all: "Tümü",
   offlineMode: "Çevrimdışı — veriler yerel olarak kaydedildi",
+  videoNeedsNet: "Video oynatmak için internet bağlantısı gerekir — video bilgileri çevrimdışı kullanılabilir",
   invalidVideoUrl: "Geçersiz video bağlantısı",
   linkCopied: "Bağlantı kopyalandı",
   restartPlayback: "Yeniden Başlat",

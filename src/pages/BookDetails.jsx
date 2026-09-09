@@ -5,6 +5,7 @@ import { Heart, Star, BookOpen, ArrowRight, FileText, User, BookMarked, Download
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useT } from "@/lib/i18n";
+import { catLabel, bookLangLabel } from "@/lib/i18n-terms";
 import { getBook, getFavoriteIds, toggleFavorite, downloadBookPdf, isPdfDownloaded } from "@/lib/offlineSync";
 import { getAccountEmail, addDownloadedBookId } from "@/lib/activeUser";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
@@ -133,7 +134,7 @@ export default function BookDetails() {
           <div className="flex items-start justify-between gap-4 mb-4">
             <div>
               <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full bg-primary/10 font-semibold mb-3 text-[hsl(var(--primary))]">
-                {book.category}
+                {catLabel(book.category, t.langCode)}
               </span>
               <h1 className="text-2xl md:text-3xl font-black text-foreground leading-tight">{book.title}</h1>
             </div>
@@ -169,6 +170,13 @@ export default function BookDetails() {
                 <FileText className="w-4 h-4 mb-1" />
                 <p className="text-lg font-bold text-[hsl(var(--primary))]">{book.pages_count}</p>
                 <p className="text-xs text-[hsl(var(--popover-foreground))]">{t.pages}</p>
+              </div>
+            }
+            {book.language &&
+            <div className="p-4 rounded-xl bg-muted/50 border border-border hover:border-primary/20 transition-colors">
+                <BookOpen className="w-4 h-4 mb-1" />
+                <p className="text-lg font-bold text-[hsl(var(--primary))]">{bookLangLabel(book.language, t.langCode)}</p>
+                <p className="text-xs text-[hsl(var(--popover-foreground))]">{t.language}</p>
               </div>
             }
             

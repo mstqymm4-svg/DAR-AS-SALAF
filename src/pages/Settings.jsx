@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useT, TRANSLATIONS } from "@/lib/i18n";
+import { bookLangLabel, BOOK_LANG_VALUES } from "@/lib/i18n-terms";
 import { setThemeMode, getThemeState, subscribeToTheme } from "@/lib/themeEngine";
 import { PageSpinner } from "@/components/Skeleton";
 
@@ -123,15 +124,7 @@ export default function Settings() {
                 onValueChange={setLanguage}
                 placeholder={t.preferredLangPlaceholder}
                 triggerClassName="mt-1.5"
-                options={[
-                { value: "الكل", label: "الكل" },
-                { value: "العربية", label: "العربية" },
-                { value: "الإنجليزية", label: "الإنجليزية" },
-                { value: "الفرنسية", label: "الفرنسية" },
-                { value: "الأوردو", label: "الأوردو" },
-                { value: "الهندية", label: "الهندية" },
-                { value: "التركية", label: "التركية" }]
-                } />
+                options={BOOK_LANG_VALUES.map((v) => ({ value: v, label: bookLangLabel(v, t.langCode) }))} />
               
             </div>
             <Button onClick={handleSavePreferences} disabled={saving} className="gap-2 rounded-[4px_20px_4px_20px]">
