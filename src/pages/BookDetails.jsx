@@ -172,13 +172,7 @@ export default function BookDetails() {
                 <p className="text-xs text-[hsl(var(--popover-foreground))]">{t.pages}</p>
               </div>
             }
-            {book.language &&
-            <div className="p-4 rounded-xl bg-muted/50 border border-border hover:border-primary/20 transition-colors">
-                <BookOpen className="w-4 h-4 mb-1" />
-                <p className="text-lg font-bold text-[hsl(var(--primary))]">{bookLangLabel(book.language, t.langCode)}</p>
-                <p className="text-xs text-[hsl(var(--popover-foreground))]">{t.language}</p>
-              </div>
-            }
+
             
 
 

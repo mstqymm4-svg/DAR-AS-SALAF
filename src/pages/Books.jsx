@@ -4,7 +4,6 @@ import { Search, WifiOff } from "lucide-react";
 import { motion } from "framer-motion";
 import AISearch from "../components/AISearch";
 import BookCard from "../components/BookCard";
-import CategoryChip, { categories } from "../components/CategoryChip";
 import { SkeletonGrid } from "../components/Skeleton";
 import { Input } from "@/components/ui/input";
 import { useT } from "@/lib/i18n";
@@ -114,12 +113,6 @@ export default function Books() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pr-11 h-12 rounded-xl bg-card border-border text-sm focus-visible:border-primary focus-visible:ring-primary/20 transition-colors" />
           
-      </div>
-
-      <div className="flex gap-2.5 overflow-x-auto pb-4 mb-6 scrollbar-hide">
-        {categories.map((cat) =>
-          <CategoryChip key={cat.name} category={cat} isActive={activeCategory === cat.name} onClick={setActiveCategory} />
-          )}
       </div>
 
       {aiResults &&
