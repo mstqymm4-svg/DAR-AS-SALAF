@@ -43,8 +43,8 @@ export default function ViewerToolbar({
     theme === "dark" ? t.tbDark : theme === "sepia" ? t.themeSepia : t.tbLight;
 
   return (
-    <div className={`shrink-0 border-t ${dark ? "border-gray-700 bg-gray-800" : "border-border bg-card"}`}>
-      <div dir="ltr" className="flex items-center justify-center px-2 py-1.5 gap-0.5 sm:gap-1 overflow-x-auto scrollbar-hide">
+    <div className={`shrink-0 border-t backdrop-blur-xl shadow-[0_-6px_24px_-12px_rgba(0,0,0,0.25)] ${dark ? "border-gray-700 bg-gray-800/90" : "border-border bg-card/90"}`}>
+      <div dir="ltr" className="flex items-center justify-center px-2 py-2 gap-0.5 sm:gap-1 overflow-x-auto scrollbar-hide">
         <ToolBtn onClick={onZoomOut} dark={dark} title={t.tbZoomOut}>
           <ZoomOut className="w-4 h-4" />
         </ToolBtn>
@@ -60,7 +60,7 @@ export default function ViewerToolbar({
         <ToolBtn onClick={onPrev} dark={dark} title={t.tbPrev} disabled={currentPage <= 1}>
           <ChevronLeft className="w-4 h-4" />
         </ToolBtn>
-        <span className={`text-xs font-mono font-bold px-2 shrink-0 whitespace-nowrap ${dark ? "text-gray-300" : "text-foreground"}`}>
+        <span className={`text-xs font-mono font-bold px-2.5 py-1 rounded-full shrink-0 whitespace-nowrap ${dark ? "text-gray-200 bg-gray-700/70" : "text-foreground bg-muted"}`}>
           {currentPage} / {totalPages} · {pct}%
         </span>
         <ToolBtn onClick={onNext} dark={dark} title={t.tbNext} disabled={currentPage >= totalPages}>
@@ -98,7 +98,7 @@ export default function ViewerToolbar({
       {/* Tappable reading-progress bar */}
       <div
         dir="ltr"
-        className={`h-1.5 cursor-pointer group relative ${dark ? "bg-gray-700" : "bg-muted"}`}
+        className={`h-1.5 hover:h-2.5 transition-all cursor-pointer group relative ${dark ? "bg-gray-700" : "bg-muted"}`}
         onClick={(e) => {
           if (!onSeekProgress) return;
           const rect = e.currentTarget.getBoundingClientRect();
@@ -107,10 +107,10 @@ export default function ViewerToolbar({
         }}
       >
         <div
-          className="h-full bg-primary transition-all duration-300 relative"
+          className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-300 relative"
           style={{ width: `${pct}%` }}
         >
-          <div className="absolute -end-1 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute -end-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white ring-2 ring-primary shadow opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
       </div>
     </div>
@@ -123,9 +123,9 @@ function ToolBtn({ children, onClick, dark, title, active, disabled }) {
       onClick={onClick}
       title={title}
       disabled={disabled}
-      className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors shrink-0 disabled:opacity-30 disabled:cursor-default ${
+      className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-95 shrink-0 disabled:opacity-30 disabled:cursor-default ${
         active
-          ? "bg-primary/15 text-primary"
+          ? "bg-primary/15 text-primary ring-1 ring-primary/30"
           : dark
           ? "hover:bg-gray-700 text-gray-300"
           : "hover:bg-muted text-muted-foreground"
