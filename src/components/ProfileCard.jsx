@@ -158,9 +158,9 @@ export default function ProfileCard() {
       </div>
 
       {/* Avatar + identity */}
-      <div className="px-6 -mt-10">
-        <div className="flex items-end justify-between">
-          <div className="relative">
+      <div className="px-5 sm:px-6 -mt-10">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+          <div className="relative self-start">
             <div className="p-[3px] rounded-full bg-gradient-to-br from-primary via-accent to-primary shadow-lg">
               <div className="w-20 h-20 rounded-full ring-2 ring-card bg-primary/10 overflow-hidden flex items-center justify-center">
                 {avatar ?
@@ -180,9 +180,16 @@ export default function ProfileCard() {
               {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
             </button>
           </div>
-          <div className="pb-1 text-end">
-            <p className="font-bold text-foreground truncate max-w-[180px]">{fullName || t.profile}</p>
-            <p className="text-xs text-muted-foreground truncate max-w-[180px]">{emailInput}</p>
+          <div className="pb-1 min-w-0 sm:text-end">
+            <div className="flex items-center gap-1.5 sm:justify-end">
+              <p className="font-bold text-base text-foreground truncate">{fullName || t.profile}</p>
+              {verified &&
+              <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/12 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">
+                  <ShieldCheck className="w-3 h-3" />
+                </span>
+              }
+            </div>
+            <p className="text-xs text-muted-foreground truncate mt-0.5">{emailInput}</p>
             
 
 
@@ -193,7 +200,7 @@ export default function ProfileCard() {
       </div>
 
       {/* Fields */}
-      <div className="px-6 pt-5 space-y-4">
+      <div className="px-5 sm:px-6 pt-5 space-y-4">
         <div>
           <Label>{t.fullName}</Label>
           <Input value={fullName} onChange={(e) => setFullName(e.target.value)} className="mt-1.5" />
@@ -227,7 +234,7 @@ export default function ProfileCard() {
       </div>
 
       {/* Stats */}
-      <div className="px-6 pt-5">
+      <div className="px-5 sm:px-6 pt-5">
         <h3 className="flex items-center gap-2 text-sm font-bold text-foreground mb-3">
           <Activity className="w-4 h-4 text-primary" /> {t.myActivity}
         </h3>
@@ -240,13 +247,13 @@ export default function ProfileCard() {
       </div>
 
       {/* Quick links */}
-      <div className="px-6 pt-4">
+      <div className="px-5 sm:px-6 pt-4">
         <ProfileQuickLinks />
       </div>
 
       {/* Recent reads */}
       {recentReads.length > 0 &&
-      <div className="px-6 pt-5 pb-6">
+      <div className="px-5 sm:px-6 pt-5 pb-6">
           <h3 className="flex items-center gap-2 text-sm font-bold text-foreground mb-3">
             <BookOpen className="w-4 h-4 text-primary" /> {t.lastRead}
           </h3>
