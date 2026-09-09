@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 import { usePlayerGestures } from "@/hooks/usePlayerGestures";
 import PlaylistPanel from "@/components/video/PlaylistPanel";
+import PlayerButton from "@/components/video/PlayerButton";
 import OfflineVideoNotice from "@/components/video/OfflineVideoNotice";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
@@ -430,53 +431,52 @@ export default function VideoPlayer({ video, onClose, playlist = [], onSelectVid
                 <span className="text-[11px] text-white/80 font-mono w-12 text-center shrink-0">{formatTime(duration)}</span>
               </div>
 
-              {/* Control buttons */}
-              <div className="flex items-center justify-between gap-1 pointer-events-auto overflow-x-auto scrollbar-hide" onClick={(e) => e.stopPropagation()}>
-                <div className="flex items-center gap-1 shrink-0">
-                  <CtrlBtn onClick={togglePlay} primary title={t.play}>
-                    {playing ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
-                  </CtrlBtn>
-                  <CtrlBtn onClick={() => prevItem && onSelectVideo?.(prevItem)} disabled={!prevItem} title={t.prevVideo}>
-                    <SkipBack className="w-5 h-5" />
-                  </CtrlBtn>
-                  <CtrlBtn onClick={() => nextItem && onSelectVideo?.(nextItem)} disabled={!nextItem} title={t.nextVideo}>
-                    <SkipForward className="w-5 h-5" />
-                  </CtrlBtn>
-                </div>
-                <div className="flex-1 min-w-0 px-2 hidden sm:block text-center">
-                  <p className="text-xs text-white/60 truncate">{video.title}</p>
-                </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  <CtrlBtn onClick={handleRestart} title={t.restartPlayback}>
-                    <RotateCcw className="w-5 h-5" />
-                  </CtrlBtn>
-                  <CtrlBtn onClick={() => skip(-10)} title="-10s">
-                    <Rewind className="w-5 h-5" />
-                  </CtrlBtn>
-                  <CtrlBtn onClick={() => skip(10)} title="+10s">
-                    <FastForward className="w-5 h-5" />
-                  </CtrlBtn>
+              {/* Primary controls — always visible, centered, large tap targets */}
+              <div className="flex items-center justify-center gap-3 pointer-events-auto mb-2" onClick={(e) => e.stopPropagation()}>
+                <PlayerButton onClick={() => prevItem && onSelectVideo?.(prevItem)} disabled={!prevItem} title={t.prevVideo}>
+                  <SkipBack className="w-5 h-5" />
+                </PlayerButton>
+                <PlayerButton onClick={() => skip(-10)} title="-10s">
+                  <Rewind className="w-5 h-5" />
+                </PlayerButton>
+                <PlayerButton onClick={togglePlay} primary size="lg" title={t.play}>
+                  {playing ? <Pause className="w-7 h-7" /> : <Play className="w-7 h-7 fill-white ml-0.5" />}
+                </PlayerButton>
+                <PlayerButton onClick={() => skip(10)} title="+10s">
+                  <FastForward className="w-5 h-5" />
+                </PlayerButton>
+                <PlayerButton onClick={() => nextItem && onSelectVideo?.(nextItem)} disabled={!nextItem} title={t.nextVideo}>
+                  <SkipForward className="w-5 h-5" />
+                </PlayerButton>
+              </div>
+
+              {/* Secondary controls — compact pill row */}
+              <div className="flex items-center justify-center gap-1 pointer-events-auto overflow-x-auto scrollbar-hide" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center gap-1 px-1.5 py-1 rounded-full bg-white/[0.07] backdrop-blur-md ring-1 ring-white/10">
+                  <PlayerButton onClick={handleRestart} size="sm" title={t.restartPlayback}>
+                    <RotateCcw className="w-4 h-4" />
+                  </PlayerButton>
                   <button
                     onClick={cycleSpeed}
                     title={t.speedLabel || "Speed"}
-                    className="h-11 px-3 rounded-full bg-white/10 backdrop-blur-md ring-1 ring-white/10 hover:bg-white/20 active:scale-95 flex items-center justify-center text-white text-xs font-bold transition-all shrink-0"
+                    className="h-10 px-3 rounded-full bg-white/10 hover:bg-white/20 active:scale-90 flex items-center justify-center text-white text-xs font-bold transition-all shrink-0"
                   >
                     {rate}x
                   </button>
-                  <CtrlBtn onClick={toggleLoop} active={loop} title={t.loopBtn}>
-                    <Repeat className="w-5 h-5" />
-                  </CtrlBtn>
+                  <PlayerButton onClick={toggleLoop} size="sm" active={loop} title={t.loopBtn}>
+                    <Repeat className="w-4 h-4" />
+                  </PlayerButton>
                   {playlist.length > 0 && (
-                    <CtrlBtn onClick={() => setShowPlaylist(s => !s)} active={showPlaylist} title={t.playlist}>
-                      <ListVideo className="w-5 h-5" />
-                    </CtrlBtn>
+                    <PlayerButton onClick={() => setShowPlaylist((s) => !s)} size="sm" active={showPlaylist} title={t.playlist}>
+                      <ListVideo className="w-4 h-4" />
+                    </PlayerButton>
                   )}
-                  <CtrlBtn onClick={toggleMute}>
-                    {muted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-                  </CtrlBtn>
-                  <CtrlBtn onClick={toggleFullscreen} title={t.tbFullscreen || "Fullscreen"}>
-                    {fullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
-                  </CtrlBtn>
+                  <PlayerButton onClick={toggleMute} size="sm">
+                    {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                  </PlayerButton>
+                  <PlayerButton onClick={toggleFullscreen} size="sm" title={t.tbFullscreen || "Fullscreen"}>
+                    {fullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+                  </PlayerButton>
                 </div>
               </div>
             </motion.div>
@@ -484,24 +484,5 @@ export default function VideoPlayer({ video, onClose, playlist = [], onSelectVid
         </AnimatePresence>
       </div>
     </div>
-  );
-}
-
-function CtrlBtn({ children, onClick, disabled, title, active, primary }) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      title={title}
-      className={`w-11 h-11 rounded-full flex items-center justify-center text-white transition-all shrink-0 disabled:opacity-30 disabled:cursor-default active:scale-95 backdrop-blur-md ring-1 ${
-        primary
-          ? "bg-primary hover:bg-primary/90 ring-white/20 shadow-lg shadow-primary/30"
-          : active
-          ? "bg-primary/80 ring-white/20"
-          : "bg-white/10 hover:bg-white/20 ring-white/10"
-      }`}
-    >
-      {children}
-    </button>
   );
 }

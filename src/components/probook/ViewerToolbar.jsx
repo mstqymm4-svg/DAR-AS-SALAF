@@ -44,7 +44,7 @@ export default function ViewerToolbar({
 
   return (
     <div className={`shrink-0 border-t backdrop-blur-xl shadow-[0_-6px_24px_-12px_rgba(0,0,0,0.25)] ${dark ? "border-gray-700 bg-gray-800/90" : "border-border bg-card/90"}`}>
-      <div dir="ltr" className="flex items-center justify-center px-2 py-2 gap-0.5 sm:gap-1 overflow-x-auto scrollbar-hide">
+      <div dir="ltr" className="flex items-center justify-center px-2 py-2 gap-1 overflow-x-auto scrollbar-hide">
         <ToolBtn onClick={onZoomOut} dark={dark} title={t.tbZoomOut}>
           <ZoomOut className="w-4 h-4" />
         </ToolBtn>
@@ -98,7 +98,7 @@ export default function ViewerToolbar({
       {/* Tappable reading-progress bar */}
       <div
         dir="ltr"
-        className={`h-1.5 hover:h-2.5 transition-all cursor-pointer group relative ${dark ? "bg-gray-700" : "bg-muted"}`}
+        className={`h-2 hover:h-3 transition-all cursor-pointer group relative ${dark ? "bg-gray-700" : "bg-muted"}`}
         onClick={(e) => {
           if (!onSeekProgress) return;
           const rect = e.currentTarget.getBoundingClientRect();
@@ -123,12 +123,12 @@ function ToolBtn({ children, onClick, dark, title, active, disabled }) {
       onClick={onClick}
       title={title}
       disabled={disabled}
-      className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-95 shrink-0 disabled:opacity-30 disabled:cursor-default ${
+      className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all active:scale-90 shrink-0 disabled:opacity-25 disabled:cursor-default ${
         active
-          ? "bg-primary/15 text-primary ring-1 ring-primary/30"
+          ? "bg-primary/15 text-primary ring-1 ring-primary/30 shadow-sm"
           : dark
-          ? "hover:bg-gray-700 text-gray-300"
-          : "hover:bg-muted text-muted-foreground"
+          ? "bg-gray-700/40 hover:bg-gray-700 text-gray-200 ring-1 ring-white/5"
+          : "bg-muted/60 hover:bg-muted text-foreground ring-1 ring-border/60"
       }`}
     >
       {children}
