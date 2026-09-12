@@ -256,8 +256,9 @@
     @apply rounded-xl;
     min-height: 2.75rem;
   }
-  main button:not([class*="rounded-full"]):not([class*="rounded-2xl"]):not([class*="rounded-lg"]):not([class*="rounded-md"]) {
-    @apply rounded-xl;
+  main button:not([class*="rounded-"]) {
+    /* Signature asymmetric corners — matches the hero banner CTA */
+    border-radius: 4px 20px 4px 20px;
   }
   button, a {
     transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
