@@ -43,7 +43,7 @@ export default function ViewerToolbar({
     theme === "dark" ? t.tbDark : theme === "sepia" ? t.themeSepia : t.tbLight;
 
   return (
-    <div className={`shrink-0 border-t backdrop-blur-xl ${dark ? "border-gray-700 bg-gray-800/90" : "border-border bg-card/90"}`}>
+    <div data-viewer-ui className={`shrink-0 border-t backdrop-blur-xl ${dark ? "border-gray-700 bg-gray-800/90" : "border-border bg-card/90"}`}>
       <div dir="ltr" className="flex items-center justify-between px-1.5 py-1.5 gap-0.5">
         <ToolBtn onClick={onZoomOut} dark={dark} title={t.tbZoomOut}>
           <ZoomOut className="w-3.5 h-3.5" />

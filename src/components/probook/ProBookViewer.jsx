@@ -233,19 +233,35 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
 
   if (loading) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center gap-4 bg-background">
-        <Loader2 className="w-10 h-10 text-primary animate-spin" />
-        <p className="text-sm text-muted-foreground">{t.readerLoading}</p>
+      <div className="w-full h-full flex flex-col bg-background">
+        <div className="w-full max-w-lg mx-auto px-4 pt-8 animate-pulse">
+          <div className="h-4 w-32 bg-muted rounded mb-6" />
+          <div className="bg-card border border-border rounded-xl shadow-sm aspect-[3/4] p-6 space-y-3">
+            <div className="h-3 w-full bg-muted rounded" />
+            <div className="h-3 w-11/12 bg-muted rounded" />
+            <div className="h-3 w-full bg-muted rounded" />
+            <div className="h-3 w-2/3 bg-muted rounded" />
+          </div>
+        </div>
+        <div className="mt-6 flex items-center justify-center gap-2 text-muted-foreground">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          <p className="text-sm">{t.readerLoading}</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-background px-4 text-center">
-        <AlertCircle className="w-10 h-10 text-destructive" />
-        <p className="text-sm text-destructive font-medium">{t.readerLoadError}</p>
-        <button onClick={() => setReloadKey(k => k + 1)} className="text-xs text-primary hover:underline">
+      <div className="w-full h-full flex flex-col items-center justify-center gap-4 bg-background px-4 text-center">
+        <span className="w-14 h-14 rounded-2xl bg-destructive/10 flex items-center justify-center">
+          <AlertCircle className="w-7 h-7 text-destructive" />
+        </span>
+        <p className="text-sm text-destructive font-semibold">{t.readerLoadError}</p>
+        <button
+          onClick={() => setReloadKey(k => k + 1)}
+          className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold active:scale-95 transition-transform"
+        >
           {t.readerRetry}
         </button>
       </div>
@@ -253,7 +269,17 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
   }
 
   return (
-    <div ref={rootRef} className="relative w-full h-full flex flex-col bg-muted/30 select-none" onContextMenu={(e) => e.preventDefault()}>
+    <div
+      ref={rootRef}
+      className="relative w-full h-full flex flex-col bg-muted/30 select-none"
+      onContextMenu={(e) => e.preventDefault()}
+      onClick={(e) => {
+        // Toggle the toolbar by tapping the page area
+        if (showToc || showSearch || showGoTo) return;
+        if (e.target.closest?.("[data-viewer-ui]")) return;
+        setShowToolbar(s => !s);
+      }}
+    >
       {/* Vertical continuous page stream */}
       <VerticalPageStream
         pdf={pdf}

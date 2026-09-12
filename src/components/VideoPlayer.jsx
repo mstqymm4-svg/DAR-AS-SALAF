@@ -34,6 +34,7 @@ export default function VideoPlayer({ video, onClose, playlist = [], onSelectVid
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [bufferedPct, setBufferedPct] = useState(0);
   const [muted, setMuted] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
@@ -134,6 +135,8 @@ export default function VideoPlayer({ video, onClose, playlist = [], onSelectVid
         setCurrentTime(cur);
         const d = player.getDuration();
         if (d) setDuration(d);
+        const loaded = player.getVideoLoadedFraction?.();
+        if (typeof loaded === "number" && d) setBufferedPct(loaded * 100);
         if (videoId && cur > 0) {
           localStorage.setItem(`video_pos_${videoId}`, String(Math.floor(cur)));
         }
@@ -421,6 +424,7 @@ export default function VideoPlayer({ video, onClose, playlist = [], onSelectVid
                   onPointerMove={(e) => { if (e.buttons === 1) seekFromClientX(e.clientX); }}
                 >
                   <div className="relative w-full h-1.5 rounded-full bg-white/20 transition-all group-hover:h-2.5">
+                    <div className="absolute inset-y-0 left-0 rounded-full bg-white/25" style={{ width: `${bufferedPct}%` }} />
                     <div className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-primary to-accent" style={{ width: `${progressPct}%` }} />
                     <div
                       className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,0.5)] transition-transform group-hover:scale-125"
