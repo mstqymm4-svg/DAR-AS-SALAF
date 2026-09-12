@@ -13,11 +13,14 @@ const DEFAULT_RATIO = 0.707; // A4 portrait fallback
 const RENDER_BUFFER = 1; // render currentPage ± 1 (fast open, light memory)
 const PREFETCH = 4; // measure aspect ratios within ±4
 
+const clampZoom = (z) => Math.max(0.5, Math.min(3, +Number(z).toFixed(2)));
+
 export default function VerticalPageStream({
   pdf,
   totalPages,
   currentPage,
   zoom,
+  onZoomChange,
   theme,
   onCurrentPageChange,
   scrollToPageRef,
@@ -28,6 +31,74 @@ export default function VerticalPageStream({
   const aspectCache = useRef({});
   const pendingAspect = useRef(new Set());
   const ratios = useRef({});
+  const touchRef = useRef({ mode: "idle" });
+  const zoomRef = useRef(zoom);
+  zoomRef.current = zoom;
+
+  // ── Custom touch handling: single-finger drag scroll + pinch-to-zoom ──
+  // touch-action:none disables native gestures, so scrolling and pinch zoom
+  // are handled here in JS — keeping the browser page-zoom out of the way.
+  const onTouchStart = (e) => {
+    const st = touchRef.current;
+    if (e.touches.length === 2) {
+      const [a, b] = e.touches;
+      st.mode = "pinch";
+      st.dist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+      st.baseZoom = zoomRef.current;
+    } else if (e.touches.length === 1) {
+      st.mode = "drag";
+      st.lastX = e.touches[0].clientX;
+      st.lastY = e.touches[0].clientY;
+      st.vY = 0;
+      st.lastT = Date.now();
+    }
+  };
+
+  const onTouchMove = (e) => {
+    const st = touchRef.current;
+    const el = scrollRef.current;
+    if (!el) return;
+    if (st.mode === "pinch" && e.touches.length === 2) {
+      const [a, b] = e.touches;
+      const d = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+      if (st.dist > 0) onZoomChange?.(clampZoom(st.baseZoom * (d / st.dist)));
+    } else if (st.mode === "drag" && e.touches.length === 1) {
+      const t = e.touches[0];
+      const now = Date.now();
+      st.vY = (t.clientY - st.lastY) / Math.max(1, now - st.lastT);
+      st.lastT = now;
+      el.scrollLeft -= t.clientX - st.lastX;
+      el.scrollTop -= t.clientY - st.lastY;
+      st.lastX = t.clientX;
+      st.lastY = t.clientY;
+    }
+  };
+
+  const onTouchEnd = (e) => {
+    const st = touchRef.current;
+    if (e.touches.length === 0) {
+      if (st.mode === "drag" && Math.abs(st.vY) > 0.05) {
+        // Momentum: continue scrolling with decay after the finger lifts
+        let v = st.vY;
+        const el = scrollRef.current;
+        let last = performance.now();
+        const step = (now) => {
+          if (!el) return;
+          const dt = now - last;
+          last = now;
+          v *= Math.pow(0.94, dt / 16);
+          el.scrollTop -= v * dt;
+          if (Math.abs(v) > 0.02) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      }
+      st.mode = "idle";
+    } else if (e.touches.length === 1) {
+      // A pinch ended with one finger still down — end the gesture cleanly
+      // instead of jumping into a drag halfway through.
+      st.mode = "idle";
+    }
+  };
 
   // ── Expose scrollToPage to parent ──
   useEffect(() => {
@@ -100,7 +171,16 @@ export default function VerticalPageStream({
       : "none";
 
   return (
-    <div ref={scrollRef} className="flex-1 overflow-auto overscroll-contain bg-muted/30" onContextMenu={(e) => e.preventDefault()}>
+    <div
+      ref={scrollRef}
+      className="flex-1 overflow-auto overscroll-contain bg-muted/30"
+      style={{ touchAction: "none" }}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      onTouchCancel={() => { touchRef.current.mode = "idle"; }}
+      onContextMenu={(e) => e.preventDefault()}
+    >
       <div dir="ltr" className="flex flex-col items-start gap-3 py-3 px-2">
         {Array.from({ length: totalPages }, (_, idx) => {
           const p = idx + 1;

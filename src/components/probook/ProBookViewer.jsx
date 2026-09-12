@@ -52,7 +52,6 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
   const rootRef = useRef(null);
   const scrollToPageRef = useRef(null);
   const currentPageRef = useRef(1);
-  const pinchRef = useRef({ dist: 0, zoom: 1, ratio: 1, last: 0 });
   const zoomRef = useRef(zoom);
   zoomRef.current = zoom;
   const didRestoreRef = useRef(false);
@@ -155,50 +154,6 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
     return () => window.removeEventListener("keydown", onKey);
   }, [nextPage, prevPage, zoomIn, zoomOut, showToc, showSearch, showGoTo]);
 
-  // ── Pinch-to-zoom (touch) ──
-  useEffect(() => {
-    const el = rootRef.current;
-    if (!el) return;
-    const onStart = (e) => {
-      if (e.touches.length === 2) {
-        const dx = e.touches[0].clientX - e.touches[1].clientX;
-        const dy = e.touches[0].clientY - e.touches[1].clientY;
-        pinchRef.current.dist = Math.hypot(dx, dy);
-        pinchRef.current.zoom = zoomRef.current;
-        pinchRef.current.ratio = 1;
-        pinchRef.current.last = 0;
-      }
-    };
-    const onMove = (e) => {
-      if (e.touches.length === 2 && pinchRef.current.dist > 0) {
-        e.preventDefault();
-        const dx = e.touches[0].clientX - e.touches[1].clientX;
-        const dy = e.touches[0].clientY - e.touches[1].clientY;
-        const ratio = Math.hypot(dx, dy) / pinchRef.current.dist;
-        pinchRef.current.ratio = ratio;
-        // Throttle live updates to keep rendering smooth during the gesture
-        const now = Date.now();
-        if (now - pinchRef.current.last < 100) return;
-        pinchRef.current.last = now;
-        setZoom(clampZoom(pinchRef.current.zoom * ratio));
-      }
-    };
-    const onEnd = () => {
-      if (pinchRef.current.dist > 0 && pinchRef.current.ratio !== 1) {
-        setZoom(clampZoom(pinchRef.current.zoom * pinchRef.current.ratio));
-      }
-      pinchRef.current.dist = 0;
-    };
-    el.addEventListener("touchstart", onStart, { passive: false });
-    el.addEventListener("touchmove", onMove, { passive: false });
-    el.addEventListener("touchend", onEnd);
-    return () => {
-      el.removeEventListener("touchstart", onStart);
-      el.removeEventListener("touchmove", onMove);
-      el.removeEventListener("touchend", onEnd);
-    };
-  }, []);
-
   // ── Search across all pages ──
   const runSearch = useCallback(async () => {
     const q = query.trim();
@@ -287,6 +242,7 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
         totalPages={totalPages}
         currentPage={currentPage}
         zoom={zoom}
+        onZoomChange={(z) => setZoom(clampZoom(z))}
         theme={theme}
         onCurrentPageChange={onStreamPageChange}
         scrollToPageRef={scrollToPageRef}
