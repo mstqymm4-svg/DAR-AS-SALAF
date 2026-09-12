@@ -34,6 +34,11 @@ export default function VerticalPageStream({
   const touchRef = useRef({ mode: "idle" });
   const zoomRef = useRef(zoom);
   zoomRef.current = zoom;
+  // Live zoom during a pinch gesture. While pinching we only scale the page
+  // visually with a CSS transform — the expensive canvas re-render happens
+  // ONCE when the fingers lift (prevents the main-thread freeze of rendering
+  // the PDF on every touchmove event).
+  const [pinchZoom, setPinchZoom] = useState(null);
 
   // ── Custom touch handling: single-finger drag scroll + pinch-to-zoom ──
   // touch-action:none disables native gestures, so scrolling and pinch zoom
@@ -61,7 +66,7 @@ export default function VerticalPageStream({
     if (st.mode === "pinch" && e.touches.length === 2) {
       const [a, b] = e.touches;
       const d = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
-      if (st.dist > 0) onZoomChange?.(clampZoom(st.baseZoom * (d / st.dist)));
+      if (st.dist > 0) setPinchZoom(clampZoom(st.baseZoom * (d / st.dist)));
     } else if (st.mode === "drag" && e.touches.length === 1) {
       const t = e.touches[0];
       const now = Date.now();
@@ -74,8 +79,15 @@ export default function VerticalPageStream({
     }
   };
 
+  // Commit the pinch result to the parent (single canvas re-render) & reset
+  const finishPinch = () => {
+    if (pinchZoom != null) onZoomChange?.(pinchZoom);
+    setPinchZoom(null);
+  };
+
   const onTouchEnd = (e) => {
     const st = touchRef.current;
+    const wasPinch = st.mode === "pinch";
     if (e.touches.length === 0) {
       if (st.mode === "drag" && Math.abs(st.vY) > 0.05) {
         // Momentum: continue scrolling with decay after the finger lifts
@@ -93,11 +105,20 @@ export default function VerticalPageStream({
         requestAnimationFrame(step);
       }
       st.mode = "idle";
+      if (wasPinch) finishPinch();
     } else if (e.touches.length === 1) {
-      // A pinch ended with one finger still down — end the gesture cleanly
-      // instead of jumping into a drag halfway through.
+      // A pinch ended with one finger still down — commit the zoom and end
+      // the gesture cleanly instead of jumping into a drag halfway through.
       st.mode = "idle";
+      if (wasPinch) finishPinch();
     }
+  };
+
+  const onTouchCancel = () => {
+    const st = touchRef.current;
+    const wasPinch = st.mode === "pinch";
+    st.mode = "idle";
+    if (wasPinch) finishPinch();
   };
 
   // ── Expose scrollToPage to parent ──
@@ -178,39 +199,55 @@ export default function VerticalPageStream({
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
-      onTouchCancel={() => { touchRef.current.mode = "idle"; }}
+      onTouchCancel={onTouchCancel}
       onContextMenu={(e) => e.preventDefault()}
     >
       <div dir="ltr" className="flex flex-col items-start gap-3 py-3 px-2">
         {Array.from({ length: totalPages }, (_, idx) => {
           const p = idx + 1;
           const r = aspect[p] || DEFAULT_RATIO;
-          const h = slotWidth > 0 ? (slotWidth * zoom) / r : 400;
+          // eff = live zoom (pinch) — outer slot sizes follow it cheaply.
+          // Inner wrapper keeps the committed zoom and is scaled visually;
+          // the canvas itself re-renders only once, after the pinch.
+          const eff = pinchZoom ?? zoom;
+          const effW = slotWidth > 0 ? slotWidth * eff : 0;
+          const comW = slotWidth > 0 ? slotWidth * zoom : 0;
+          const effH = effW > 0 ? effW / r : 400;
+          const comH = comW > 0 ? comW / r : 400;
           const shouldRender = Math.abs(p - currentPage) <= RENDER_BUFFER;
           return (
             <div
               key={p}
               data-page={p}
-              className="bg-white shadow-lg shrink-0 mx-auto"
+              className="bg-white shadow-lg shrink-0 mx-auto overflow-hidden"
               style={{
-                width: slotWidth > 0 ? slotWidth * zoom : "100%",
-                height: h,
+                width: effW > 0 ? effW : "100%",
+                height: effH,
                 filter: pageFilter,
               }}
             >
-              {shouldRender && pdf ? (
-                <PdfPageRenderer
-                  pdf={pdf}
-                  pageNumber={p}
-                  zoom={zoom}
-                  containerWidth={slotWidth}
-                  containerHeight={h}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-xs text-gray-400 select-none">
-                  {p}
-                </div>
-              )}
+              <div
+                style={{
+                  width: comW > 0 ? comW : "100%",
+                  height: comH,
+                  transform: `scale(${eff / zoom})`,
+                  transformOrigin: "top left",
+                }}
+              >
+                {shouldRender && pdf ? (
+                  <PdfPageRenderer
+                    pdf={pdf}
+                    pageNumber={p}
+                    zoom={zoom}
+                    containerWidth={slotWidth}
+                    containerHeight={comH}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-xs text-gray-400 select-none">
+                    {p}
+                  </div>
+                )}
+              </div>
             </div>
           );
         })}
