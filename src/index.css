@@ -14,9 +14,9 @@
     --font-title: var(--font-tajawal);
     --font-nav: var(--font-tajawal);
     --font-button: var(--font-tajawal);
-    --background: 40 30% 97%;
-    --foreground: 160 30% 10%;
-    --card: 40 25% 99%;
+    --background: 42 34% 96%;
+    --foreground: 165 32% 12%;
+    --card: 40 40% 99.5%;
     --card-foreground: 160 30% 10%;
     --popover: 40 25% 99%;
     --popover-foreground: 160 30% 10%;
@@ -24,14 +24,14 @@
     --primary-foreground: 40 30% 97%;
     --secondary: 40 40% 92%;
     --secondary-foreground: 160 30% 15%;
-    --muted: 40 20% 94%;
-    --muted-foreground: 160 10% 45%;
-    --accent: 43 80% 55%;
+    --muted: 40 24% 94%;
+    --muted-foreground: 160 12% 42%;
+    --accent: 41 78% 52%;
     --accent-foreground: 160 30% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 40 20% 88%;
-    --input: 40 20% 88%;
+    --border: 40 22% 87%;
+    --input: 40 22% 87%;
     --ring: 158 45% 28%;
     --chart-1: 158 45% 28%;
     --chart-2: 43 80% 55%;
@@ -50,9 +50,9 @@
   }
 
   .dark {
-    --background: 160 20% 7%;
-    --foreground: 40 20% 95%;
-    --card: 160 20% 10%;
+    --background: 165 22% 8%;
+    --foreground: 40 22% 95%;
+    --card: 165 20% 11.5%;
     --card-foreground: 40 20% 95%;
     --popover: 160 20% 10%;
     --popover-foreground: 40 20% 95%;
@@ -219,21 +219,51 @@
 
   /* ── Global UI polish: typography scale ── */
   h1 {
-    @apply text-2xl sm:text-3xl font-bold tracking-tight leading-snug;
+    @apply text-[1.6rem] sm:text-3xl font-extrabold tracking-tight leading-tight;
   }
   h2 {
     @apply text-xl sm:text-2xl font-bold tracking-tight leading-snug;
   }
   h3 {
-    @apply text-base sm:text-lg font-semibold leading-snug;
+    @apply text-[0.98rem] sm:text-lg font-semibold leading-snug;
+  }
+  h4, h5, h6 {
+    @apply text-sm font-semibold leading-snug;
   }
   p {
-    @apply leading-relaxed;
+    @apply leading-relaxed text-[0.94rem] sm:text-base;
+  }
+  main p.text-xs, main span.text-xs {
+    letter-spacing: 0.01em;
   }
 
   /* ── Global UI polish: page rhythm ── */
   main > * + * {
     margin-block-start: 1.5rem;
+  }
+
+  /* Section headers get a touch more breathing room */
+  main h2 + p,
+  main h1 + p {
+    margin-block-start: 0.25rem;
+    @apply text-muted-foreground;
+  }
+
+  /* Inputs & buttons: consistent, comfortable touch targets */
+  main input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+  main textarea,
+  main select {
+    @apply rounded-xl;
+    min-height: 2.75rem;
+  }
+  main button:not([class*="rounded-full"]):not([class*="rounded-2xl"]):not([class*="rounded-lg"]):not([class*="rounded-md"]) {
+    @apply rounded-xl;
+  }
+  button, a {
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  }
+  main button:active {
+    transform: scale(0.97);
   }
 
   /* ── Global UI polish: unified card surfaces ── */
