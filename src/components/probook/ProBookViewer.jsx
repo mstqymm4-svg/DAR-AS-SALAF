@@ -272,6 +272,7 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
     <div
       ref={rootRef}
       className="relative w-full h-full flex flex-col bg-muted/30 select-none"
+      style={{ touchAction: "pan-y" }}
       onContextMenu={(e) => e.preventDefault()}
       onClick={(e) => {
         // Toggle the toolbar by tapping the page area

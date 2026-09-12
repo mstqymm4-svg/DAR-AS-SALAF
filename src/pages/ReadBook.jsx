@@ -24,6 +24,15 @@ export default function ReadBook() {
     setLoading(false);
   };
 
+  // Hide the app's bottom nav while reading; restore it when leaving
+  useEffect(() => {
+    const nav = document.getElementById("bottom-nav");
+    if (nav) nav.style.transform = "translateY(100%)";
+    return () => {
+      if (nav) nav.style.transform = "translateY(0)";
+    };
+  }, []);
+
   if (loading) {
     return (
       <PageLogoLoader />
@@ -41,7 +50,7 @@ export default function ReadBook() {
   }
 
   return (
-    <div className="flex flex-col" style={{ height: "100dvh" }}>
+    <div className="fixed top-16 inset-x-0 bottom-0 z-40 flex flex-col bg-background">
       {/* Top Bar */}
       <div className="bg-card border-b border-border px-4 py-2 flex items-center justify-between gap-3 shrink-0">
         <Link to={`/book/${book.id}`} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
