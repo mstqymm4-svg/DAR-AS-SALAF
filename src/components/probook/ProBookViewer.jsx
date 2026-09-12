@@ -54,7 +54,31 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
   const currentPageRef = useRef(1);
   const zoomRef = useRef(zoom);
   zoomRef.current = zoom;
+  const lastTapRef = useRef(0);
+  const [showZoomPct, setShowZoomPct] = useState(false);
   const didRestoreRef = useRef(false);
+
+  // ── Flash the zoom level whenever it changes ──
+  const firstZoomRef = useRef(true);
+  useEffect(() => {
+    if (firstZoomRef.current) { firstZoomRef.current = false; return; }
+    setShowZoomPct(true);
+    const tm = setTimeout(() => setShowZoomPct(false), 900);
+    return () => clearTimeout(tm);
+  }, [zoom]);
+
+  // ── Ctrl/⌘ + wheel (mouse wheel / trackpad pinch) → zoom the page itself ──
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const onWheel = (e) => {
+      if (!e.ctrlKey && !e.metaKey) return;
+      e.preventDefault();
+      setZoom(z => clampZoom(z * (e.deltaY < 0 ? 1.1 : 1 / 1.1)));
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
 
   const isRTL = language === "ar" || language === "ur";
 
@@ -230,9 +254,18 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
       style={{ touchAction: "pan-y" }}
       onContextMenu={(e) => e.preventDefault()}
       onClick={(e) => {
-        // Toggle the toolbar by tapping the page area
+        // Tap the page area to toggle the toolbar; double-tap to zoom 1x ↔ 2x
         if (showToc || showSearch || showGoTo) return;
         if (e.target.closest?.("[data-viewer-ui]")) return;
+        const now = Date.now();
+        const isDoubleTap = now - lastTapRef.current < 350;
+        lastTapRef.current = now;
+        if (isDoubleTap) {
+          // Undo the toolbar toggle from the first tap, then zoom
+          setShowToolbar(s => !s);
+          setZoom(z => (z > 1.01 ? 1 : 2));
+          return;
+        }
         setShowToolbar(s => !s);
       }}
     >
@@ -247,6 +280,13 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
         onCurrentPageChange={onStreamPageChange}
         scrollToPageRef={scrollToPageRef}
       />
+
+      {/* Zoom level indicator */}
+      <div
+        className={`absolute top-4 left-1/2 -translate-x-1/2 z-20 px-3 py-1.5 rounded-full bg-black/70 text-white text-xs font-bold pointer-events-none transition-opacity duration-200 ${showZoomPct ? "opacity-100" : "opacity-0"}`}
+      >
+        {Math.round(zoom * 100)}%
+      </div>
 
       {/* Panels */}
       <TocPanel
