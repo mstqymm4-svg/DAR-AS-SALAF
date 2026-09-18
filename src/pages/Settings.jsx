@@ -66,6 +66,34 @@ export default function Settings() {
     toast.success(t.applyLang + " ✓");
   };
 
+  // SDK logout clears the tokens and redirects to the server logout endpoint.
+  // Safety net: if that redirect never starts, clear the session and reload.
+  const handleLogout = () => {
+    try {
+      base44.auth.logout("/");
+    } catch (e) {
+      console.error("Logout failed:", e);
+    }
+    setTimeout(() => {
+      try {
+        localStorage.removeItem("base44_access_token");
+        localStorage.removeItem("token");
+      } catch (e) {}
+      window.location.replace("/");
+    }, 800);
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      await base44.functions.invoke("deleteAccountRequest", {});
+      toast.success(t.deleteRequestSent);
+    } catch (e) {
+      toast.error(t.deleteRequestFailed);
+      return;
+    }
+    setTimeout(() => handleLogout(), 1200);
+  };
+
   if (loading) return <PageSpinner />;
 
   return (
@@ -193,7 +221,7 @@ export default function Settings() {
             <h2 className="text-base font-bold">{t.logout}</h2>
           </div>
           <p className="text-sm text-muted-foreground mb-4">{t.logoutSub}</p>
-          <Button variant="destructive" onClick={() => base44.auth.logout()} className="gap-2 rounded-[4px_20px_4px_20px]">
+          <Button variant="destructive" onClick={handleLogout} className="gap-2 rounded-[4px_20px_4px_20px]">
             <LogOut className="w-4 h-4" /> {t.logout}
           </Button>
         </motion.div>
@@ -220,7 +248,7 @@ export default function Settings() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
-                <AlertDialogAction onClick={() => base44.auth.logout()}>{t.deletePermanently}</AlertDialogAction>
+                <AlertDialogAction onClick={handleDeleteAccount}>{t.deletePermanently}</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>

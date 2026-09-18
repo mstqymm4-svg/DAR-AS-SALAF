@@ -96,6 +96,8 @@ export default {
   deleteAccountWarning: "Emin misiniz? Tüm verileriniz kalıcı olarak silinecektir ve bu işlem geri alınamaz.",
   cancel: "İptal",
   deletePermanently: "Kalıcı Olarak Sil",
+  deleteRequestSent: "Hesap silme talebiniz alındı ve yakında tamamlanacak.",
+  deleteRequestFailed: "Silme talebi gönderilemedi. Lütfen tekrar deneyin.",
   preferredLangPlaceholder: "Tercih Edilen Dil",
   aboutTitle: "Hakkında",
   aboutP1: "{appName} uygulaması — Dar Al-Uloom Al-Muhammadiyye Es-Salafiyye, Şeyh Muhammed Harun Nur Muhammed El-Medani için yapılmıştır. Şeyh'in kitaplarını ve İslami içeriğini yayınlamak için oğlu Mustakim Muhammed Harun tarafından, şeyhin kitaplarını, videolarını ve derslerini bir araya getiren bir uygulama olarak yapılmıştır.",
