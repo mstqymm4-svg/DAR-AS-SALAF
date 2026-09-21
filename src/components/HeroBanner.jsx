@@ -221,7 +221,8 @@ export default function HeroBanner() {
     videoMute: read("hero_video_mute") !== "false",
     videoBrightness: Number(read("hero_video_brightness", "100")),
     lottieUrl: read("hero_lottie_url"),
-    customHtml: read("hero_custom_html")
+    customHtml: read("hero_custom_html"),
+    extraLayers: (() => {try {return JSON.parse(read("hero_extra_layers", "[]"));} catch {return [];}})()
   }));
 
   useEffect(() => {
@@ -252,7 +253,8 @@ export default function HeroBanner() {
         videoMute: read("hero_video_mute") !== "false",
         videoBrightness: Number(read("hero_video_brightness", "100")),
         lottieUrl: read("hero_lottie_url"),
-        customHtml: read("hero_custom_html")
+        customHtml: read("hero_custom_html"),
+        extraLayers: (() => {try {return JSON.parse(read("hero_extra_layers", "[]"));} catch {return [];}})()
       });
     });
     return unsub;
@@ -329,6 +331,19 @@ export default function HeroBanner() {
       <div className="relative overflow-hidden rounded-3xl min-h-[300px] md:min-h-[360px] flex items-center">
         {/* Background layer */}
         {renderBg()}
+
+        {/* Extra effect layers combined on top of the base background */}
+        {s.extraLayers?.length > 0 && (
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            {s.extraLayers.includes("particles") && <ParticlesCanvas speed={s.animSpeed} />}
+            {s.extraLayers.includes("stars") && <StarsCanvas speed={s.animSpeed} />}
+            {s.extraLayers.includes("waves") && <WavesAnimation color2={s.gradTo} speed={s.animSpeed} />}
+            {s.extraLayers.includes("islamic_pattern") && <IslamicPatternSvg color2={s.gradTo} speed={s.animSpeed} />}
+            {s.extraLayers.includes("floating_shapes") && <FloatingShapes color2={s.gradTo} speed={s.animSpeed} />}
+            {s.extraLayers.includes("custom_html") && s.customHtml &&
+              <div className="absolute inset-0" dangerouslySetInnerHTML={{ __html: s.customHtml }} />}
+          </div>
+        )}
 
         {/* Overlay */}
         <div className="absolute inset-0 opacity-100 rounded-md" style={overlayStyle} />
