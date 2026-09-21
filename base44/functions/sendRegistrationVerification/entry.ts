@@ -80,8 +80,8 @@ export default async function (req) {
     msg.setSender({ addr: senderAddr, name: 'دار العلوم | Dar Al Uloom' });
     msg.setRecipient(email);
     msg.setSubject(subject);
-    msg.addMessage({ contentType: 'text/plain; charset=UTF-8', data: plain });
-    msg.addMessage({ contentType: 'text/html; charset=UTF-8', data: html });
+    msg.addMessage({ contentType: 'text/plain', data: plain });
+    msg.addMessage({ contentType: 'text/html', data: html });
 
     const res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
       method: 'POST',
