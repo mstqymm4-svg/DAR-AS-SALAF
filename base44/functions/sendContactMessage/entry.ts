@@ -1,4 +1,12 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
+import { createMimeMessage } from 'npm:mimetext@3.0.24';
+
+function encodeRaw(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = "";
+  bytes.forEach((b) => { bin += String.fromCharCode(b); });
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
 
 export default async function (req) {
   try {
@@ -26,12 +34,23 @@ export default async function (req) {
       `البريد الإلكتروني: ${email}\n\n` +
       `الرسالة:\n${String(message).slice(0, 5000)}`;
 
-    await base44.asServiceRole.integrations.Core.SendEmail({
-      to,
-      subject: `تواصل معنا — ${safeName}`,
-      body,
-      from_name: 'دار العلوم',
+    // Send via the Dar Al Uloom Gmail connection (builder's shared account)
+    const { accessToken } = await base44.asServiceRole.connectors.getConnection("gmail");
+
+    const msg = createMimeMessage();
+    msg.setSender({ addr: 'no-reply@daraluloom.app', name: 'دار العلوم — تواصل معنا' });
+    msg.setRecipient(to);
+    msg.setSubject(`تواصل معنا — ${safeName}`);
+    msg.addMessage({ contentType: 'text/plain', data: body });
+
+    const res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ raw: encodeRaw(msg.asRaw()) }),
     });
+    if (!res.ok) {
+      return Response.json({ error: `Gmail send failed (${res.status})` }, { status: 502 });
+    }
 
     return Response.json({ ok: true });
   } catch (error) {
