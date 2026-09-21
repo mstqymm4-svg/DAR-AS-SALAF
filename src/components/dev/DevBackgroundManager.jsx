@@ -19,6 +19,7 @@ import { base44 } from "@/api/base44Client";
 import HeroBanner from "@/components/HeroBanner";
 import UserLayer, { USER_LAYER_EFFECTS } from "@/components/hero/UserLayer";
 import MediaLayer, { BLEND_MODES, MOTIONS } from "@/components/hero/MediaLayer";
+import AiLayerStudio from "@/components/dev/AiLayerStudio";
 
 // ── Background types ──────────────────────────────────────────────────────────
 const BG_TYPES = [
@@ -229,33 +230,6 @@ export default function DevBackgroundManager() {
     effect: "particles", color: "#ffd786", density: 60, speed: 5,
     url: "", blend: "screen", opacity: 70, motion: "drift", tile: false, tileSize: 160,
     aiPrompt: "", html: "",
-  };
-
-  const [aiBusy, setAiBusy] = useState(false);
-  const generateAiLayer = async () => {
-    const desc = (layerForm?.aiPrompt || "").trim();
-    if (!desc) { toast.error("اكتب وصف التأثير الذي تريده"); return; }
-    setAiBusy(true);
-    try {
-      const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are generating ONE decorative animated overlay layer for a website hero banner.
-Requested effect (Arabic): "${desc}"
-
-Return ONLY raw HTML containing inline <style> with @keyframes and a single wrapper <div>.
-Rules:
-- All elements absolutely positioned, fill the parent (position:absolute; inset:0), pointer-events:none.
-- Prefix every CSS class and keyframe name with "ai${Date.now().toString(36)}" to avoid collisions.
-- Pure HTML+CSS only, no JS, no external images, no text content.
-- Semi-transparent, subtle, loops infinitely.`,
-        response_json_schema: { type: "object", properties: { html: { type: "string" } }, required: ["html"] }
-      });
-      const html = res?.html || "";
-      if (!html) { toast.error("تعذر إنشاء التأثير — حاول بوصف آخر"); return; }
-      setLayerForm(f => ({ ...f, html, label: f.label || desc.slice(0, 24) }));
-      toast.success("تم إنشاء التأثير ✓ شاهد المعاينة");
-    } finally {
-      setAiBusy(false);
-    }
   };
 
   const uploadFile = async (file, onDone, label = "الملف") => {
@@ -573,17 +547,7 @@ Rules:
 
                 {/* AI source */}
                 {layerForm.source === "ai" && (
-                  <div className="space-y-2">
-                    <Label className="text-xs">صف التأثير الذي تريده بكلماتك</Label>
-                    <textarea value={layerForm.aiPrompt}
-                      onChange={e => setLayerForm({ ...layerForm, aiPrompt: e.target.value })}
-                      className="w-full h-20 p-2.5 text-xs bg-card rounded-xl border border-border resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
-                      placeholder="مثال: أوراق خضراء تتساقط ببطء مع وهج ذهبي في الأطراف" />
-                    <Button size="sm" onClick={generateAiLayer} disabled={aiBusy} className="h-9 text-xs gap-1.5 w-full">
-                      <Sparkles className="w-3.5 h-3.5" />
-                      {aiBusy ? "جارٍ إنشاء التأثير..." : "أنشئ التأثير"}
-                    </Button>
-                  </div>
+                  <AiLayerStudio layerForm={layerForm} setLayerForm={setLayerForm} />
                 )}
 
                 {/* 1. Effect picker */}
