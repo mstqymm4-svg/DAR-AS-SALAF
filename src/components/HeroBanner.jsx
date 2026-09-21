@@ -310,9 +310,9 @@ export default function HeroBanner() {
       <GradientAnimation from={gradFrom} to={gradTo} speed={animSpeed} />;
     }
     if (bgType === "gradient_anim") return <GradientAnimation from={gradFrom} to={gradTo} speed={animSpeed} />;
-    if (bgType === "particles") return <><GradientAnimation from={gradFrom} to={gradTo} speed={2} /><ParticlesCanvas speed={animSpeed} /></>;
-    if (bgType === "islamic_pattern") return <><GradientAnimation from={gradFrom} to={gradTo} speed={3} /><IslamicPatternSvg color2={gradTo} speed={animSpeed} /></>;
-    if (bgType === "floating_shapes") return <><GradientAnimation from={gradFrom} to={gradTo} speed={3} /><FloatingShapes color2={gradTo} speed={animSpeed} /></>;
+    if (bgType === "particles") return <><div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${gradFrom}, ${gradTo})` }} /><ParticlesCanvas speed={animSpeed} /></>;
+    if (bgType === "islamic_pattern") return <><div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${gradFrom}, ${gradTo})` }} /><IslamicPatternSvg color2={gradTo} speed={animSpeed} /></>;
+    if (bgType === "floating_shapes") return <><div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${gradFrom}, ${gradTo})` }} /><FloatingShapes color2={gradTo} speed={animSpeed} /></>;
     if (bgType === "stars") return <><div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${gradFrom}, ${gradTo})` }} /><StarsCanvas speed={animSpeed} /></>;
     if (bgType === "waves") return <><div className="absolute inset-0" style={{ background: `linear-gradient(180deg, ${gradFrom}, ${gradTo})` }} /><WavesAnimation color2={gradTo} speed={animSpeed} /></>;
     // fallback
