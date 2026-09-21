@@ -18,6 +18,7 @@ import { getSetting, setSettings } from "@/lib/settingsStore";
 import { base44 } from "@/api/base44Client";
 import HeroBanner from "@/components/HeroBanner";
 import UserLayer, { USER_LAYER_EFFECTS } from "@/components/hero/UserLayer";
+import MediaLayer, { BLEND_MODES, MOTIONS } from "@/components/hero/MediaLayer";
 
 // ── Background types ──────────────────────────────────────────────────────────
 const BG_TYPES = [
@@ -119,6 +120,7 @@ export default function DevBackgroundManager() {
   const [fullscreen, setFullscreen] = useState(false);
   const fileRef   = useRef();
   const slideRef  = useRef();
+  const layerFileRef = useRef();
 
   const isVideo = st.bgType === "video_mp4" || st.bgType === "video_webm";
   const isImage = st.bgType === "static_image" || st.bgType === "animated_gif";
@@ -192,10 +194,15 @@ export default function DevBackgroundManager() {
     const label = layerForm.label.trim();
     if (!label) { toast.error("أدخل اسم الطبقة"); return; }
     const id = layerForm.id || "l" + Date.now().toString(36);
-    const cfg = {
-      effect: layerForm.effect, color: layerForm.color,
-      density: layerForm.density, speed: layerForm.speed
-    };
+    const src = layerForm.source || "effect";
+    if (src === "media" && !layerForm.url) { toast.error("ارفع صورة أو فيديو للطبقة أولاً"); return; }
+    if (src === "ai" && !layerForm.html) { toast.error("أنشئ التأثير بالوصف أولاً"); return; }
+    const cfg = src === "effect"
+      ? { effect: layerForm.effect, color: layerForm.color, density: layerForm.density, speed: layerForm.speed }
+      : src === "media"
+        ? { url: layerForm.url, blend: layerForm.blend, opacity: layerForm.opacity,
+            motion: layerForm.motion, speed: layerForm.speed, tile: layerForm.tile, tileSize: layerForm.tileSize }
+        : { html: layerForm.html };
     const exists = st.customLayers.some(l => l.id === id);
     const customLayers = exists
       ? st.customLayers.map(l => l.id === id ? { id, label, ...cfg } : l)
@@ -215,6 +222,40 @@ export default function DevBackgroundManager() {
       extraLayers: st.extraLayers.filter(x => x !== "custom:" + id)
     });
     if (layerForm?.id === id) setLayerForm(null);
+  };
+
+  const NEW_LAYER = {
+    id: "", label: "", source: "effect",
+    effect: "particles", color: "#ffd786", density: 60, speed: 5,
+    url: "", blend: "screen", opacity: 70, motion: "drift", tile: false, tileSize: 160,
+    aiPrompt: "", html: "",
+  };
+
+  const [aiBusy, setAiBusy] = useState(false);
+  const generateAiLayer = async () => {
+    const desc = (layerForm?.aiPrompt || "").trim();
+    if (!desc) { toast.error("اكتب وصف التأثير الذي تريده"); return; }
+    setAiBusy(true);
+    try {
+      const res = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are generating ONE decorative animated overlay layer for a website hero banner.
+Requested effect (Arabic): "${desc}"
+
+Return ONLY raw HTML containing inline <style> with @keyframes and a single wrapper <div>.
+Rules:
+- All elements absolutely positioned, fill the parent (position:absolute; inset:0), pointer-events:none.
+- Prefix every CSS class and keyframe name with "ai${Date.now().toString(36)}" to avoid collisions.
+- Pure HTML+CSS only, no JS, no external images, no text content.
+- Semi-transparent, subtle, loops infinitely.`,
+        response_json_schema: { type: "object", properties: { html: { type: "string" } }, required: ["html"] }
+      });
+      const html = res?.html || "";
+      if (!html) { toast.error("تعذر إنشاء التأثير — حاول بوصف آخر"); return; }
+      setLayerForm(f => ({ ...f, html, label: f.label || desc.slice(0, 24) }));
+      toast.success("تم إنشاء التأثير ✓ شاهد المعاينة");
+    } finally {
+      setAiBusy(false);
+    }
   };
 
   const uploadFile = async (file, onDone, label = "الملف") => {
@@ -427,7 +468,7 @@ export default function DevBackgroundManager() {
           <div className="border-t border-border pt-3 space-y-2">
             <div className="flex items-center justify-between">
               <p className="text-xs font-bold">🧩 طبقاتك الخاصة</p>
-              <button onClick={() => setLayerForm({ id: "", label: "", effect: "particles", color: "#ffd786", density: 60, speed: 5 })}
+              <button onClick={() => setLayerForm({ ...NEW_LAYER })}
                 className="flex items-center gap-1 text-[11px] text-primary font-bold hover:underline">
                 <Plus className="w-3.5 h-3.5" /> إضافة طبقة جديدة
               </button>
@@ -453,9 +494,8 @@ export default function DevBackgroundManager() {
                     </button>
                     {on && <Check className="w-3 h-3 shrink-0" />}
                     <button onClick={() => setLayerForm({
-                      id: cl.id, label: cl.label,
-                      effect: cl.effect || "particles", color: cl.color || "#ffd786",
-                      density: cl.density ?? 60, speed: cl.speed ?? 5
+                      ...NEW_LAYER, ...cl,
+                      source: cl.url ? "media" : cl.effect ? "effect" : "ai",
                     })}
                       className="text-muted-foreground hover:text-primary shrink-0">
                       <Settings className="w-3.5 h-3.5" />
@@ -470,7 +510,84 @@ export default function DevBackgroundManager() {
             </div>
             {layerForm && (
               <div className="bg-muted/40 rounded-xl p-3 space-y-3">
+                {/* 0. Source picker */}
+                <div className="flex gap-1 bg-card p-1 rounded-xl border border-border">
+                  {[
+                    { id: "effect", label: "تأثير جاهز" },
+                    { id: "media",  label: "صورة / فيديو" },
+                    { id: "ai",     label: "بالوصف ✨" },
+                  ].map(o => (
+                    <button key={o.id} onClick={() => setLayerForm({ ...layerForm, source: o.id })}
+                      className={`flex-1 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
+                        (layerForm.source || "effect") === o.id ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+                      }`}>{o.label}</button>
+                  ))}
+                </div>
+
+                {/* MEDIA source */}
+                {layerForm.source === "media" && (
+                  <div className="space-y-2">
+                    <input ref={layerFileRef} type="file" accept="image/*,video/mp4,video/webm" className="hidden"
+                      onChange={e => uploadFile(e.target.files[0], url => setLayerForm(f => ({ ...f, url })), "الطبقة")} />
+                    <Button variant="outline" className="w-full gap-2 h-10 text-xs" disabled={uploading}
+                      onClick={() => layerFileRef.current.click()}>
+                      <Upload className="w-4 h-4" />
+                      {uploading ? `جارٍ الرفع... ${uploadPct}%` : layerForm.url ? "تغيير الملف" : "ارفع صورة شفافة / GIF / فيديو"}
+                    </Button>
+                    <Input value={layerForm.url} onChange={e => setLayerForm({ ...layerForm, url: e.target.value })}
+                      dir="ltr" placeholder="أو الصق رابطاً مباشراً" className="h-9 text-[11px] font-mono" />
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <Label className="text-[11px]">نمط الدمج</Label>
+                        <select value={layerForm.blend} onChange={e => setLayerForm({ ...layerForm, blend: e.target.value })}
+                          className="w-full h-9 rounded-lg bg-card border border-border text-xs px-2">
+                          {BLEND_MODES.map(b => <option key={b.id} value={b.id}>{b.label}</option>)}
+                        </select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[11px]">الحركة</Label>
+                        <select value={layerForm.motion} onChange={e => setLayerForm({ ...layerForm, motion: e.target.value })}
+                          className="w-full h-9 rounded-lg bg-card border border-border text-xs px-2">
+                          {MOTIONS.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[11px]">الشفافية: {layerForm.opacity}%</Label>
+                      <Slider min={5} max={100} value={[layerForm.opacity]}
+                        onValueChange={([v]) => setLayerForm({ ...layerForm, opacity: v })} />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label className="text-[11px]">تكرار كنمط (Tile)</Label>
+                      <Switch checked={layerForm.tile} onCheckedChange={v => setLayerForm({ ...layerForm, tile: v })} />
+                    </div>
+                    {layerForm.tile && (
+                      <div className="space-y-1">
+                        <Label className="text-[11px]">حجم النمط: {layerForm.tileSize}px</Label>
+                        <Slider min={40} max={400} step={10} value={[layerForm.tileSize]}
+                          onValueChange={([v]) => setLayerForm({ ...layerForm, tileSize: v })} />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* AI source */}
+                {layerForm.source === "ai" && (
+                  <div className="space-y-2">
+                    <Label className="text-xs">صف التأثير الذي تريده بكلماتك</Label>
+                    <textarea value={layerForm.aiPrompt}
+                      onChange={e => setLayerForm({ ...layerForm, aiPrompt: e.target.value })}
+                      className="w-full h-20 p-2.5 text-xs bg-card rounded-xl border border-border resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      placeholder="مثال: أوراق خضراء تتساقط ببطء مع وهج ذهبي في الأطراف" />
+                    <Button size="sm" onClick={generateAiLayer} disabled={aiBusy} className="h-9 text-xs gap-1.5 w-full">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      {aiBusy ? "جارٍ إنشاء التأثير..." : "أنشئ التأثير"}
+                    </Button>
+                  </div>
+                )}
+
                 {/* 1. Effect picker */}
+                {(layerForm.source || "effect") === "effect" && (
                 <div>
                   <Label className="text-xs mb-1.5 block">١. اختر شكل الطبقة</Label>
                   <div className="grid grid-cols-3 gap-1.5">
@@ -487,16 +604,18 @@ export default function DevBackgroundManager() {
                     ))}
                   </div>
                 </div>
+                )}
                 {/* 2. Name */}
                 <div className="space-y-1">
-                  <Label className="text-xs">٢. اسم الطبقة</Label>
+                  <Label className="text-xs">اسم الطبقة</Label>
                   <Input value={layerForm.label}
                     onChange={e => setLayerForm({ ...layerForm, label: e.target.value })}
                     placeholder="مثلاً: ذهب متطاير" className="h-9 text-xs" />
                 </div>
                 {/* 3. Color / density / speed */}
+                {(layerForm.source || "effect") === "effect" && (
                 <div>
-                  <Label className="text-xs mb-1.5 block">٣. التخصيص</Label>
+                  <Label className="text-xs mb-1.5 block">التخصيص</Label>
                   <div className="grid grid-cols-3 gap-3 items-start">
                     <div className="space-y-1">
                       <Label className="text-[11px]">اللون</Label>
@@ -516,9 +635,16 @@ export default function DevBackgroundManager() {
                     </div>
                   </div>
                 </div>
+                )}
                 {/* Live preview */}
                 <div className="relative h-20 rounded-xl overflow-hidden border border-border bg-black/70">
-                  <UserLayer cfg={layerForm} />
+                  {layerForm.source === "media"
+                    ? <MediaLayer cfg={layerForm} />
+                    : layerForm.source === "ai"
+                      ? (layerForm.html
+                          ? <div className="absolute inset-0" dangerouslySetInnerHTML={{ __html: layerForm.html }} />
+                          : <p className="absolute inset-0 flex items-center justify-center text-[11px] text-white/60">المعاينة تظهر بعد إنشاء التأثير</p>)
+                      : <UserLayer cfg={layerForm} />}
                 </div>
                 <div className="flex gap-2">
                   <Button size="sm" onClick={saveCustomLayer} className="h-8 text-xs gap-1">

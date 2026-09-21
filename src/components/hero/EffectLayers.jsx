@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import UserLayer from "./UserLayer";
+import MediaLayer from "./MediaLayer";
 
 // ── Canvas / CSS effect layers, composable on top of any hero background ──────
 
@@ -363,9 +364,11 @@ export default function ExtraEffectLayers({ layers = [], speed, color2, customHt
         <div className="absolute inset-0" dangerouslySetInnerHTML={{ __html: customHtml }} />}
       {/* User-defined layers (created in the admin panel) */}
       {customLayers.filter(cl => layers.includes("custom:" + cl.id)).map(cl =>
-        cl.effect
-          ? <UserLayer key={cl.id} cfg={cl} />
-          : <div key={cl.id} className="absolute inset-0" dangerouslySetInnerHTML={{ __html: cl.html }} />)}
+        cl.url
+          ? <MediaLayer key={cl.id} cfg={cl} />
+          : cl.effect
+            ? <UserLayer key={cl.id} cfg={cl} />
+            : <div key={cl.id} className="absolute inset-0" dangerouslySetInnerHTML={{ __html: cl.html }} />)}
     </div>
   );
 }
