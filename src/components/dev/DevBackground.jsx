@@ -37,6 +37,13 @@ const BG_TYPES = [
   { id: "islamic_pattern", label: "نمط إسلامي", icon: "☪" },
   { id: "floating_shapes", label: "أشكال طائرة", icon: "◆" },
   { id: "custom_html",     label: "HTML مخصص",  icon: "💻" },
+  { id: "snow",            label: "ثلج",         icon: "❄" },
+  { id: "rain",            label: "مطر",          icon: "🌧" },
+  { id: "fireflies",       label: "يراعات مضيئة", icon: "🟢" },
+  { id: "bubbles",         label: "فقاعات",      icon: "🫧" },
+  { id: "light_rays",      label: "أشعة ضوء",    icon: "🔆" },
+  { id: "aurora",          label: "شفق قطبي",    icon: "🌌" },
+  { id: "grid",            label: "شبكة هندسية", icon: "▦" },
   ];
 
 const TRANSITIONS = ["fade", "slide", "zoom", "flip", "blur"];

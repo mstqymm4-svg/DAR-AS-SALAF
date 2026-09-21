@@ -4,151 +4,9 @@ import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { getSetting, subscribeToSettings } from "@/lib/settingsStore";
 import { useT } from "@/lib/i18n";
-
-// ── Canvas-based animated backgrounds ─────────────────────────────────────────
-function ParticlesCanvas({ color1, color2, speed }) {
-  const canvasRef = useRef();
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    let raf;
-    const particles = Array.from({ length: 80 }, () => ({
-      x: Math.random() * canvas.offsetWidth,
-      y: Math.random() * canvas.offsetHeight,
-      r: Math.random() * 3 + 1,
-      dx: (Math.random() - 0.5) * speed * 0.4,
-      dy: (Math.random() - 0.5) * speed * 0.4,
-      alpha: Math.random() * 0.8 + 0.2
-    }));
-    const resize = () => {canvas.width = canvas.offsetWidth;canvas.height = canvas.offsetHeight;};
-    resize();
-    window.addEventListener("resize", resize);
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach((p) => {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255,215,100,${p.alpha})`;
-        ctx.fill();
-        p.x += p.dx;p.y += p.dy;
-        if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
-        if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
-      });
-      raf = requestAnimationFrame(draw);
-    };
-    draw();
-    return () => {cancelAnimationFrame(raf);window.removeEventListener("resize", resize);};
-  }, [speed]);
-  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />;
-}
-
-function StarsCanvas({ speed }) {
-  const canvasRef = useRef();
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    let raf,t = 0;
-    const stars = Array.from({ length: 120 }, () => ({
-      x: Math.random(), y: Math.random(),
-      r: Math.random() * 2 + 0.5,
-      twinkle: Math.random() * Math.PI * 2
-    }));
-    const resize = () => {canvas.width = canvas.offsetWidth;canvas.height = canvas.offsetHeight;};
-    resize();
-    window.addEventListener("resize", resize);
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      t += 0.01 * speed;
-      stars.forEach((s) => {
-        const alpha = 0.4 + 0.6 * Math.abs(Math.sin(t + s.twinkle));
-        ctx.beginPath();
-        ctx.arc(s.x * canvas.width, s.y * canvas.height, s.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255,255,200,${alpha})`;
-        ctx.fill();
-      });
-      raf = requestAnimationFrame(draw);
-    };
-    draw();
-    return () => {cancelAnimationFrame(raf);window.removeEventListener("resize", resize);};
-  }, [speed]);
-  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />;
-}
-
-function IslamicPatternSvg({ color1, color2, speed }) {
-  return (
-    <div className="absolute inset-0 overflow-hidden">
-      <svg className="absolute inset-0 w-full h-full opacity-20" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <pattern id="islamic" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
-            <polygon points="40,5 75,25 75,55 40,75 5,55 5,25" fill="none" stroke={color2} strokeWidth="1.5" />
-            <polygon points="40,15 65,28 65,52 40,65 15,52 15,28" fill="none" stroke={color2} strokeWidth="0.8" opacity="0.6" />
-            <circle cx="40" cy="40" r="5" fill="none" stroke={color2} strokeWidth="1" />
-            <line x1="40" y1="5" x2="40" y2="15" stroke={color2} strokeWidth="0.8" />
-            <line x1="75" y1="25" x2="65" y2="28" stroke={color2} strokeWidth="0.8" />
-            <line x1="75" y1="55" x2="65" y2="52" stroke={color2} strokeWidth="0.8" />
-            <line x1="40" y1="75" x2="40" y2="65" stroke={color2} strokeWidth="0.8" />
-            <line x1="5" y1="55" x2="15" y2="52" stroke={color2} strokeWidth="0.8" />
-            <line x1="5" y1="25" x2="15" y2="28" stroke={color2} strokeWidth="0.8" />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#islamic)"
-        style={{ animation: `slide ${20 / speed}s linear infinite` }} />
-      </svg>
-      <style>{`@keyframes slide { from { transform: translate(0,0); } to { transform: translate(80px, 80px); } }`}</style>
-    </div>);
-
-}
-
-function WavesAnimation({ color1, color2, speed }) {
-  const dur = 6 / speed;
-  return (
-    <div className="absolute inset-0 overflow-hidden">
-      {[1, 2, 3].map((i) =>
-      <div key={i} className="absolute bottom-0 left-0 right-0"
-      style={{
-        height: `${30 + i * 10}%`,
-        background: `${color2}${i === 1 ? "33" : i === 2 ? "22" : "15"}`,
-        borderRadius: "100% 100% 0 0",
-        animation: `wave ${dur + i}s ease-in-out infinite alternate`,
-        animationDelay: `${i * 0.3}s`
-      }} />
-      )}
-      <style>{`@keyframes wave { from { transform: translateX(-5%) scaleY(1); } to { transform: translateX(5%) scaleY(1.1); } }`}</style>
-    </div>);
-
-}
-
-function FloatingShapes({ color2, speed }) {
-  const shapes = [
-  { top: "10%", left: "5%", size: 60, shape: "hex", delay: 0 },
-  { top: "70%", left: "8%", size: 40, shape: "diamond", delay: 1 },
-  { top: "20%", right: "5%", size: 80, shape: "hex", delay: 0.5 },
-  { top: "60%", right: "3%", size: 50, shape: "diamond", delay: 1.5 },
-  { top: "40%", left: "15%", size: 30, shape: "circle", delay: 2 },
-  { top: "50%", right: "12%", size: 35, shape: "circle", delay: 2.5 }];
-
-  const dur = 4 / speed;
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {shapes.map((s, i) =>
-      <div key={i} className="absolute opacity-20"
-      style={{
-        top: s.top, left: s.left, right: s.right,
-        width: s.size, height: s.size,
-        background: color2,
-        borderRadius: s.shape === "circle" ? "50%" : s.shape === "diamond" ? "4px" : "20%",
-        transform: s.shape === "diamond" ? "rotate(45deg)" : undefined,
-        animation: `float${i} ${dur + i * 0.5}s ease-in-out infinite`
-      }} />
-      )}
-      <style>{shapes.map((_, i) =>
-        `@keyframes float${i} { 0%,100% { transform: translateY(0) rotate(${i * 30}deg); } 50% { transform: translateY(-20px) rotate(${i * 30 + 10}deg); } }`
-        ).join("")}</style>
-    </div>);
-
-}
+import ExtraEffectLayers, {
+  ParticlesCanvas, StarsCanvas, IslamicPatternSvg, WavesAnimation, FloatingShapes
+} from "@/components/hero/EffectLayers";
 
 function GradientAnimation({ from, to, speed }) {
   const dur = 8 / speed;
@@ -333,17 +191,7 @@ export default function HeroBanner() {
         {renderBg()}
 
         {/* Extra effect layers combined on top of the base background */}
-        {s.extraLayers?.length > 0 && (
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            {s.extraLayers.includes("particles") && <ParticlesCanvas speed={s.animSpeed} />}
-            {s.extraLayers.includes("stars") && <StarsCanvas speed={s.animSpeed} />}
-            {s.extraLayers.includes("waves") && <WavesAnimation color2={s.gradTo} speed={s.animSpeed} />}
-            {s.extraLayers.includes("islamic_pattern") && <IslamicPatternSvg color2={s.gradTo} speed={s.animSpeed} />}
-            {s.extraLayers.includes("floating_shapes") && <FloatingShapes color2={s.gradTo} speed={s.animSpeed} />}
-            {s.extraLayers.includes("custom_html") && s.customHtml &&
-              <div className="absolute inset-0" dangerouslySetInnerHTML={{ __html: s.customHtml }} />}
-          </div>
-        )}
+        <ExtraEffectLayers layers={s.extraLayers} speed={s.animSpeed} color2={s.gradTo} customHtml={s.customHtml} />
 
         {/* Overlay */}
         <div className="absolute inset-0 opacity-100 rounded-md" style={overlayStyle} />
