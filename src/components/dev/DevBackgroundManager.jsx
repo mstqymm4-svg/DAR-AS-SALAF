@@ -17,6 +17,7 @@ import {
 import { getSetting, setSettings } from "@/lib/settingsStore";
 import { base44 } from "@/api/base44Client";
 import HeroBanner from "@/components/HeroBanner";
+import UserLayer, { USER_LAYER_EFFECTS } from "@/components/hero/UserLayer";
 
 // ── Background types ──────────────────────────────────────────────────────────
 const BG_TYPES = [
@@ -191,10 +192,14 @@ export default function DevBackgroundManager() {
     const label = layerForm.label.trim();
     if (!label) { toast.error("أدخل اسم الطبقة"); return; }
     const id = layerForm.id || "l" + Date.now().toString(36);
+    const cfg = {
+      effect: layerForm.effect, color: layerForm.color,
+      density: layerForm.density, speed: layerForm.speed
+    };
     const exists = st.customLayers.some(l => l.id === id);
     const customLayers = exists
-      ? st.customLayers.map(l => l.id === id ? { id, label, html: layerForm.html } : l)
-      : [...st.customLayers, { id, label, html: layerForm.html }];
+      ? st.customLayers.map(l => l.id === id ? { id, label, ...cfg } : l)
+      : [...st.customLayers, { id, label, ...cfg }];
     const key = "custom:" + id;
     update({
       customLayers,
@@ -422,7 +427,7 @@ export default function DevBackgroundManager() {
           <div className="border-t border-border pt-3 space-y-2">
             <div className="flex items-center justify-between">
               <p className="text-xs font-bold">🧩 طبقاتك الخاصة</p>
-              <button onClick={() => setLayerForm({ id: "", label: "", html: "" })}
+              <button onClick={() => setLayerForm({ id: "", label: "", effect: "particles", color: "#ffd786", density: 60, speed: 5 })}
                 className="flex items-center gap-1 text-[11px] text-primary font-bold hover:underline">
                 <Plus className="w-3.5 h-3.5" /> إضافة طبقة جديدة
               </button>
@@ -447,7 +452,11 @@ export default function DevBackgroundManager() {
                       <span className="text-xs font-medium truncate">{cl.label}</span>
                     </button>
                     {on && <Check className="w-3 h-3 shrink-0" />}
-                    <button onClick={() => setLayerForm({ id: cl.id, label: cl.label, html: cl.html })}
+                    <button onClick={() => setLayerForm({
+                      id: cl.id, label: cl.label,
+                      effect: cl.effect || "particles", color: cl.color || "#ffd786",
+                      density: cl.density ?? 60, speed: cl.speed ?? 5
+                    })}
                       className="text-muted-foreground hover:text-primary shrink-0">
                       <Settings className="w-3.5 h-3.5" />
                     </button>
@@ -460,14 +469,57 @@ export default function DevBackgroundManager() {
               })}
             </div>
             {layerForm && (
-              <div className="bg-muted/40 rounded-xl p-3 space-y-2">
-                <Input value={layerForm.label}
-                  onChange={e => setLayerForm({ ...layerForm, label: e.target.value })}
-                  placeholder="اسم الطبقة — مثلاً: فقاعات ذهبية" className="h-9 text-xs" />
-                <textarea value={layerForm.html}
-                  onChange={e => setLayerForm({ ...layerForm, html: e.target.value })}
-                  className="w-full h-24 p-2.5 text-xs font-mono bg-muted rounded-xl border border-border resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  placeholder="<div style='...'>...</div>" />
+              <div className="bg-muted/40 rounded-xl p-3 space-y-3">
+                {/* 1. Effect picker */}
+                <div>
+                  <Label className="text-xs mb-1.5 block">١. اختر شكل الطبقة</Label>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {USER_LAYER_EFFECTS.map(e => (
+                      <button key={e.id} onClick={() => setLayerForm({ ...layerForm, effect: e.id })}
+                        className={`flex flex-col items-center gap-0.5 p-2 rounded-xl border-2 transition-all ${
+                          layerForm.effect === e.id
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border bg-card hover:border-primary/40"
+                        }`}>
+                        <span className="text-lg leading-none">{e.icon}</span>
+                        <span className="text-[10px] font-medium">{e.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {/* 2. Name */}
+                <div className="space-y-1">
+                  <Label className="text-xs">٢. اسم الطبقة</Label>
+                  <Input value={layerForm.label}
+                    onChange={e => setLayerForm({ ...layerForm, label: e.target.value })}
+                    placeholder="مثلاً: ذهب متطاير" className="h-9 text-xs" />
+                </div>
+                {/* 3. Color / density / speed */}
+                <div>
+                  <Label className="text-xs mb-1.5 block">٣. التخصيص</Label>
+                  <div className="grid grid-cols-3 gap-3 items-start">
+                    <div className="space-y-1">
+                      <Label className="text-[11px]">اللون</Label>
+                      <input type="color" value={layerForm.color}
+                        onChange={e => setLayerForm({ ...layerForm, color: e.target.value })}
+                        className="w-full h-9 rounded-lg cursor-pointer border border-border p-0.5" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[11px]">الكمية: {layerForm.density}</Label>
+                      <Slider min={10} max={150} value={[layerForm.density]}
+                        onValueChange={([v]) => setLayerForm({ ...layerForm, density: v })} />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[11px]">السرعة: {layerForm.speed}x</Label>
+                      <Slider min={1} max={10} value={[layerForm.speed]}
+                        onValueChange={([v]) => setLayerForm({ ...layerForm, speed: v })} />
+                    </div>
+                  </div>
+                </div>
+                {/* Live preview */}
+                <div className="relative h-20 rounded-xl overflow-hidden border border-border bg-black/70">
+                  <UserLayer cfg={layerForm} />
+                </div>
                 <div className="flex gap-2">
                   <Button size="sm" onClick={saveCustomLayer} className="h-8 text-xs gap-1">
                     <Check className="w-3.5 h-3.5" /> حفظ وتفعيل
