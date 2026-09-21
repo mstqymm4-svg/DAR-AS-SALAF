@@ -191,7 +191,14 @@ export default function BookDetails() {
 
           {book.pdf_url &&
           <div className="space-y-2">
-            <Link to={`/read/${book.id}`} className="block">
+            <Link
+              to={`/read/${book.id}`}
+              className="block"
+              onClick={() => {
+                import("@/lib/pdfLoader")
+                  .then(({ prefetchPdf }) => prefetchPdf(book.pdf_url, { bookId: book.id, title: book.title }))
+                  .catch(() => {});
+              }}>
               <Button className="w-full gap-2 h-12 text-sm font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow rounded-[4px_24px_4px_24px]">
                 <BookMarked className="w-4 h-4" />
                 {t.readBook}

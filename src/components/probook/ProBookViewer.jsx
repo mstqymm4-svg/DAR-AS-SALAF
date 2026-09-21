@@ -87,15 +87,16 @@ export default function ProBookViewer({ pdfUrl, title, bookId, language = "ar" }
     let cancelled = false;
     setLoading(true); setError(false); setPdf(null); setOutline([]); setCurrentPage(1);
     loadPdfDocument(pdfUrl, { bookId, title })
-      .then(async (doc) => {
+      .then((doc) => {
         if (cancelled) return;
         setPdf(doc);
         setTotalPages(doc.numPages);
-        try {
-          const out = await doc.getOutline();
-          if (!cancelled) setOutline(await normalizeOutline(out, doc));
-        } catch { if (!cancelled) setOutline([]); }
-        if (!cancelled) setLoading(false);
+        // Show the reader immediately — the outline loads in the background
+        setLoading(false);
+        doc.getOutline()
+          .then((out) => (cancelled ? [] : normalizeOutline(out, doc)))
+          .then((items) => { if (!cancelled) setOutline(items || []); })
+          .catch(() => {});
       })
       .catch(() => { if (!cancelled) { setError(true); setLoading(false); } });
     return () => { cancelled = true; };

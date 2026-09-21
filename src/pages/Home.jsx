@@ -106,7 +106,7 @@ export default function Home() {
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-l from-red-600/15 via-red-500/8 to-transparent border border-red-200/50 dark:border-red-500/20 hover:border-red-400/60 hover:shadow-xl hover:shadow-red-500/10 transition-all group overflow-hidden relative">
-          
+        
             <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-red-500/30 group-hover:scale-110 group-hover:rotate-3 transition-transform bg-gradient-to-br from-[#e21246] to-[#b00d3a]">
               <Youtube className="w-7 h-7 text-white" />
             </div>
@@ -124,23 +124,23 @@ export default function Home() {
       {/* Featured Books */}
       {featuredBooks.length > 0 &&
         <section className="mb-12">
-          
-
-
-
-
-
-
-
-
-
-
-          
-          
-
-
-
-          
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+              <span className="w-8 h-8 rounded-lg bg-accent/15 flex items-center justify-center">
+                <Sparkles className="w-4 h-4 text-accent" />
+              </span>
+              {t.featuredBooks}
+            </h2>
+            <Link to="/books" className="text-sm text-primary font-bold hover:underline flex items-center gap-1 hover:gap-2 transition-all">
+              {t.viewAll}
+              <ArrowLeft className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {featuredBooks.slice(0, 4).map((book, i) =>
+            <BookCard key={book.id} book={book} index={i} isFavorite={favorites.includes(book.id)} onToggleFavorite={user ? handleToggleFavorite : null} />
+            )}
+          </div>
         </section>
         }
 

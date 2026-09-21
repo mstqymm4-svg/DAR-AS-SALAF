@@ -10,6 +10,8 @@ import { getBooks, getVideos, getFavoriteIds, toggleFavorite } from "@/lib/offli
 import { getAccountEmail, getVideoFavIds, setVideoFavIds as saveVideoFavIds } from "@/lib/activeUser";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { useContentRefresh } from "@/hooks/useContentSync";
+import PullToRefresh from "@/components/PullToRefresh";
+import { forceSyncNow } from "@/lib/contentSyncEngine";
 
 export default function Favorites() {
   const t = useT();
@@ -64,6 +66,7 @@ export default function Favorites() {
   }
 
   return (
+    <PullToRefresh onRefresh={async () => {await forceSyncNow();loadFavorites();}}>
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {!isOnline &&
       <motion.div
@@ -87,15 +90,17 @@ export default function Favorites() {
       <div className="flex gap-2 mb-6">
         <button
           onClick={() => setTab("books")}
-          className={`px-4 py-2 text-sm font-medium transition-colors rounded-[4px_20px_4px_20px] ${tab === "books" ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}>
+          className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors rounded-[4px_20px_4px_20px] ${tab === "books" ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}>
           
           {t.navBooks}
+          <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${tab === "books" ? "bg-primary-foreground/20" : "bg-muted text-muted-foreground"}`}>{books.length}</span>
         </button>
         <button
           onClick={() => setTab("videos")}
-          className={`px-4 py-2 text-sm font-medium transition-colors rounded-[4px_20px_4px_20px] ${tab === "videos" ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}>
+          className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors rounded-[4px_20px_4px_20px] ${tab === "videos" ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}>
           
           {t.navVideos}
+          <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${tab === "videos" ? "bg-primary-foreground/20" : "bg-muted text-muted-foreground"}`}>{videos.filter((v) => videoFavIds.includes(v.id)).length}</span>
         </button>
       </div>
 
@@ -139,6 +144,7 @@ export default function Favorites() {
           </div>
 
       }
-    </div>);
+    </div>
+    </PullToRefresh>);
 
 }

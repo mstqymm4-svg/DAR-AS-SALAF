@@ -6,6 +6,7 @@ import AISearch from "../components/AISearch";
 import BookCard from "../components/BookCard";
 import { SkeletonGrid } from "../components/Skeleton";
 import { Input } from "@/components/ui/input";
+import { MobileSelect } from "@/components/ui/mobile-select";
 import { useT } from "@/lib/i18n";
 import { bookLangLabel } from "@/lib/i18n-terms";
 import { getBooks, getFavoriteIds, toggleFavorite } from "@/lib/offlineSync";
@@ -21,6 +22,7 @@ export default function Books() {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
   const [activeCategory, setActiveCategory] = useState("الكل");
   const [user, setUser] = useState(null);
   const [preferredLanguage, setPreferredLanguage] = useState("الكل");
@@ -63,7 +65,16 @@ export default function Books() {
     );
   };
 
-  const filteredBooks = aiResults ?? books.filter((book) => {
+  const sortBooks = (list) => {
+    const arr = [...list];
+    if (sortBy === "title") arr.sort((a, b) => String(a.title || "").localeCompare(String(b.title || ""), "ar"));
+    else if (sortBy === "rating") arr.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    else if (sortBy === "oldest") arr.sort((a, b) => new Date(a.created_date || 0) - new Date(b.created_date || 0));
+    else arr.sort((a, b) => new Date(b.created_date || 0) - new Date(a.created_date || 0));
+    return arr;
+  };
+
+  const filteredBooks = aiResults ?? sortBooks(books.filter((book) => {
     const matchesCategory = activeCategory === "الكل" || book.category === activeCategory;
     const matchesSearch =
     !searchQuery ||
@@ -71,7 +82,7 @@ export default function Books() {
     book.author?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesLanguage = preferredLanguage === "الكل" || !book.language || book.language === preferredLanguage;
     return matchesCategory && matchesSearch && matchesLanguage;
-  });
+  }));
 
   if (loading) {
     return (
@@ -121,16 +132,28 @@ export default function Books() {
         </div>
         }
 
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-sm text-muted-foreground">{filteredBooks.length} {t.booksCount}</p>
-        {preferredLanguage !== "الكل" &&
-          <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between mb-4 gap-2">
+        <p className="text-sm text-muted-foreground shrink-0">{filteredBooks.length} {t.booksCount}</p>
+        <div className="flex items-center gap-3 min-w-0">
+          {preferredLanguage !== "الكل" &&
+          <div className="flex items-center gap-2 shrink-0">
             <span className="text-xs text-muted-foreground">{t.lang}: {bookLangLabel(preferredLanguage, t.langCode)}</span>
             <button onClick={() => setPreferredLanguage("الكل")} className="text-xs text-primary hover:underline">
               {t.showAll}
             </button>
           </div>
           }
+          <MobileSelect
+            value={sortBy}
+            onValueChange={setSortBy}
+            placeholder={t.sortBy}
+            options={[
+            { value: "newest", label: t.sortNewest },
+            { value: "oldest", label: t.sortOldest },
+            { value: "title", label: t.sortTitle },
+            { value: "rating", label: t.sortRating }]} />
+
+        </div>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">

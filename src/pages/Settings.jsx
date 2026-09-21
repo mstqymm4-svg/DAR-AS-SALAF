@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Bell, Moon, Sun, Globe, LogOut, Save, Languages, Info, Mail } from "lucide-react";
+import { Bell, Moon, Sun, Globe, LogOut, Save, Languages, Info, Mail, ShieldCheck, AlertCircle, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useT, TRANSLATIONS } from "@/lib/i18n";
 import { bookLangLabel, BOOK_LANG_VALUES } from "@/lib/i18n-terms";
+import { getAccountEmail } from "@/lib/activeUser";
 import { setThemeMode, getThemeState, subscribeToTheme } from "@/lib/themeEngine";
 import { PageSpinner } from "@/components/Skeleton";
 
@@ -32,6 +33,7 @@ export default function Settings() {
   const [notifications, setNotifications] = useState(true);
   const [language, setLanguage] = useState("العربية");
   const [appLang, setAppLang] = useState(() => ls.get("dev_app_lang", "ar"));
+  const [verified, setVerified] = useState(false);
 
   useEffect(() => {
     loadUser();
@@ -44,6 +46,8 @@ export default function Settings() {
     if (u) {
       setNotifications(u.notifications_enabled ?? true);
       setLanguage(u.preferred_language || "العربية");
+      const em = getAccountEmail(u) || u.email;
+      try { setVerified(!!em && localStorage.getItem(`email_verified_${em}`) === "1"); } catch (e) {}
     }
     setLoading(false);
   };
@@ -191,6 +195,31 @@ export default function Settings() {
           <Button onClick={handleSaveAppLang} className="gap-2 w-full rounded-[4px_20px_4px_20px]">
             <Save className="w-4 h-4" /> {t.applyLang}
           </Button>
+        </motion.div>
+
+        {/* Security & Privacy */}
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.28 }} className="bg-card border border-border rounded-2xl p-6">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            </div>
+            <h2 className="text-base font-bold">{t.securityTitle}</h2>
+          </div>
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              {verified ?
+              <ShieldCheck className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" /> :
+              <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />}
+              
+              <p className={`text-sm font-medium ${verified ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}`}>
+                {verified ? t.securityVerified : t.securityUnverified}
+              </p>
+            </div>
+            <div className="flex items-start gap-3">
+              <Lock className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+              <p className="text-sm text-muted-foreground leading-relaxed">{t.securityPrivacySub}</p>
+            </div>
+          </div>
         </motion.div>
 
         {/* About & Contact */}

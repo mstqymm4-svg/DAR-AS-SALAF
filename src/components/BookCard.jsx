@@ -24,6 +24,13 @@ export default function BookCard({ book, isFavorite, onToggleFavorite, index = 0
   const handleRead = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    // Warm the PDF chunk, worker and document while the reader page loads —
+    // the book opens visibly faster.
+    if (book.pdf_url) {
+      import("@/lib/pdfLoader")
+        .then(({ prefetchPdf }) => prefetchPdf(book.pdf_url, { bookId: book.id, title: book.title }))
+        .catch(() => {});
+    }
     navigate(`/read/${book.id}`);
   };
 

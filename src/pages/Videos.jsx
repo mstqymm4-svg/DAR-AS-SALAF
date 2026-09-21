@@ -20,6 +20,7 @@ export default function Videos() {
   const [channels, setChannels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("all");
   const [playingVideo, setPlayingVideo] = useState(null);
   const [favorites, setFavorites] = useState([]);
   const [user, setUser] = useState(null);
@@ -46,6 +47,7 @@ export default function Videos() {
 
   const filtered = useMemo(() => {
     return videos.filter((v) => {
+      if (category !== "all" && v.category !== category) return false;
       if (
         search &&
         !v.title?.toLowerCase().includes(search.toLowerCase()) &&
@@ -55,9 +57,10 @@ export default function Videos() {
       }
       return true;
     });
-  }, [videos, search]);
+  }, [videos, search, category]);
 
-  const featured = useMemo(() => videos.filter((v) => v.is_featured), [videos]);
+  const categories = useMemo(() => [...new Set(videos.map((v) => v.category).filter(Boolean))], [videos]);
+  const featured = useMemo(() => videos.filter((v) => v.is_featured && (category === "all" || v.category === category)), [videos, category]);
   const recent = useMemo(() => [...filtered].sort((a, b) => new Date(b.created_date) - new Date(a.created_date)), [filtered]);
 
   const toggleFavorite = (videoId) => {
@@ -126,6 +129,25 @@ export default function Videos() {
               ))}
             </div>
           </section>
+        )}
+
+        {/* Categories */}
+        {categories.length > 1 && (
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            <button
+              onClick={() => setCategory("all")}
+              className={`shrink-0 px-4 py-1.5 text-xs font-bold transition-colors rounded-[4px_20px_4px_20px] ${category === "all" ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}>
+              {t.showAll}
+            </button>
+            {categories.map((c) => (
+              <button
+                key={c}
+                onClick={() => setCategory(c)}
+                className={`shrink-0 px-4 py-1.5 text-xs font-bold transition-colors rounded-[4px_20px_4px_20px] ${category === c ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}>
+                {c}
+              </button>
+            ))}
+          </div>
         )}
 
         {/* Search */}

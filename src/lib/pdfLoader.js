@@ -132,3 +132,12 @@ export function getCachedPage(key) {
 export function clearPageCache() {
   _pageCache.clear();
 }
+
+/**
+ * Warm the PDF worker, chunk and document caches in the background — call the
+ * moment the user taps "read" so the book opens visibly faster.
+ */
+export function prefetchPdf(url, metadata = {}) {
+  if (!url) return;
+  loadPdfDocument(url, metadata).catch(() => {});
+}
