@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Input } from "@/components/ui/input";
-import { Sparkles, Search, Video, Tv, Clock, WifiOff } from "lucide-react";
+import { Sparkles, Search, Video, Tv, Clock } from "lucide-react";
 import { toast } from "sonner";
 import VideoPlayer from "@/components/VideoPlayer";
 import VideoCard from "@/components/VideoCard";
@@ -9,13 +9,11 @@ import { useT } from "@/lib/i18n";
 import { base44 } from "@/api/base44Client";
 import { getVideos, getVideoChannels } from "@/lib/offlineSync";
 import { getAccountEmail, getVideoFavIds, setVideoFavIds, markVideoWatched } from "@/lib/activeUser";
-import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { useContentRefresh } from "@/hooks/useContentSync";
 import SmartImage from "@/components/SmartImage";
 
 export default function Videos() {
   const t = useT();
-  const { isOnline } = useOnlineStatus();
   const [videos, setVideos] = useState([]);
   const [channels, setChannels] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -90,12 +88,6 @@ export default function Videos() {
 
   return (
     <div className="pb-8" dir={t.dir}>
-      {!isOnline &&
-      <div className="flex items-center gap-2 px-4 py-2 mx-4 mt-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-700 dark:text-orange-400 text-xs font-medium">
-          <WifiOff className="w-4 h-4" />
-          {t.offlineMode}
-        </div>
-      }
       {/* Header */}
       <div className="bg-gradient-to-l from-primary/10 to-transparent py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">

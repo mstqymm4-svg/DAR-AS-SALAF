@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { BookOpen, ArrowLeft, Sparkles, Youtube, ExternalLink, WifiOff } from "lucide-react";
+import { BookOpen, ArrowLeft, Sparkles, Youtube, ExternalLink } from "lucide-react";
 import BookCard from "../components/BookCard";
 import HeroBanner from "../components/HeroBanner";
 import SocialChannelsSection from "../components/SocialChannelsSection";
@@ -12,7 +12,6 @@ import { useT } from "@/lib/i18n";
 import { getSetting, subscribeToSettings } from "@/lib/settingsStore";
 import { getFeaturedBooks, getRecentBooks, getFavoriteIds, toggleFavorite } from "@/lib/offlineSync";
 import { getAccountEmail } from "@/lib/activeUser";
-import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { useContentRefresh } from "@/hooks/useContentSync";
 import PullToRefresh from "@/components/PullToRefresh";
 import { forceSyncNow } from "@/lib/contentSyncEngine";
@@ -28,7 +27,6 @@ export default function Home() {
   const [youtubeUrl, setYoutubeUrl] = useState(() => getSetting("youtube_url") || "");
   const [youtubeLabel, setYoutubeLabel] = useState(() => getSetting("youtube_label") || t.youtubeBtn);
   const [youtubeSubText, setYoutubeSubText] = useState(() => getSetting("youtube_sub") || "");
-  const { isOnline } = useOnlineStatus();
 
   const loadData = async () => {
     const u = await base44.auth.me().catch(() => null);
@@ -78,18 +76,6 @@ export default function Home() {
   return (
     <PullToRefresh onRefresh={async () => {await forceSyncNow();loadData();}}>
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      {/* Offline indicator */}
-      {!isOnline &&
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-700 dark:text-orange-400 text-xs font-medium mb-4 mt-2">
-          
-          <WifiOff className="w-4 h-4" />
-          {t.offlineMode}
-        </motion.div>
-        }
-
       {/* Hero */}
       <HeroBanner />
 

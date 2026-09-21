@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Search, WifiOff } from "lucide-react";
-import { motion } from "framer-motion";
+import { Search } from "lucide-react";
 import AISearch from "../components/AISearch";
 import BookCard from "../components/BookCard";
 import { SkeletonGrid } from "../components/Skeleton";
@@ -11,7 +10,6 @@ import { useT } from "@/lib/i18n";
 import { bookLangLabel } from "@/lib/i18n-terms";
 import { getBooks, getFavoriteIds, toggleFavorite } from "@/lib/offlineSync";
 import { getAccountEmail } from "@/lib/activeUser";
-import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { useContentRefresh } from "@/hooks/useContentSync";
 import PullToRefresh from "@/components/PullToRefresh";
 import { forceSyncNow } from "@/lib/contentSyncEngine";
@@ -28,7 +26,6 @@ export default function Books() {
   const [preferredLanguage, setPreferredLanguage] = useState("الكل");
   const [aiResults, setAiResults] = useState(null);
   const [aiLabel, setAiLabel] = useState("");
-  const { isOnline } = useOnlineStatus();
 
   const urlParams = new URLSearchParams(window.location.search);
   const categoryParam = urlParams.get("category");
@@ -95,16 +92,6 @@ export default function Books() {
   return (
     <PullToRefresh onRefresh={async () => {await forceSyncNow();loadData();}}>
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {!isOnline &&
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-700 dark:text-orange-400 text-xs font-bold mb-4">
-          
-          <WifiOff className="w-4 h-4" />
-          {t.offlineMode}
-        </motion.div>
-        }
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground mb-1">{t.library}</h1>
         <p className="text-sm text-muted-foreground">{t.librarySub}</p>

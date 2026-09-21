@@ -45,19 +45,8 @@ export default function SyncStatusBadge() {
     };
   }, []);
 
-  // Don't show when idle and no recent activity
-  if (!status.isSyncing && !showSuccess && !status.error) {
-    // Show offline indicator only
-    if (!isOnline) {
-      return (
-        <div className="fixed bottom-20 lg:bottom-4 left-4 z-40 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/90 backdrop-blur-sm border border-border shadow-sm text-xs text-muted-foreground">
-          <CloudOff className="w-3 h-3" />
-          <span>{t.offlineMode}</span>
-        </div>);
-
-    }
-    return null;
-  }
+  // Nothing to show when idle — the app looks identical online and offline
+  if (!status.isSyncing && !showSuccess && !status.error) return null;
 
   return (
     <AnimatePresence>

@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Heart, WifiOff } from "lucide-react";
-import { motion } from "framer-motion";
+import { Heart } from "lucide-react";
 import BookCard from "../components/BookCard";
 import VideoCard from "@/components/VideoCard";
 import { SkeletonGrid } from "../components/Skeleton";
 import { useT } from "@/lib/i18n";
 import { getBooks, getVideos, getFavoriteIds, toggleFavorite } from "@/lib/offlineSync";
 import { getAccountEmail, getVideoFavIds, setVideoFavIds as saveVideoFavIds } from "@/lib/activeUser";
-import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { useContentRefresh } from "@/hooks/useContentSync";
 import PullToRefresh from "@/components/PullToRefresh";
 import { forceSyncNow } from "@/lib/contentSyncEngine";
@@ -22,7 +20,6 @@ export default function Favorites() {
   const [tab, setTab] = useState("books");
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
-  const { isOnline } = useOnlineStatus();
 
   const loadFavorites = async () => {
     const u = await base44.auth.me().catch(() => null);
@@ -68,16 +65,6 @@ export default function Favorites() {
   return (
     <PullToRefresh onRefresh={async () => {await forceSyncNow();loadFavorites();}}>
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {!isOnline &&
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-700 dark:text-orange-400 text-xs font-medium mb-4">
-        
-          <WifiOff className="w-4 h-4" />
-          {t.offlineMode}
-        </motion.div>
-      }
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground mb-2 flex items-center gap-2">
           <Heart className="w-6 h-6 text-red-500" />
