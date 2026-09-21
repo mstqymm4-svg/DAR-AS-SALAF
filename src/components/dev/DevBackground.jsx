@@ -11,7 +11,7 @@ import {
   Settings, Eye, RotateCcw
 } from "lucide-react";
 import { getSetting, setSettings } from "@/lib/settingsStore";
-import { base44 } from "@/api/base44Client";
+import { uploads } from "@/lib/uploadFacade";
 import HeroBanner from "@/components/HeroBanner";
 
 const BG_TYPES = [
@@ -138,7 +138,7 @@ export default function DevBackground() {
     setUploading(true); setUploadPct(0); setUploadLabel(label);
     const fakeProgress = setInterval(() => setUploadPct(p => Math.min(p + 8, 88)), 300);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await uploads.upload({ file, kind: isVideo ? "videos" : "misc" });
       clearInterval(fakeProgress); setUploadPct(100);
       onDone(file_url);
       toast.success("✓ تم الرفع بنجاح");

@@ -2,7 +2,6 @@
  * DevTheme — Professional Theme Engine UI
  * Handles light / dark / auto modes with live preview
  */
-import { useState, useEffect } from "react";
 import { Moon, Sun, Monitor, Check, Palette, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -68,13 +67,9 @@ function ThemePreviewCard({ isDark }) {
 
 export default function DevTheme() {
   const { mode, isDark, setMode } = useTheme();
-  const [previewMode, setPreviewMode] = useState(null); // null = use current
-
-  const displayIsDark = previewMode === "dark" || (previewMode === "auto" ? false : previewMode === null ? isDark : false);
 
   const handleApply = (modeId) => {
     setMode(modeId);
-    setPreviewMode(null);
     toast.success(
       modeId === "dark" ? "🌙 تم تفعيل الوضع الليلي على جميع الصفحات" :
       modeId === "light" ? "☀️ تم تفعيل الوضع الفاتح على جميع الصفحات" :
@@ -119,7 +114,6 @@ export default function DevTheme() {
         {MODES.map(m => {
           const Icon = m.icon;
           const isActive = mode === m.id;
-          const isPreviewing = previewMode === m.id;
           return (
             <div key={m.id}
               className={`rounded-2xl border-2 p-4 transition-all cursor-pointer ${
@@ -141,15 +135,7 @@ export default function DevTheme() {
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">{m.desc}</p>
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={e => { e.stopPropagation(); setPreviewMode(isPreviewing ? null : m.id); }}
-                    className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
-                    title="معاينة">
-                    <Eye className="w-4 h-4" />
-                  </button>
-                  {isActive && <Check className="w-5 h-5 text-primary mt-2" />}
-                </div>
+                {isActive && <Check className="w-5 h-5 text-primary shrink-0" />}
               </div>
             </div>
           );
@@ -161,11 +147,6 @@ export default function DevTheme() {
         <div className="flex items-center gap-2">
           <Eye className="w-4 h-4 text-muted-foreground" />
           <p className="text-sm font-semibold">معاينة مباشرة للواجهة</p>
-          {previewMode && (
-            <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-              معاينة: {MODES.find(m => m.id === previewMode)?.label}
-            </span>
-          )}
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>

@@ -35,9 +35,9 @@ const PRESETS = [
     settings: { hero_bg_type: "static_image", hero_bg_url: "https://images.unsplash.com/photo-1564769662533-4f00a87b4056?w=1600&auto=format&fit=crop", hero_bg_brightness: "65", hero_overlay_alpha: "35", hero_overlay_color: "#000000" } },
 ];
 
-const CUSTOM_KEY = "dar_custom_bg_presets";
-const loadCustom = () => { try { return JSON.parse(localStorage.getItem(CUSTOM_KEY) || "[]"); } catch { return []; } };
-const saveCustom = (list) => { try { localStorage.setItem(CUSTOM_KEY, JSON.stringify(list)); } catch {} };
+// Custom presets live in the settings store so they sync across devices
+const loadCustom = () => { try { return JSON.parse(getSetting("custom_bg_presets") || "[]"); } catch { return []; } };
+const saveCustom = (list) => setSettings({ custom_bg_presets: JSON.stringify(list) });
 
 const CATEGORIES = ["الكل", "إسلامية", "فخمة", "متحركة", "صور", "مخصص"];
 
@@ -174,8 +174,12 @@ export default function DevBackgroundLibrary() {
               className={`w-full relative flex flex-col overflow-hidden rounded-2xl border-2 transition-all hover:scale-[1.02] active:scale-95 ${
                 applied === preset.id ? "border-primary shadow-lg shadow-primary/20" : "border-border hover:border-primary/50"
               }`}>
-              <div className={`h-20 bg-gradient-to-br ${preset.preview} flex items-center justify-center`}>
-                <span className="text-4xl">{preset.icon}</span>
+              <div className={`h-20 bg-gradient-to-br ${preset.preview} flex items-center justify-center relative`}>
+                {preset.settings.hero_bg_url && (
+                  <img src={preset.settings.hero_bg_url} alt={preset.label}
+                    className="absolute inset-0 w-full h-full object-cover opacity-80" />
+                )}
+                <span className="text-4xl relative drop-shadow-lg">{preset.icon}</span>
                 {applied === preset.id && (
                   <div className="absolute top-2 left-2 bg-primary text-primary-foreground rounded-full p-0.5">
                     <Check className="w-3 h-3" />

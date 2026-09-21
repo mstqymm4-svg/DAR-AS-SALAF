@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { SlidersHorizontal, Globe, Moon, Check, RotateCcw, Tags, Plus, X, ArrowLeft } from "lucide-react";
+import { SlidersHorizontal, Globe, Moon, Check, RotateCcw, Tags, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -113,13 +113,17 @@ export default function DevAppDesign() {
           <span className="text-xs font-mono font-bold text-primary">{borderRadius}px</span>
         </div>
         <Slider min={0} max={24} step={2} value={[borderRadius]} onValueChange={([v]) => handleRadius(v)} />
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {[0, 4, 8, 12, 16, 20, 24].map(r => (
             <button key={r} onClick={() => handleRadius(r)}
               className={`px-2 py-1 text-xs font-bold border rounded-lg transition-all ${borderRadius===r?"border-primary bg-primary text-primary-foreground":"border-border hover:border-primary/40"}`}>
               {r}
             </button>
           ))}
+          <button onClick={() => handleRadius(12)}
+            className="ms-auto flex items-center gap-1 px-2 py-1 text-xs font-bold text-muted-foreground hover:text-primary transition-colors">
+            <RotateCcw className="w-3 h-3" /> افتراضي
+          </button>
         </div>
       </div>
 

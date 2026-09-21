@@ -24,7 +24,7 @@ export const uploads = {
       const res = await uploadApi.upload(file, kind);
       return { file_url: res.url, url: res.url };
     }
-    const res = await base44.integrations.Core.UploadFile({ file });
+    const res = await base44.integrations.Core.UploadPublicFile({ file });
     return { file_url: res.file_url, url: res.file_url };
   },
 };
