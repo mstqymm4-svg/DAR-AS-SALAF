@@ -10,7 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import {
   Plus, Pencil, Trash2, Eye, EyeOff, Upload, Save, Youtube, Star, StarOff,
-  Video, Tv, Search,
+  Video, Tv, Search, Loader2,
 } from "lucide-react";
 
 // Extract YouTube video ID from URL
@@ -195,6 +195,7 @@ function VideosTab() {
     title: "", youtube_url: "", description: "", channel_id: "",
     channel_name: "", category: "عام", video_type: "normal", duration: "", is_featured: false, visible: true, sort_order: 0,
   });
+  const [fetchingMeta, setFetchingMeta] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -209,6 +210,32 @@ function VideosTab() {
 
   useEffect(() => { load(); }, [load]);
 
+  // ── Auto-fill video data (title / channel / duration) from the YouTube URL ──
+  // Only fills fields the admin left empty — manual entries are never overwritten.
+  useEffect(() => {
+    if (!showForm || !extractYoutubeId(form.youtube_url)) return;
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      setFetchingMeta(true);
+      try {
+        const res = await base44.functions.invoke("fetchVideoMeta", { url: form.youtube_url });
+        const meta = res.data || {};
+        if (cancelled) return;
+        setForm((prev) => ({
+          ...prev,
+          title: prev.title || meta.title || "",
+          channel_name: prev.channel_name || meta.channel_name || "",
+          duration: prev.duration || meta.duration || "",
+        }));
+      } catch (e) {
+        /* silent — manual entry always remains possible */
+      } finally {
+        if (!cancelled) setFetchingMeta(false);
+      }
+    }, 600);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [form.youtube_url, showForm]);
+
   const handleSave = async () => {
     if (!form.title || !form.youtube_url) { toast.error("أدخل العنوان والرابط"); return; }
     const thumbnail = getThumbnail(form.youtube_url);
@@ -216,7 +243,7 @@ function VideosTab() {
     const data = {
   ...form,
   thumbnail,
-  channel_name: ch?.name || "",
+  channel_name: ch?.name || form.channel_name || "",
   video_type: form.video_type || "normal",
 };
     try {
@@ -269,12 +296,21 @@ function VideosTab() {
       {showForm && (
         <div className="bg-muted/30 border border-border rounded-xl p-4 space-y-3">
           <div>
-            <Label className="text-xs">عنوان الفيديو</Label>
+            <Label className="text-xs">
+              عنوان الفيديو <span className="text-muted-foreground font-normal">(يُجلب تلقائيًا من الرابط — قابل للتعديل)</span>
+            </Label>
             <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
               placeholder="عنوان الفيديو" className="h-9 text-sm" />
           </div>
           <div>
-            <Label className="text-xs">رابط يوتيوب</Label>
+            <div className="flex items-center justify-between">
+              <Label className="text-xs">رابط يوتيوب</Label>
+              {fetchingMeta && (
+                <span className="text-[10px] text-primary flex items-center gap-1">
+                  <Loader2 className="w-3 h-3 animate-spin" /> جلب البيانات تلقائيًا...
+                </span>
+              )}
+            </div>
             <Input value={form.youtube_url} onChange={(e) => setForm({ ...form, youtube_url: e.target.value })}
               placeholder="https://youtube.com/watch?v=..." className="h-9 text-sm" />
           </div>

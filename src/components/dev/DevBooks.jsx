@@ -16,6 +16,15 @@ const DEFAULT_CATS = ["القرآن وعلومه","الحديث الشريف","�
 const emptyForm = { title:"", author:"", category:"القرآن وعلومه", description:"", cover_image:"", pages_count:"", language:"العربية", pdf_url:"", is_featured:false, rating:0, status:"published" };
 const STATUS_OPTIONS = [{ value:"published", label:"منشور", color:"text-green-600" },{ value:"draft", label:"مسودة", color:"text-amber-600" },{ value:"hidden", label:"مخفي", color:"text-red-500" }];
 
+// Derive a clean book title from a PDF filename / direct URL (editable manually)
+const titleFromPdfUrl = (url) => {
+  try {
+    const name = decodeURIComponent(String(url).split("?")[0].split("#")[0]).split("/").pop() || "";
+    if (!/\.pdf$/i.test(name)) return "";
+    return name.replace(/\.pdf$/i, "").replace(/[-_+]+/g, " ").trim();
+  } catch (e) { return ""; }
+};
+
 export default function DevBooks() {
   const [books, setBooks]           = useState([]);
   const [loading, setLoading]       = useState(true);
@@ -115,7 +124,15 @@ export default function DevBooks() {
 
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      setForm(p => ({...p, [field]: file_url}));
+      setForm(p => {
+        const next = { ...p, [field]: file_url };
+        // Auto-fill the title from the PDF filename if the title is still empty
+        if (isPdf && !p.title) {
+          const derived = file.name.replace(/\.pdf$/i, "").replace(/[-_+]+/g, " ").trim();
+          if (derived) next.title = derived;
+        }
+        return next;
+      });
       toast.success("تم رفع " + (isPdf ? "الملف" : "الغلاف") + " ✓");
     } catch (err) {
       toast.error("فشل الرفع: " + (err?.message || "خطأ غير معروف"));
@@ -261,7 +278,10 @@ export default function DevBooks() {
                 </label>
               </div>
             </div>
-            <Input value={form.pdf_url} onChange={e=>setForm(p=>({...p,pdf_url:e.target.value}))} placeholder="أو رابط PDF مباشر" className="text-xs h-8" />
+            <Input value={form.pdf_url} onChange={e=>{
+              const val = e.target.value;
+              setForm(p=>({...p, pdf_url:val, title: p.title || titleFromPdfUrl(val)}));
+            }} placeholder="أو رابط PDF مباشر — يُستخرج العنوان تلقائيًا" className="text-xs h-8" />
             <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
               <Label className="text-sm cursor-pointer">كتاب مميز ⭐</Label>
               <Switch checked={form.is_featured} onCheckedChange={v=>setForm(p=>({...p,is_featured:v}))} />
