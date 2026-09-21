@@ -54,6 +54,23 @@ const TABS = [
 
 const TRANSITIONS = ["fade", "slide", "zoom", "blur"];
 
+// Layers that can be combined on top of ANY base background type
+const EXTRA_LAYERS = [
+  { id: "particles",       label: "جزيئات",        icon: "✨" },
+  { id: "stars",           label: "نجوم",          icon: "⭐" },
+  { id: "waves",           label: "موجات",         icon: "〰" },
+  { id: "islamic_pattern", label: "نمط إسلامي",    icon: "☪" },
+  { id: "floating_shapes", label: "أشكال طائرة",   icon: "◆" },
+  { id: "snow",            label: "ثلج",           icon: "❄" },
+  { id: "rain",            label: "مطر",           icon: "🌧" },
+  { id: "fireflies",       label: "يراعات مضيئة",  icon: "🟢" },
+  { id: "bubbles",         label: "فقاعات",        icon: "🫧" },
+  { id: "light_rays",      label: "أشعة ضوء",      icon: "🔆" },
+  { id: "aurora",          label: "شفق قطبي",      icon: "🌌" },
+  { id: "grid",            label: "شبكة هندسية",   icon: "▦" },
+  { id: "custom_html",     label: "HTML مخصص",     icon: "💻" },
+];
+
 function r(k, fallback = "") { return getSetting(k) || fallback; }
 
 function buildState() {
@@ -86,6 +103,7 @@ function buildState() {
     gradFrom:    r("hero_grad_from") || "#134e2a",
     gradTo:      r("hero_grad_to") || "#1a6b3c",
     customHtml:  r("hero_custom_html"),
+    extraLayers: (() => { try { return JSON.parse(r("hero_extra_layers") || "[]"); } catch { return []; } })(),
   };
 }
 
@@ -134,9 +152,10 @@ export default function DevBackgroundManager() {
       hero_video_mobile:  next.videoMobile,
       hero_video_speed:   next.videoSpeed,
       hero_grad_from:     next.gradFrom,
-      hero_grad_to:       next.gradTo,
+      hero_grad_to:      next.gradTo,
       hero_custom_html:   next.customHtml,
-    });
+      hero_extra_layers:  JSON.stringify(next.extraLayers || []),
+      });
   }, []);
 
   const update = useCallback((patch) => {
@@ -156,7 +175,7 @@ export default function DevBackgroundManager() {
       overlayColor: "#000000", overlayAlpha: 30, animSpeed: 5, zoom: false, parallax: false,
       bgUrl: "", slideUrls: [], slideTrans: "fade", slideDur: 4,
       autoplay: true, loop: true, mute: true, videoBright: 100, videoMobile: true, videoSpeed: 1,
-      gradFrom: "#134e2a", gradTo: "#1a6b3c", customHtml: "",
+      gradFrom: "#134e2a", gradTo: "#1a6b3c", customHtml: "", extraLayers: [],
     };
     setSt(def); persist(def);
     toast.success("تمت الاستعادة للإعدادات الافتراضية");
@@ -334,6 +353,40 @@ export default function DevBackgroundManager() {
               placeholder="<div style='background: linear-gradient(...);'>...</div>" />
           </div>
         )}
+
+        {/* ── Extra layers combined on top of the base type ── */}
+        <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+          <p className="text-sm font-bold flex items-center gap-2">
+            <Layers className="w-4 h-4 text-primary" /> طبقات إضافية فوق الخلفية
+          </p>
+          <p className="text-[11px] text-muted-foreground">
+            فعّل أي عدد من الطبقات لتركيبها فوق النوع المختار — مثلاً فيديو + ثلج + نمط إسلامي معاً
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {EXTRA_LAYERS.map(layer => {
+              const on = st.extraLayers.includes(layer.id);
+              return (
+                <button key={layer.id}
+                  onClick={() => update({ extraLayers: on ? st.extraLayers.filter(l => l !== layer.id) : [...st.extraLayers, layer.id] })}
+                  className={`flex items-center gap-2 p-2.5 rounded-xl border-2 transition-all ${
+                    on ? "border-primary bg-primary/10 text-primary" : "border-border bg-card hover:border-primary/40"
+                  }`}>
+                  <span className="text-base">{layer.icon}</span>
+                  <span className="text-xs font-medium flex-1 text-right">{layer.label}</span>
+                  {on && <Check className="w-3.5 h-3.5 shrink-0" />}
+                </button>
+              );
+            })}
+          </div>
+          {st.extraLayers.includes("custom_html") && (
+            <div className="space-y-1">
+              <Label className="text-xs">كود الطبقة المخصصة</Label>
+              <textarea value={st.customHtml} onChange={e => update({ customHtml: e.target.value })}
+                className="w-full h-24 p-3 text-xs font-mono bg-muted rounded-xl border border-border resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
+                placeholder="<div style='...'>...</div>" />
+            </div>
+          )}
+        </div>
       </div>
     );
   };
