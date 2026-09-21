@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Type, Upload, Check, RotateCcw, Eye, SlidersHorizontal } from "lucide-react";
+import { Type, Upload, Check, RotateCcw, Eye, SlidersHorizontal, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -12,12 +12,24 @@ import { FONT_PRESETS, FONT_ROLES } from "@/lib/fontConstants";
 const CATEGORIES = ["الكل", "حديث", "أوردو", "كلاسيكي", "قرآني", "زخرفي"];
 
 function injectFont(preset) {
+  // Uploaded fonts carry a file URL instead of a stylesheet URL
+  if (preset.file_url) { injectCustomFontFace(preset.name, preset.file_url); return; }
+  if (!preset.url) return;
   const linkId = `df-${preset.name.replace(/\s+/g,"-")}`;
   if (!document.getElementById(linkId)) {
     const link = document.createElement("link");
     link.id = linkId; link.rel = "stylesheet"; link.href = preset.url;
     document.head.appendChild(link);
   }
+}
+
+function injectCustomFontFace(name, fileUrl) {
+  const styleId = `dff-${name.replace(/\s+/g,"-")}`;
+  if (document.getElementById(styleId)) return;
+  const style = document.createElement("style");
+  style.id = styleId;
+  style.textContent = `@font-face { font-family: '${name}'; src: url('${fileUrl}'); font-display: swap; }`;
+  document.head.appendChild(style);
 }
 
 export default function DevFonts() {
@@ -31,6 +43,11 @@ export default function DevFonts() {
   const [customFonts, setCustomFonts]   = useState(() => {
     try { return JSON.parse(getSetting("custom_fonts") || "[]"); } catch(e) { return []; }
   });
+
+  // Re-register uploaded fonts on every mount so they survive a page reload
+  useEffect(() => {
+    customFonts.forEach(f => { if (f.file_url) injectCustomFontFace(f.name, f.file_url); });
+  }, [customFonts]);
 
   useEffect(() => {
     const unsub = subscribeToSettings((s) => {
@@ -73,10 +90,8 @@ export default function DevFonts() {
     setUploading(true);
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
     const fontName = file.name.replace(/\.[^.]+$/, "");
-    const style = document.createElement("style");
-    style.textContent = `@font-face { font-family: '${fontName}'; src: url('${file_url}'); }`;
-    document.head.appendChild(style);
-    const newFont = { name: fontName, label: fontName, category: "مرفوع", url: "", value: `'${fontName}', sans-serif` };
+    injectCustomFontFace(fontName, file_url);
+    const newFont = { name: fontName, label: fontName, category: "مرفوع", url: "", file_url, value: `'${fontName}', sans-serif` };
     const updated = [...customFonts, newFont];
     setCustomFonts(updated);
     setSetting("custom_fonts", JSON.stringify(updated));
@@ -90,16 +105,37 @@ export default function DevFonts() {
       setSetting(`font_${r.key}`, "");
     });
     document.documentElement.style.removeProperty("font-size");
-    setSetting("font_size", "16");
+    document.documentElement.style.removeProperty("line-height");
+    document.documentElement.style.removeProperty("letter-spacing");
+    setSettings({ font_size: "16", line_height: "1.6", letter_spacing: "0" });
     setRoleFonts(Object.fromEntries(FONT_ROLES.map(r => [r.key, ""])));
     setFontSize(16);
-    toast.success("تم إعادة جميع الخطوط للافتراضي");
+    setLineHeight(1.6);
+    setLetterSpacing(0);
+    toast.success("تم إعادة جميع الخطوط والطباعة للافتراضي");
+  };
+
+  const deleteCustomFont = (font) => {
+    if (!confirm(`حذف الخط "${font.name}"؟`)) return;
+    const updated = customFonts.filter(f => f.name !== font.name);
+    setCustomFonts(updated);
+    setSetting("custom_fonts", JSON.stringify(updated));
+    // Clear any role still pointing at the removed font
+    FONT_ROLES.forEach(r => {
+      if (roleFonts[r.key] === font.name) {
+        document.documentElement.style.removeProperty(r.cssVar);
+        setSetting(`font_${r.key}`, "");
+        setRoleFonts(prev => ({ ...prev, [r.key]: "" }));
+      }
+    });
+    toast.success("تم حذف الخط");
   };
 
   const allFonts = [...FONT_PRESETS, ...customFonts];
   const filtered = allFonts.filter(p => fontCat === "الكل" || p.category === fontCat);
   const currentRole = FONT_ROLES.find(r => r.key === activeRole);
-  const currentFontPreset = FONT_PRESETS.find(f => f.name === roleFonts[activeRole]);
+  // Resolve a role's font family from presets AND uploaded fonts
+  const familyOf = (roleKey) => allFonts.find(f => f.name === roleFonts[roleKey])?.value || undefined;
 
   return (
     <div className="space-y-6" dir="rtl">
@@ -110,18 +146,18 @@ export default function DevFonts() {
           <h3 className="font-bold text-sm">معاينة مباشرة</h3>
         </div>
         <div className="bg-background rounded-xl p-4 border border-border space-y-3">
-          <p className="text-2xl font-bold" style={{ fontFamily: (roleFonts.heading && FONT_PRESETS.find(f=>f.name===roleFonts.heading)?.value) || undefined }}>
+          <p className="text-2xl font-bold" style={{ fontFamily: familyOf("heading"), lineHeight, letterSpacing: `${letterSpacing}em` }}>
             المكتبة الإسلامية الرقمية
           </p>
-          <p className="text-base font-semibold text-primary" style={{ fontFamily: (roleFonts.title && FONT_PRESETS.find(f=>f.name===roleFonts.title)?.value) || undefined }}>
+          <p className="text-base font-semibold text-primary" style={{ fontFamily: familyOf("title"), lineHeight, letterSpacing: `${letterSpacing}em` }}>
             صحيح البخاري — الإمام البخاري
           </p>
-          <p className="text-sm text-muted-foreground" style={{ fontFamily: (roleFonts.body && FONT_PRESETS.find(f=>f.name===roleFonts.body)?.value) || undefined }}>
+          <p className="text-sm text-muted-foreground" style={{ fontFamily: familyOf("body"), lineHeight, letterSpacing: `${letterSpacing}em` }}>
             بسم الله الرحمن الرحيم — نمونہ متن اردو
           </p>
           <div className="flex gap-2 flex-wrap">
-            <span className="text-xs bg-primary text-primary-foreground px-3 py-1.5 rounded-lg" style={{ fontFamily: (roleFonts.button && FONT_PRESETS.find(f=>f.name===roleFonts.button)?.value) || undefined }}>تصفح المكتبة</span>
-            <span className="text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded-lg" style={{ fontFamily: (roleFonts.nav && FONT_PRESETS.find(f=>f.name===roleFonts.nav)?.value) || undefined }}>الرئيسية · المكتبة · المفضلة</span>
+            <span className="text-xs bg-primary text-primary-foreground px-3 py-1.5 rounded-lg" style={{ fontFamily: familyOf("button") }}>تصفح المكتبة</span>
+            <span className="text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded-lg" style={{ fontFamily: familyOf("nav") }}>الرئيسية · المكتبة · المفضلة</span>
           </div>
         </div>
       </div>
@@ -214,8 +250,10 @@ export default function DevFonts() {
             {customFonts.map(f => (
               <div key={f.name} className="flex items-center gap-2 text-xs bg-muted/50 px-3 py-2 rounded-lg">
                 <span className="text-green-600">✓</span>
-                <span className="font-medium">{f.name}</span>
-                <span className="text-muted-foreground mr-auto">مرفوع</span>
+                <span className="font-medium" style={{ fontFamily: f.value }}>{f.name}</span>
+                <button onClick={() => deleteCustomFont(f)} className="mr-auto p-1 rounded-lg hover:bg-destructive/10 transition-colors" title="حذف الخط">
+                  <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                </button>
               </div>
             ))}
           </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Palette, Check, RotateCcw, Download, Upload, Sun, Moon } from "lucide-react";
+import { Palette, Check, RotateCcw, Download, Upload, Sun, Moon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
@@ -122,8 +122,21 @@ export default function DevColors() {
     reader.readAsText(file);
   };
 
+  const clearField = (key) => {
+    setColors(prev => ({ ...prev, [key]: "" }));
+    setSettings({ [key]: "" });
+    setActivePreset(null);
+  };
+
   const fields = mode === "dark" ? DARK_FIELDS : COLOR_FIELDS;
   const presets = mode === "dark" ? DARK_PRESETS : COLOR_PRESETS;
+
+  // Highlight the preset that matches the currently saved colors
+  const prefix = mode === "dark" ? "color_dark_" : "color_";
+  const matchedPreset = presets.find(pr =>
+    pr.bg === colors[prefix + "bg"] && pr.primary === colors[prefix + "primary"] && pr.card === colors[prefix + "card"]
+  )?.name;
+  const selectedPreset = activePreset || matchedPreset;
 
   // Preview colors for the selected mode
   const p = mode === "dark"
@@ -161,7 +174,7 @@ export default function DevColors() {
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {presets.map(preset => (
             <button key={preset.name} onClick={() => handlePreset(preset)}
-              className={`relative flex flex-col gap-2 p-3 rounded-xl border-2 transition-all ${activePreset === preset.name ? "border-primary shadow-md shadow-primary/20" : "border-border hover:border-primary/40"}`}>
+              className={`relative flex flex-col gap-2 p-3 rounded-xl border-2 transition-all ${selectedPreset === preset.name ? "border-primary shadow-md shadow-primary/20" : "border-border hover:border-primary/40"}`}>
               <div className="flex gap-1 rounded-lg overflow-hidden h-8 shadow-sm">
                 <div className="flex-1" style={{ background: `hsl(${preset.bg})` }} />
                 <div className="flex-1" style={{ background: `hsl(${preset.primary})` }} />
@@ -169,7 +182,7 @@ export default function DevColors() {
                 <div className="flex-1" style={{ background: `hsl(${preset.card})` }} />
               </div>
               <span className="text-xs font-bold text-center">{preset.name}</span>
-              {activePreset === preset.name && <div className="absolute top-2 left-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center"><Check className="w-3 h-3 text-primary-foreground" /></div>}
+              {selectedPreset === preset.name && <div className="absolute top-2 left-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center"><Check className="w-3 h-3 text-primary-foreground" /></div>}
             </button>
           ))}
         </div>
@@ -217,8 +230,14 @@ export default function DevColors() {
                 <div className="flex-1 min-w-0">
                   <Label className="text-xs font-bold">{label}</Label>
                   <p className="text-[10px] text-muted-foreground">{desc}</p>
-                  <p className="text-[10px] font-mono text-primary mt-0.5">{hex}</p>
+                  <p className="text-[10px] font-mono text-primary mt-0.5">{hsl ? hex : "افتراضي"}</p>
                 </div>
+                {hsl && (
+                  <button onClick={() => clearField(key)} title="إعادة هذا اللون للافتراضي"
+                    className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors shrink-0">
+                    <X className="w-3.5 h-3.5 text-muted-foreground" />
+                  </button>
+                )}
               </div>
             );
           })}
