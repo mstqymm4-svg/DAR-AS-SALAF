@@ -1,66 +1,67 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { BookOpen, Users, HardDrive, Activity, TrendingUp, Star, FileText, Clock, Video, Heart, Tv } from "lucide-react";
+import { BookOpen, Users, HardDrive, Activity, TrendingUp, Star, FileText, Clock, Video, Heart, Tv, RefreshCw } from "lucide-react";
+import StatCard from "@/components/dev/StatCard";
+import CategoryBreakdown from "@/components/dev/CategoryBreakdown";
 
 export default function DevDashboard() {
-  const [stats, setStats] = useState({ total: 0, featured: 0, categories: 0, withPdf: 0, videos: 0, channels: 0, favorites: 0 });
+  const [stats, setStats] = useState({ total: 0, featured: 0, categories: 0, withPdf: 0, videos: 0, channels: 0, favorites: 0, users: 0 });
   const [recentBooks, setRecentBooks] = useState([]);
+  const [allBooks, setAllBooks] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      const [books, videos, channels, favs] = await Promise.all([
-        base44.entities.Book.list('-created_date', 1000).catch(() => []),
-        base44.entities.Video.list('-created_date', 1000).catch(() => []),
-        base44.entities.VideoChannel.list('-created_date', 1000).catch(() => []),
-        base44.entities.Favorite.list('-created_date', 1000).catch(() => []),
-      ]);
-      const cats = new Set(books.map(b => b.category));
-      setStats({
-        total: books.length,
-        featured: books.filter(b=>b.is_featured).length,
-        categories: cats.size,
-        withPdf: books.filter(b=>b.pdf_url).length,
-        videos: videos.length,
-        channels: channels.length,
-        favorites: favs.length,
-      });
-      setRecentBooks(books.slice(0, 8));
-      setLoading(false);
-    })();
-  }, []);
+  const loadAll = async () => {
+    setLoading(true);
+    const [books, videos, channels, favs, users] = await Promise.all([
+      base44.entities.Book.list('-created_date', 1000).catch(() => []),
+      base44.entities.Video.list('-created_date', 1000).catch(() => []),
+      base44.entities.VideoChannel.list('-created_date', 1000).catch(() => []),
+      base44.entities.Favorite.list('-created_date', 1000).catch(() => []),
+      base44.entities.User.list('-created_date', 500).catch(() => []),
+    ]);
+    const cats = new Set(books.map(b => b.category));
+    setStats({
+      total: books.length,
+      featured: books.filter(b=>b.is_featured).length,
+      categories: cats.size,
+      withPdf: books.filter(b=>b.pdf_url).length,
+      videos: videos.length,
+      channels: channels.length,
+      favorites: favs.length,
+      users: users.length,
+    });
+    setAllBooks(books);
+    setRecentBooks(books.slice(0, 8));
+    setLoading(false);
+  };
 
-  const StatCard = ({ icon: IconComp, label, value, color }) => (
-    <div className={`bg-card border border-border rounded-2xl p-5 flex items-center gap-4`}>
-      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color}`}>
-        <IconComp className="w-6 h-6" />
-      </div>
-      <div>
-        <p className="text-2xl font-black">{loading ? "..." : value}</p>
-        <p className="text-xs text-muted-foreground font-medium">{label}</p>
-      </div>
-    </div>
-  );
+  useEffect(() => { loadAll(); }, []);
 
   return (
     <div className="space-y-6" dir="rtl">
-      <div>
-        <h2 className="text-xl font-black mb-1">مرحباً بك في مركز التحكم</h2>
-        <p className="text-sm text-muted-foreground">نظرة عامة على حالة المكتبة الرقمية</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-black mb-1">مرحباً بك في مركز التحكم</h2>
+          <p className="text-sm text-muted-foreground">نظرة عامة على حالة المكتبة الرقمية</p>
+        </div>
+        <button onClick={loadAll} className="p-2 rounded-xl hover:bg-muted transition-colors shrink-0" title="تحديث">
+          <RefreshCw className={`w-4 h-4 text-muted-foreground ${loading ? "animate-spin" : ""}`} />
+        </button>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={BookOpen}  label="إجمالي الكتب"   value={stats.total}      color="bg-primary/10 text-primary" />
-        <StatCard icon={Star}      label="كتاب مميز"       value={stats.featured}   color="bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" />
-        <StatCard icon={Activity}  label="تصنيف"           value={stats.categories} color="bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" />
-        <StatCard icon={FileText}  label="كتاب بـ PDF"     value={stats.withPdf}    color="bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400" />
-        <StatCard icon={Video}     label="الفيديوهات"      value={stats.videos}     color="bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400" />
-        <StatCard icon={Tv}        label="القنوات"         value={stats.channels}   color="bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400" />
-        <StatCard icon={Heart}     label="المفضلة"         value={stats.favorites}  color="bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400" />
-        <StatCard icon={HardDrive} label="تغطية PDF"       value={stats.total ? Math.round((stats.withPdf/stats.total)*100) + "%" : "0%"} color="bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400" />
+        <StatCard loading={loading} icon={BookOpen}  label="إجمالي الكتب"   value={stats.total}      color="bg-primary/10 text-primary" />
+        <StatCard loading={loading} icon={Star}      label="كتاب مميز"       value={stats.featured}   color="bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" />
+        <StatCard loading={loading} icon={Activity}  label="تصنيف"           value={stats.categories} color="bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" />
+        <StatCard loading={loading} icon={FileText}  label="كتاب بـ PDF"     value={stats.withPdf}    color="bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400" />
+        <StatCard loading={loading} icon={Video}     label="الفيديوهات"      value={stats.videos}     color="bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400" />
+        <StatCard loading={loading} icon={Tv}        label="القنوات"         value={stats.channels}   color="bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400" />
+        <StatCard loading={loading} icon={Heart}     label="المفضلة"         value={stats.favorites}  color="bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400" />
+        <StatCard loading={loading} icon={Users}     label="المستخدمون"      value={stats.users}      color="bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400" />
       </div>
+
+      {!loading && <CategoryBreakdown books={allBooks} />}
 
       {/* PDF Coverage */}
       {!loading && stats.total > 0 && (

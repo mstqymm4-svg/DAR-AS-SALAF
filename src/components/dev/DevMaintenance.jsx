@@ -9,6 +9,8 @@ export default function DevMaintenance() {
   const [loading, setLoading] = useState(true);
   const [cleaning, setCleaning] = useState(false);
   const [optimizing, setOptimizing] = useState(false);
+  const [clearingCache, setClearingCache] = useState(false);
+  const [cleaningOrphans, setCleaningOrphans] = useState(false);
 
   useEffect(() => {
     loadStats();
@@ -18,10 +20,10 @@ export default function DevMaintenance() {
     setLoading(true);
     try {
       const [books, favs, videos, channels] = await Promise.all([
-        base44.entities.Book.list("-created_date", 1).catch(() => []),
-        base44.entities.Favorite.list("-created_date", 1).catch(() => []),
-        base44.entities.Video.list("-created_date", 1).catch(() => []),
-        base44.entities.VideoChannel.list("-created_date", 1).catch(() => []),
+        base44.entities.Book.list("-created_date", 1000).catch(() => []),
+        base44.entities.Favorite.list("-created_date", 1000).catch(() => []),
+        base44.entities.Video.list("-created_date", 1000).catch(() => []),
+        base44.entities.VideoChannel.list("-created_date", 1000).catch(() => []),
       ]);
       setStats({
         books: books.length,
@@ -53,11 +55,46 @@ export default function DevMaintenance() {
     setCleaning(false);
   };
 
-  const clearPageCache = () => {
+  const clearPageCache = async () => {
+    if (!confirm("مسح ذاكرة المتصفح المؤقتة للتطبيق؟ (الكتب المحفوظة للقراءة دون اتصال تبقى كما هي)")) return;
+    setClearingCache(true);
     try {
-      // Clear any in-memory caches by reloading
-      toast.success("تم مسح ذاكرة الصفحات المؤقتة");
-    } catch(e) {}
+      let cleared = 0;
+      if (typeof caches !== "undefined") {
+        const names = await caches.keys();
+        for (const name of names) {
+          await caches.delete(name);
+          cleared++;
+        }
+      }
+      toast.success(cleared > 0 ? `تم مسح ${cleared} ذاكرة مؤقتة` : "لا توجد ذاكرة مؤقتة لمسحها");
+    } catch (e) {
+      toast.error("فشل مسح الذاكرة المؤقتة");
+    }
+    setClearingCache(false);
+  };
+
+  // Remove favorites pointing at books that no longer exist
+  const cleanOrphanFavorites = async () => {
+    setCleaningOrphans(true);
+    try {
+      const [books, favs] = await Promise.all([
+        base44.entities.Book.list("-created_date", 1000),
+        base44.entities.Favorite.list("-created_date", 1000),
+      ]);
+      const ids = new Set(books.map(b => b.id));
+      const orphans = favs.filter(f => f.book_id && !ids.has(f.book_id));
+      if (orphans.length === 0) {
+        toast.success("لا توجد مفضلات معلّقة ✓");
+      } else if (confirm(`حذف ${orphans.length} مفضلة تشير إلى كتب محذوفة؟`)) {
+        await Promise.allSettled(orphans.map(f => base44.entities.Favorite.delete(f.id)));
+        toast.success(`تم حذف ${orphans.length} مفضلة معلّقة`);
+        loadStats();
+      }
+    } catch (e) {
+      toast.error("فشل الفحص");
+    }
+    setCleaningOrphans(false);
   };
 
   const optimizeDB = async () => {
@@ -137,13 +174,30 @@ export default function DevMaintenance() {
                 <RefreshCw className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-bold">مسح ذاكرة الصفحات</p>
-                <p className="text-xs text-muted-foreground mt-0.5">إعادة تحميل صفحات PDF</p>
+                <p className="text-sm font-bold">مسح ذاكرة المتصفح</p>
+                <p className="text-xs text-muted-foreground mt-0.5">حذف الملفات المؤقتة المخزّنة</p>
               </div>
             </div>
-            <Button variant="outline" size="sm" onClick={clearPageCache} className="w-full rounded-xl gap-1.5">
-              <RefreshCw className="w-3.5 h-3.5" />
+            <Button variant="outline" size="sm" onClick={clearPageCache} disabled={clearingCache} className="w-full rounded-xl gap-1.5">
+              {clearingCache ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
               مسح
+            </Button>
+          </div>
+
+          {/* Orphan favorites */}
+          <div className="border border-border rounded-xl p-4">
+            <div className="flex items-start gap-3 mb-3">
+              <div className="w-9 h-9 rounded-lg bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center shrink-0">
+                <Database className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-bold">تنظيف المفضلات المعلّقة</p>
+                <p className="text-xs text-muted-foreground mt-0.5">مفضلات لكتب تم حذفها</p>
+              </div>
+            </div>
+            <Button variant="outline" size="sm" onClick={cleanOrphanFavorites} disabled={cleaningOrphans} className="w-full rounded-xl gap-1.5">
+              {cleaningOrphans ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+              فحص وتنظيف
             </Button>
           </div>
 

@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Activity, RefreshCw, Search, Clock, User, Tag } from "lucide-react";
+import { Activity, RefreshCw, Search, Clock, User, Tag, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export default function DevLogs() {
   const [logs, setLogs]     = useState([]);
@@ -33,11 +34,35 @@ export default function DevLogs() {
     return map[key] || key;
   };
 
+  const exportCsv = () => {
+    const header = ["الإعداد", "المفتاح", "القيمة السابقة", "القيمة الجديدة", "بواسطة", "التاريخ"];
+    const esc = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const rows = filtered.map(l => [
+      keyLabel(l.setting_key), l.setting_key, l.previous_value, l.setting_value,
+      l.changed_by, l.updated_date ? new Date(l.updated_date).toLocaleString("ar") : "",
+    ].map(esc).join(","));
+    const csv = "\uFEFF" + [header.map(esc).join(","), ...rows].join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `activity-logs-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-5" dir="rtl">
-      <div className="flex items-center justify-between">
-        <h3 className="font-bold text-sm flex items-center gap-2"><Activity className="w-4 h-4 text-primary" /> سجلات النشاط والتغييرات</h3>
-        <button onClick={loadLogs} className="p-1.5 rounded-lg hover:bg-muted transition-colors"><RefreshCw className="w-4 h-4 text-muted-foreground" /></button>
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="font-bold text-sm flex items-center gap-2">
+          <Activity className="w-4 h-4 text-primary" /> سجلات النشاط والتغييرات
+          <span className="text-xs text-muted-foreground font-normal">({filtered.length})</span>
+        </h3>
+        <div className="flex items-center gap-1 shrink-0">
+          <Button variant="outline" size="sm" onClick={exportCsv} className="rounded-xl gap-1.5 h-8">
+            <Download className="w-3.5 h-3.5" /> تصدير
+          </Button>
+          <button onClick={loadLogs} className="p-1.5 rounded-lg hover:bg-muted transition-colors"><RefreshCw className="w-4 h-4 text-muted-foreground" /></button>
+        </div>
       </div>
 
       <div className="relative">
