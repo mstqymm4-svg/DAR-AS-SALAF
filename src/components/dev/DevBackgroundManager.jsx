@@ -104,6 +104,7 @@ function buildState() {
     gradTo:      r("hero_grad_to") || "#1a6b3c",
     customHtml:  r("hero_custom_html"),
     extraLayers: (() => { try { return JSON.parse(r("hero_extra_layers") || "[]"); } catch { return []; } })(),
+    customLayers: (() => { try { return JSON.parse(r("hero_custom_layers") || "[]"); } catch { return []; } })(),
   };
 }
 
@@ -155,6 +156,7 @@ export default function DevBackgroundManager() {
       hero_grad_to:      next.gradTo,
       hero_custom_html:   next.customHtml,
       hero_extra_layers:  JSON.stringify(next.extraLayers || []),
+      hero_custom_layers: JSON.stringify(next.customLayers || []),
       });
   }, []);
 
@@ -175,10 +177,39 @@ export default function DevBackgroundManager() {
       overlayColor: "#000000", overlayAlpha: 30, animSpeed: 5, zoom: false, parallax: false,
       bgUrl: "", slideUrls: [], slideTrans: "fade", slideDur: 4,
       autoplay: true, loop: true, mute: true, videoBright: 100, videoMobile: true, videoSpeed: 1,
-      gradFrom: "#134e2a", gradTo: "#1a6b3c", customHtml: "", extraLayers: [],
+      gradFrom: "#134e2a", gradTo: "#1a6b3c", customHtml: "", extraLayers: [], customLayers: [],
     };
     setSt(def); persist(def);
     toast.success("تمت الاستعادة للإعدادات الافتراضية");
+  };
+
+  // ── User-defined custom layers ──
+  const [layerForm, setLayerForm] = useState(null); // { id, label, html }
+
+  const saveCustomLayer = () => {
+    if (!layerForm) return;
+    const label = layerForm.label.trim();
+    if (!label) { toast.error("أدخل اسم الطبقة"); return; }
+    const id = layerForm.id || "l" + Date.now().toString(36);
+    const exists = st.customLayers.some(l => l.id === id);
+    const customLayers = exists
+      ? st.customLayers.map(l => l.id === id ? { id, label, html: layerForm.html } : l)
+      : [...st.customLayers, { id, label, html: layerForm.html }];
+    const key = "custom:" + id;
+    update({
+      customLayers,
+      extraLayers: [...new Set([...st.extraLayers.filter(x => x !== key), key])]
+    });
+    setLayerForm(null);
+    toast.success(exists ? "تم تحديث الطبقة ✓" : "تمت إضافة الطبقة وتفعيلها ✓");
+  };
+
+  const deleteCustomLayer = (id) => {
+    update({
+      customLayers: st.customLayers.filter(l => l.id !== id),
+      extraLayers: st.extraLayers.filter(x => x !== "custom:" + id)
+    });
+    if (layerForm?.id === id) setLayerForm(null);
   };
 
   const uploadFile = async (file, onDone, label = "الملف") => {
@@ -386,6 +417,68 @@ export default function DevBackgroundManager() {
                 placeholder="<div style='...'>...</div>" />
             </div>
           )}
+
+          {/* ── User's own layers ── */}
+          <div className="border-t border-border pt-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-bold">🧩 طبقاتك الخاصة</p>
+              <button onClick={() => setLayerForm({ id: "", label: "", html: "" })}
+                className="flex items-center gap-1 text-[11px] text-primary font-bold hover:underline">
+                <Plus className="w-3.5 h-3.5" /> إضافة طبقة جديدة
+              </button>
+            </div>
+            {st.customLayers.length === 0 && !layerForm && (
+              <p className="text-[11px] text-muted-foreground">
+                لا توجد طبقات خاصة بعد — أنشئ طبقتك بكود HTML/CSS مخصص وتفعّلها مثل باقي الطبقات
+              </p>
+            )}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {st.customLayers.map(cl => {
+                const key = "custom:" + cl.id;
+                const on = st.extraLayers.includes(key);
+                return (
+                  <div key={cl.id}
+                    className={`flex items-center gap-1 p-2.5 rounded-xl border-2 transition-all ${
+                      on ? "border-primary bg-primary/10 text-primary" : "border-border bg-card"
+                    }`}>
+                    <button onClick={() => update({ extraLayers: on ? st.extraLayers.filter(l => l !== key) : [...st.extraLayers, key] })}
+                      className="flex items-center gap-1.5 flex-1 min-w-0 text-right">
+                      <span className="text-base shrink-0">🧩</span>
+                      <span className="text-xs font-medium truncate">{cl.label}</span>
+                    </button>
+                    {on && <Check className="w-3 h-3 shrink-0" />}
+                    <button onClick={() => setLayerForm({ id: cl.id, label: cl.label, html: cl.html })}
+                      className="text-muted-foreground hover:text-primary shrink-0">
+                      <Settings className="w-3.5 h-3.5" />
+                    </button>
+                    <button onClick={() => deleteCustomLayer(cl.id)}
+                      className="text-muted-foreground hover:text-destructive shrink-0">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+            {layerForm && (
+              <div className="bg-muted/40 rounded-xl p-3 space-y-2">
+                <Input value={layerForm.label}
+                  onChange={e => setLayerForm({ ...layerForm, label: e.target.value })}
+                  placeholder="اسم الطبقة — مثلاً: فقاعات ذهبية" className="h-9 text-xs" />
+                <textarea value={layerForm.html}
+                  onChange={e => setLayerForm({ ...layerForm, html: e.target.value })}
+                  className="w-full h-24 p-2.5 text-xs font-mono bg-muted rounded-xl border border-border resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  placeholder="<div style='...'>...</div>" />
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={saveCustomLayer} className="h-8 text-xs gap-1">
+                    <Check className="w-3.5 h-3.5" /> حفظ وتفعيل
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => setLayerForm(null)} className="h-8 text-xs">
+                    إلغاء
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );

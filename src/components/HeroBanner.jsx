@@ -80,7 +80,8 @@ export default function HeroBanner() {
     videoBrightness: Number(read("hero_video_brightness", "100")),
     lottieUrl: read("hero_lottie_url"),
     customHtml: read("hero_custom_html"),
-    extraLayers: (() => {try {return JSON.parse(read("hero_extra_layers", "[]"));} catch {return [];}})()
+    extraLayers: (() => {try {return JSON.parse(read("hero_extra_layers", "[]"));} catch {return [];}})(),
+    customLayers: (() => {try {return JSON.parse(read("hero_custom_layers", "[]"));} catch {return [];}})()
   }));
 
   useEffect(() => {
@@ -112,7 +113,8 @@ export default function HeroBanner() {
         videoBrightness: Number(read("hero_video_brightness", "100")),
         lottieUrl: read("hero_lottie_url"),
         customHtml: read("hero_custom_html"),
-        extraLayers: (() => {try {return JSON.parse(read("hero_extra_layers", "[]"));} catch {return [];}})()
+        extraLayers: (() => {try {return JSON.parse(read("hero_extra_layers", "[]"));} catch {return [];}})(),
+        customLayers: (() => {try {return JSON.parse(read("hero_custom_layers", "[]"));} catch {return [];}})()
       });
     });
     return unsub;
@@ -191,7 +193,7 @@ export default function HeroBanner() {
         {renderBg()}
 
         {/* Extra effect layers combined on top of the base background */}
-        <ExtraEffectLayers layers={s.extraLayers} speed={s.animSpeed} color2={s.gradTo} customHtml={s.customHtml} />
+        <ExtraEffectLayers layers={s.extraLayers} speed={s.animSpeed} color2={s.gradTo} customHtml={s.customHtml} customLayers={s.customLayers} />
 
         {/* Overlay */}
         <div className="absolute inset-0 opacity-100 rounded-md" style={overlayStyle} />

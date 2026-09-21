@@ -342,7 +342,7 @@ export function GridPattern({ speed }) {
 }
 
 // ── Renderer: draws the enabled composable layers ──────────────────────────────
-export default function ExtraEffectLayers({ layers = [], speed, color2, customHtml }) {
+export default function ExtraEffectLayers({ layers = [], speed, color2, customHtml, customLayers = [] }) {
   if (!layers.length) return null;
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -360,6 +360,9 @@ export default function ExtraEffectLayers({ layers = [], speed, color2, customHt
       {layers.includes("grid") && <GridPattern speed={speed} />}
       {layers.includes("custom_html") && customHtml &&
         <div className="absolute inset-0" dangerouslySetInnerHTML={{ __html: customHtml }} />}
+      {/* User-defined layers (created in the admin panel) */}
+      {customLayers.filter(cl => layers.includes("custom:" + cl.id)).map(cl =>
+        <div key={cl.id} className="absolute inset-0" dangerouslySetInnerHTML={{ __html: cl.html }} />)}
     </div>
   );
 }
