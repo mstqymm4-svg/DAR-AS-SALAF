@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Layers, Eye } from "lucide-react";
+import { Layers, Eye, RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
@@ -60,8 +61,20 @@ export default function DevCards() {
     toast.success("تم الحفظ ✓");
   };
 
+  const handleReset = () => {
+    setBorderRadius(16); setPadding(16); setGap(16);
+    setCardStyle("modern"); setShadow("md"); setHover("lift");
+    setSettings({
+      card_radius: "16", card_padding: "16", card_gap: "16",
+      card_style: "modern", card_shadow: "md", card_hover: "lift",
+    });
+    document.documentElement.style.setProperty("--card-radius", "16px");
+    document.documentElement.style.setProperty("--card-padding", "16px");
+    document.documentElement.style.setProperty("--card-gap", "16px");
+    toast.success("تم إعادة إعدادات البطاقات للافتراضي");
+  };
+
   const previewShadow = SHADOW_OPTIONS.find(s => s.id === shadow)?.value || "";
-  const currentStyle = CARD_STYLES.find(s => s.id === cardStyle);
 
   const getStyleClasses = (style) => {
     switch(style) {
@@ -82,7 +95,7 @@ export default function DevCards() {
           <Eye className="w-4 h-4 text-primary" />
           <h3 className="font-bold text-sm">معاينة مباشرة للبطاقات</h3>
         </div>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3" style={{ gap: `${gap}px` }}>
           {[1,2,3].map(i => (
             <div key={i}
               className={`overflow-hidden transition-all duration-300 ${getStyleClasses(cardStyle)} ${HOVER_OPTIONS.find(h=>h.id===hover)?.css||""}`}
@@ -116,17 +129,23 @@ export default function DevCards() {
 
         <div className="space-y-2">
           <div className="flex justify-between"><Label className="text-xs">نصف قطر الزوايا</Label><span className="text-xs font-mono font-bold text-primary">{borderRadius}px</span></div>
-          <Slider min={0} max={32} step={2} value={[borderRadius]} onValueChange={([v]) => { setBorderRadius(v); save("card_radius", v); }} />
+          <Slider min={0} max={32} step={2} value={[borderRadius]}
+            onValueChange={([v]) => setBorderRadius(v)}
+            onValueCommit={([v]) => save("card_radius", v)} />
         </div>
 
         <div className="space-y-2">
           <div className="flex justify-between"><Label className="text-xs">الحشوة الداخلية</Label><span className="text-xs font-mono font-bold text-primary">{padding}px</span></div>
-          <Slider min={8} max={40} step={4} value={[padding]} onValueChange={([v]) => { setPadding(v); save("card_padding", v); }} />
+          <Slider min={8} max={40} step={4} value={[padding]}
+            onValueChange={([v]) => setPadding(v)}
+            onValueCommit={([v]) => save("card_padding", v)} />
         </div>
 
         <div className="space-y-2">
           <div className="flex justify-between"><Label className="text-xs">المسافة بين البطاقات</Label><span className="text-xs font-mono font-bold text-primary">{gap}px</span></div>
-          <Slider min={8} max={48} step={4} value={[gap]} onValueChange={([v]) => { setGap(v); save("card_gap", v); }} />
+          <Slider min={8} max={48} step={4} value={[gap]}
+            onValueChange={([v]) => setGap(v)}
+            onValueCommit={([v]) => save("card_gap", v)} />
         </div>
       </div>
 
@@ -155,6 +174,10 @@ export default function DevCards() {
           ))}
         </div>
       </div>
+
+      <Button variant="outline" onClick={handleReset} className="w-full rounded-xl h-11 gap-2 font-bold hover:border-destructive/50 hover:text-destructive">
+        <RotateCcw className="w-4 h-4" /> إعادة إعدادات البطاقات للافتراضي
+      </Button>
     </div>
   );
 }

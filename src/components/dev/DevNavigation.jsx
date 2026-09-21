@@ -6,26 +6,18 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { getSetting, setSettings, setSetting, subscribeToSettings } from "@/lib/settingsStore";
 
-const DEFAULT_NAV_ITEMS = [
-  { id: "home",      label: "الرئيسية",  path: "/",          icon: "Home",     visible: true },
-  { id: "books",     label: "المكتبة",   path: "/books",     icon: "BookOpen", visible: true },
-  { id: "favorites", label: "المفضلة",   path: "/favorites", icon: "Heart",    visible: true },
-  { id: "settings",  label: "الإعدادات", path: "/settings",  icon: "Settings", visible: true },
-  { id: "dev",       label: "المطور",    path: "/dev",       icon: "Code",     visible: false },
-];
+import { DEFAULT_NAV_ITEMS, NAV_ICONS, readNavItems } from "@/lib/navConfig";
 
 export default function DevNavigation() {
   const [showDevNav, setShowDevNav] = useState(() => getSetting("show_dev_nav") !== "false");
-  const [navItems, setNavItems]     = useState(() => {
-    try { return JSON.parse(getSetting("nav_items") || "null") || DEFAULT_NAV_ITEMS; } catch(e) { return DEFAULT_NAV_ITEMS; }
-  });
+  const [navItems, setNavItems]     = useState(() => readNavItems());
   const [dragIdx, setDragIdx]       = useState(null);
   const [saved, setSaved]           = useState(false);
 
   useEffect(() => {
     const unsub = subscribeToSettings((s) => {
       setShowDevNav(s.show_dev_nav !== "false");
-      try { if (s.nav_items) setNavItems(JSON.parse(s.nav_items)); } catch(e) {}
+      if (s.nav_items) setNavItems(readNavItems(s.nav_items));
     });
     return unsub;
   }, []);
@@ -60,6 +52,9 @@ export default function DevNavigation() {
     setNavItems(updated);
   };
 
+  // Persist the edited label as soon as the field loses focus
+  const handleLabelBlur = () => setSettings({ nav_items: JSON.stringify(navItems) });
+
   const handleSave = () => {
     setSettings({ nav_items: JSON.stringify(navItems), show_dev_nav: String(showDevNav) });
     setSaved(true);
@@ -80,12 +75,15 @@ export default function DevNavigation() {
         <h3 className="font-bold text-sm mb-4 flex items-center gap-2"><Navigation className="w-4 h-4 text-primary" /> معاينة شريط التنقل</h3>
         <div className="bg-background border border-border rounded-xl p-3">
           <div className="flex items-center justify-around">
-            {navItems.filter(i => i.visible).map((item, i) => (
-              <div key={item.id} className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl ${i===0?"text-primary":"text-muted-foreground"}`}>
-                <div className="w-5 h-5 rounded bg-current opacity-50" />
-                <span className="text-[10px] font-medium">{item.label}</span>
-              </div>
-            ))}
+            {navItems.filter(i => i.visible).map((item, i) => {
+              const Icon = NAV_ICONS[item.icon];
+              return (
+                <div key={item.id} className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl ${i===0?"text-primary":"text-muted-foreground"}`}>
+                  {Icon ? <Icon className="w-5 h-5" /> : <div className="w-5 h-5 rounded bg-current opacity-50" />}
+                  <span className="text-[10px] font-medium">{item.label}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -113,10 +111,10 @@ export default function DevNavigation() {
               className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all cursor-grab active:cursor-grabbing ${dragIdx === idx ? "border-primary bg-primary/5 opacity-70" : "border-border hover:border-primary/30 bg-muted/30"}`}>
               <GripVertical className="w-4 h-4 text-muted-foreground shrink-0" />
               <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                <span className="text-xs font-bold text-muted-foreground">{idx + 1}</span>
+                {(() => { const Icon = NAV_ICONS[item.icon]; return Icon ? <Icon className="w-4 h-4 text-muted-foreground" /> : <span className="text-xs font-bold text-muted-foreground">{idx + 1}</span>; })()}
               </div>
               <div className="flex-1 min-w-0">
-                <input value={item.label} onChange={e => handleLabelChange(item.id, e.target.value)}
+                <input value={item.label} onChange={e => handleLabelChange(item.id, e.target.value)} onBlur={handleLabelBlur}
                   className="w-full bg-transparent text-sm font-bold outline-none border-none p-0 focus:border-b focus:border-primary" />
                 <p className="text-[10px] text-muted-foreground font-mono">{item.path}</p>
               </div>

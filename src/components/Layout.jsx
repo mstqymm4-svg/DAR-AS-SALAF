@@ -6,6 +6,7 @@ import { base44 } from "@/api/base44Client";
 import { useT } from "@/lib/i18n";
 import { getSetting, subscribeToSettings } from "@/lib/settingsStore";
 import { getAccountEmail, getAvatarUrl } from "@/lib/activeUser";
+import { NAV_ICONS, readNavItems } from "@/lib/navConfig";
 
 export default function Layout() {
   const location = useLocation();
@@ -17,6 +18,7 @@ export default function Layout() {
   const [logoUrl, setLogoUrl] = useState(() => getSetting("logo_url"));
   const [appNameOverride, setAppNameOverride] = useState(() => getSetting("app_name"));
   const [appSubtitleOverride, setAppSubtitleOverride] = useState(() => getSetting("app_subtitle"));
+  const [navConfig, setNavConfig] = useState(() => readNavItems());
 
   useEffect(() => {
     const unsub = subscribeToSettings((s) => {
@@ -24,6 +26,7 @@ export default function Layout() {
       setLogoUrl(s.logo_url || "");
       setAppNameOverride(s.app_name || "");
       setAppSubtitleOverride(s.app_subtitle || "");
+      setNavConfig(readNavItems(s.nav_items));
     });
     const handler = () => setShowDevNav(getSetting("show_dev_nav") !== "false");
     const avatarHandler = () => setAvatarUrl(getAvatarUrl(getAccountEmail(null)));
@@ -32,12 +35,13 @@ export default function Layout() {
     return () => {unsub();window.removeEventListener("storage", handler);window.removeEventListener("dau-avatar-change", avatarHandler);};
   }, []);
 
+  // Order, labels and visibility come from the developer panel (إدارة التنقل)
   const navItems = [
-  { path: "/", icon: Home, label: t.navHome },
-  { path: "/books", icon: BookOpen, label: t.navBooks },
-  { path: "/videos", icon: Video, label: t.navVideos },
-  { path: "/favorites", icon: Heart, label: t.navFav },
-  { path: "/settings", icon: Settings, label: t.navSettings },
+  ...navConfig.filter((item) => item.visible !== false).map((item) => ({
+    path: item.path,
+    icon: NAV_ICONS[item.icon] || Home,
+    label: item.label || t[item.labelKey] || item.id
+  })),
   ...(showDevNav ? [{ path: "/dev", icon: Code, label: "Dev" }] : [])];
 
 
