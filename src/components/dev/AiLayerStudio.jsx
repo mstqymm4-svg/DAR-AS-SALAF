@@ -48,41 +48,30 @@ export default function AiLayerStudio({ layerForm, setLayerForm }) {
     setBusy(true);
     try {
       const res = await base44.integrations.Core.InvokeLLM({
-        model: "claude-sonnet-5",
-        prompt: `You are a senior motion-design engineer crafting a PREMIUM decorative animated overlay for a luxury Islamic library website hero banner.
+        model: "gemini_3_flash",
+        prompt: `Create a premium animated CSS overlay layer for a website hero banner.
 
-USER DESCRIPTION (Arabic, may be anything — always deliver something beautiful): "${desc}"
-Style level: ${lx.hint}
-Color palette: ${pl.hint}
-Motion speed: ${motion}/10 (higher = faster, but always graceful — never busy or distracting)
-${variation ? "Produce a DIFFERENT artistic interpretation than the obvious one — new composition and motion language." : ""}
+Description (Arabic): "${desc}"
+Style: ${lx.hint} · Palette: ${pl.hint} · Speed: ${motion}/10
+${variation ? "Give a different composition than the obvious one." : ""}
 
-DELIVER a self-contained fragment: one <style> block followed by ONE wrapper <div class="${ns}">.
+Output one <style> block + one <div class="${ns}">…</div>.
+Rules:
+- Namespace every class and @keyframes with "${ns}". No global selectors.
+- Wrapper: position:absolute;inset:0;overflow:hidden;pointer-events:none.
+- HTML+CSS only, no JS, no images, no text. Max 30 elements.
+- Infinite seamless loops; animate transform/opacity/filter only.
+- 2–3 depth layers: soft radial-gradient glow base, blurred glow orbs, fine particles. Use mix-blend-mode:screen, low opacity (0.08–0.5), varied :nth-child sizes/positions/durations (10s–30s) with negative delays.
+- Stays subtle so white text above remains readable.
 
-HARD REQUIREMENTS
-- Namespace EVERY class and @keyframes name with "${ns}" (e.g. .${ns}-orb, @keyframes ${ns}-float). No global selectors, no html/body/*.
-- Wrapper: position:absolute; inset:0; overflow:hidden; pointer-events:none; and every child pointer-events:none.
-- Pure HTML + CSS only. No JavaScript, no <img>, no external URLs, no fonts, no text glyphs.
-- Everything loops seamlessly and infinitely (animation-iteration-count:infinite), no visible restart jump.
-- Animate ONLY transform, opacity and filter for GPU performance; add will-change on moving elements.
-- Mobile-safe: no fixed pixel layouts — use %, vw/vh, clamp(). Keep total element count under 60.
-- End with a @media (prefers-reduced-motion: reduce) block that slows/stops the motion.
-
-CRAFT (this is what makes it feel expensive)
-- Build 3–4 stacked depth layers: a soft ambient gradient/vignette base, a mid layer of glow orbs or light sweeps with blur(), a foreground of fine particles/shapes, plus one subtle accent (shimmer, bloom, or thin light rays).
-- Use radial-gradient / conic-gradient glows, mix-blend-mode: screen or soft-light, backdrop-friendly low opacity (0.05–0.5), and blur values for atmospheric depth.
-- Vary each element with :nth-child() rules: different sizes, positions, animation-duration (8s–40s range) and negative animation-delay so the scene looks alive and never synchronized.
-- Use cubic-bezier easing, not linear, except for continuous drifts.
-- The layer must stay transparent enough that white hero text on top remains perfectly readable.
-
-Return ONLY the html string.`,
+Return only the html.`,
         response_json_schema: {
           type: "object",
           properties: { html: { type: "string" }, name: { type: "string" } },
           required: ["html"]
         }
       });
-      const html = res?.html || "";
+      const html = (res?.html || "").replace(/^```[a-z]*\n?|```$/g, "").trim();
       if (!html) { toast.error("تعذر إنشاء التأثير — حاول بوصف آخر"); return; }
       setLayerForm(f => ({ ...f, html, label: f.label || res?.name || desc.slice(0, 24) }));
       toast.success(variation ? "تنويع جديد جاهز ✓" : "تم إنشاء طبقة فخمة ✓ شاهد المعاينة");
