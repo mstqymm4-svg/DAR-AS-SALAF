@@ -7,6 +7,8 @@ Original problem: Remove Base44 runtime dependency from the existing React/Vite 
 - Phase 2 DONE: backend merged into `backend/` (history kept), init migration, env checks, Dockerfile fix, 2 security fixes (draft leak, role escalation), 21/21 tests on throwaway local PostgreSQL. Record: `docs/migration/BACKEND_MERGE.md`.
 - Frontend baseline: `vite build` succeeds (still Base44-dependent at runtime).
 
+- 2026-10-14 Android: Play error diagnosed (package mismatch, Base44 AAB = com.base69c8e483a69a0d215eee4ef7.app, Wix One signed). Capacitor 8 project added (android/), com.darululoom.app, vc2, target 36, bundled assets, back button, local icons. Unsigned AAB built OK (5.5 MB) → /app/backups/app-release-unsigned-v2.aab. Guide: docs/ANDROID_RELEASE.md. User priority now: Play release only, keep Base44.
+
 ## Next
 - P0 Phase 3: AccountData, ReadingProgress, publication state/trash, YouTube/video-source fields, file metadata + R2 driver, activity log, email verify/reset/account deletion, lockout, Base44-ID columns.
 - P0 AAB diagnosis once artifacts provided.
