@@ -11,5 +11,7 @@ export const base44 = createClient({
   // Website: same-origin (''). Android app: set VITE_BASE44_SERVER_URL=https://base44.app (see .env.android).
   serverUrl: import.meta.env.VITE_BASE44_SERVER_URL || '',
   requiresAuth: false,
+  // Android build sets VITE_BASE44_ANALYTICS=false (no usage tracking). Website unchanged.
+  analytics: { enabled: import.meta.env.VITE_BASE44_ANALYTICS !== 'false' },
   appBaseUrl
 });
