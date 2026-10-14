@@ -6,6 +6,7 @@ import { socialChannelCreateSchema, socialChannelUpdateSchema } from "../validat
 
 const h = crudHandlers({
   model: "socialChannel",
+  publicWhere: { visible: true },
   searchFields: ["name", "description"],
   sortFields: ["name", "sortOrder", "createdAt"],
   defaultOrderBy: { sortOrder: "asc" },

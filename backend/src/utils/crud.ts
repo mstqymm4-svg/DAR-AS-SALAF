@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { prisma } from "../config/prisma";
 import { success, paginated } from "./apiResponse";
 import { ApiError } from "./ApiError";
+import type { AuthenticatedRequest } from "../types/express";
 
 export interface CrudOptions {
   model: string; // prisma model name, camelized (e.g. "book", "category")
@@ -11,10 +12,18 @@ export interface CrudOptions {
   defaultOrderBy?: Record<string, "asc" | "desc">;
   include?: any;
   beforeCreate?: (data: any, req: Request) => any | Promise<any>;
+  /** Filter forced on non-admin readers (e.g. { status: "published" }) so drafts/hidden items never leak. */
+  publicWhere?: Record<string, unknown>;
+}
+
+function isAdmin(req: Request) {
+  const role = (req as AuthenticatedRequest).user?.role;
+  return role === "ADMIN" || role === "SUPER_ADMIN";
 }
 
 export function crudHandlers(opts: CrudOptions) {
   const model = (prisma as any)[opts.model];
+  const visibility = (req: Request) => (opts.publicWhere && !isAdmin(req) ? opts.publicWhere : {});
 
   function orderBy(q: any) {
     const sort = q.sort as string | undefined;
@@ -36,8 +45,9 @@ export function crudHandlers(opts: CrudOptions) {
           where.OR = opts.searchFields.map((f) => ({ [f]: { contains: q.search, mode: "insensitive" } }));
         }
         for (const f of opts.filterFields || []) {
-          if (q[f] !== undefined && q[f] !== "") where[f] = q[f];
+          if (q[f] !== undefined && q[f] !== "") where[f] = q[f] === "true" ? true : q[f] === "false" ? false : q[f];
         }
+        Object.assign(where, visibility(req));
         const [rows, total] = await Promise.all([
           model.findMany({
             where,
@@ -55,7 +65,7 @@ export function crudHandlers(opts: CrudOptions) {
     },
     async get(req: Request, res: Response, next: NextFunction) {
       try {
-        const row = await model.findUnique({ where: { id: req.params.id }, include: opts.include });
+        const row = await model.findFirst({ where: { id: req.params.id, ...visibility(req) }, include: opts.include });
         if (!row) return next(ApiError.notFound());
         return success(res, row);
       } catch (e) {

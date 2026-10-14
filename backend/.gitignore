@@ -24,4 +24,4 @@ logs/
 .DS_Store
 .idea/
 .vscode/
-*.tsbuildinfo
+*.tsbuildinfo.test-uploads/

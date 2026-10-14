@@ -11,6 +11,16 @@ function required(key: string, fallback?: string): string {
   return v;
 }
 
+// Fail fast on weak secrets outside local dev/test.
+if (process.env.NODE_ENV === "production") {
+  for (const k of ["JWT_ACCESS_SECRET", "JWT_REFRESH_SECRET"]) {
+    if ((process.env[k] || "").length < 32) throw new Error(`${k} must be at least 32 characters in production`);
+  }
+  if (process.env.JWT_ACCESS_SECRET === process.env.JWT_REFRESH_SECRET) {
+    throw new Error("JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must differ");
+  }
+}
+
 export const env = {
   nodeEnv: process.env.NODE_ENV || "development",
   isProd: process.env.NODE_ENV === "production",

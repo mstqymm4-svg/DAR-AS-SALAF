@@ -27,6 +27,15 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
     });
   }
 
+  // Upload errors (multer limits / rejected file types)
+  if ((err as any)?.name === "MulterError") {
+    const code = (err as any).code === "LIMIT_FILE_SIZE" ? 413 : 400;
+    return res.status(code).json({ success: false, message: (err as Error).message });
+  }
+  if ((err as Error)?.message === "Unsupported file type") {
+    return res.status(415).json({ success: false, message: "Unsupported file type" });
+  }
+
   // Prisma known errors
   const anyErr = err as { code?: string; message?: string };
   if (anyErr?.code === "P2002") {

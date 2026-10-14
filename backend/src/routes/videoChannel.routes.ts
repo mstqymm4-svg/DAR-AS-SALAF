@@ -6,6 +6,7 @@ import { videoChannelCreateSchema, videoChannelUpdateSchema } from "../validator
 
 const h = crudHandlers({
   model: "videoChannel",
+  publicWhere: { visible: true },
   searchFields: ["name", "description"],
   sortFields: ["name", "sortOrder", "createdAt"],
   defaultOrderBy: { sortOrder: "asc" },

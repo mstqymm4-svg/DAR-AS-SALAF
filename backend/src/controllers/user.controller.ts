@@ -23,7 +23,13 @@ export const userController = {
     try {
       const { role, isActive, fullName, preferredLanguage, notificationsEnabled } = req.body;
       const data: any = {};
-      if (role !== undefined) data.role = role;
+      if (role !== undefined) {
+        // Only SUPER_ADMIN may change roles; prevents ADMIN self-escalation.
+        if (req.user?.role !== "SUPER_ADMIN") return next(ApiError.forbidden("Only SUPER_ADMIN can change roles"));
+        if (!["USER", "ADMIN", "SUPER_ADMIN"].includes(role)) return next(ApiError.badRequest("Invalid role"));
+        data.role = role;
+      }
+      if (isActive !== undefined && req.params.id === req.user?.id) return next(ApiError.badRequest("Cannot change your own active state"));
       if (isActive !== undefined) data.isActive = isActive;
       if (fullName !== undefined) data.fullName = fullName;
       if (preferredLanguage !== undefined) data.preferredLanguage = preferredLanguage;

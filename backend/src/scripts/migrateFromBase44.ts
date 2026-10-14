@@ -74,7 +74,7 @@ async function migrateBooks() {
   console.log(`books: processed ${rows.length}`);
 }
 
-function mapLanguage(l?: string) {
+function mapLanguage(l?: string): any {
   const map: Record<string, string> = {
     "العربية": "ar", "الإنجليزية": "en", "الفرنسية": "fr", "الأوردو": "ur", "الهندية": "hi",
   };

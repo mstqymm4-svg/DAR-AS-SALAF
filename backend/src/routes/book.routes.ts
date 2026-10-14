@@ -11,6 +11,7 @@ const h = crudHandlers({
   sortFields: ["title", "rating", "createdAt", "updatedAt"],
   defaultOrderBy: { createdAt: "desc" },
   include: { author: true, category: true },
+  publicWhere: { status: "published" },
 });
 
 const router = Router();

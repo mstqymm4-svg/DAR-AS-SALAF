@@ -21,6 +21,20 @@ export function authenticate(req: AuthenticatedRequest, _res: Response, next: Ne
   }
 }
 
+/** Attaches `req.user` when a valid token is present; never rejects. Used so public reads can show drafts to admins only. */
+export function optionalAuth(req: AuthenticatedRequest, _res: Response, next: NextFunction) {
+  const header = req.headers.authorization || "";
+  if (header.startsWith("Bearer ")) {
+    try {
+      const payload = verifyAccessToken(header.slice(7));
+      req.user = { id: payload.sub, email: payload.email, role: payload.role as Role };
+    } catch {
+      /* invalid token on a public route: treat as anonymous */
+    }
+  }
+  return next();
+}
+
 /** Role guard. Usage: authorize("ADMIN") or authorize("ADMIN", "SUPER_ADMIN"). */
 export function authorize(...allowed: Role[]) {
   return (req: AuthenticatedRequest, _res: Response, next: NextFunction) => {

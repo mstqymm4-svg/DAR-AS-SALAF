@@ -11,6 +11,7 @@ const h = crudHandlers({
   sortFields: ["title", "sortOrder", "createdAt"],
   defaultOrderBy: { sortOrder: "asc" },
   include: { channel: true },
+  publicWhere: { visible: true },
 });
 
 const router = Router();

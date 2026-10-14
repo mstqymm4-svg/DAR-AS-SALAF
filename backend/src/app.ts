@@ -6,6 +6,7 @@ import path from "path";
 import { env } from "./config/env";
 import { apiRateLimiter } from "./middleware/rateLimit";
 import { errorHandler, notFound } from "./middleware/error";
+import { optionalAuth } from "./middleware/auth";
 import healthRoutes from "./routes/health.routes";
 import authRoutes from "./routes/auth.routes";
 import bookRoutes from "./routes/book.routes";
@@ -40,13 +41,17 @@ app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 // ── Logging ─────────────────────────────────────────────
-app.use(morgan(env.isProd ? "combined" : "dev", { stream: { write: (m) => logger.info(m.trim()) } }));
+app.use(morgan(env.isProd ? "combined" : "dev", {
+  skip: () => env.nodeEnv === "test",
+  stream: { write: (m) => logger.info(m.trim()) },
+}));
 
 // ── Static uploads (local storage) ──────────────────────
 app.use("/uploads", express.static(path.resolve(env.storage.uploadDir)));
 
 // ── Rate limiting (global) ───────────────────────────────
 app.use("/api", apiRateLimiter);
+app.use("/api", optionalAuth);
 
 // ── Routes ───────────────────────────────────────────────
 app.get("/", (_req, res) => res.json({ name: "DAR AL ULOOM API", status: "running" }));
