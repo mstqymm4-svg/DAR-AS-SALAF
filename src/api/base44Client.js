@@ -8,7 +8,8 @@ export const base44 = createClient({
   appId,
   token,
   functionsVersion,
-  serverUrl: '',
+  // Website: same-origin (''). Android app: set VITE_BASE44_SERVER_URL=https://base44.app (see .env.android).
+  serverUrl: import.meta.env.VITE_BASE44_SERVER_URL || '',
   requiresAuth: false,
   appBaseUrl
 });
