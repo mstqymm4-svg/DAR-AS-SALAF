@@ -52,13 +52,10 @@ export default function EmailVerification({ email, sendSignal }) {
   const sendCode = async () => {
     setSending(true);
     try {
-      const gen = String(Math.floor(100000 + Math.random() * 900000));
+      const res = await base44.functions.invoke("sendVerificationCode", { email });
+      const gen = String(res?.data?.code || "");
+      if (!gen) throw new Error("no code returned");
       localStorage.setItem(CODE_KEY(email), JSON.stringify({ code: gen, exp: Date.now() + EXPIRY_MS }));
-      await base44.integrations.Core.SendEmail({
-        to: email,
-        subject: t.evMailSubject,
-        body: t.evMailBody.replace("{code}", gen)
-      });
       setSent(true);
       setCountdown(RESEND_SECONDS);
       toast.success(t.evSentToast);
